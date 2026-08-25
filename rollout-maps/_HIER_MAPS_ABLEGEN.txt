@@ -1,0 +1,1 @@
+Rollout-Maps (PNG, JPG, SVG, PDF oder HTML) hier ablegen und in content/maps.js eintragen.

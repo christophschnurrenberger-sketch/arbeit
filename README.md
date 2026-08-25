@@ -1,4 +1,25 @@
-# IT Process Portfolio Cockpit
+# IT Process Management Board
+
+Ein Management-Board, das vollständig aus einem OneDrive-Ordner läuft – ohne
+Server und ohne Installation. Einstieg ist `index.html`; die Pflegeanleitung für
+News, Anhänge und Maps steht in [`ANLEITUNG.md`](ANLEITUNG.md).
+
+| Reiter | Inhalt | Gepflegt über |
+|---|---|---|
+| News | Meldungen ans Management | `content/news.js` bzw. „Redaktion" im Board |
+| Dashboard | das Portfolio-Cockpit (siehe unten) | `python3 build/build.py --extract` |
+| Rollout-Maps | Karten als Bild, PDF oder HTML-Seite | `content/maps.js` + Ordner `rollout-maps/` |
+| Anhänge | Dokumente aus dem Ordner | `content/attachments.js` + Ordner `anhaenge/` |
+
+Inhalte liegen als JavaScript-Dateien in `content/` und nicht als JSON, weil ein
+Browser aus einem lokalen Ordner (`file://`) keine JSON-Dateien nachladen darf –
+`<script src>` dagegen schon. Die Redaktion im Board erzeugt diese Dateien
+fertig zum Ersetzen; ein Entwurf bleibt so lange im Browser erhalten, bis die
+erzeugte Datei im Ordner liegt, und räumt sich dann selbst auf.
+
+---
+
+# Portfolio-Dashboard
 
 Management-Dashboard für das Corporate-IT-Prozessportfolio aus
 `data/Process_Portfolio_Timeline.xlsx` — ein einzelnes, in sich geschlossenes
@@ -122,3 +143,6 @@ python3 build/build.py --extract
 | `build/parts/app.js` | Filterlogik, Diagramme, Timeline, Tabelle |
 | `build/model.json` | erzeugtes Datenmodell |
 | `dashboard/index.html` | fertiges Dashboard |
+| `index.html` | Management Board (Einstieg) |
+| `content/*.js` | Inhalte des Boards |
+| `anhaenge/`, `rollout-maps/` | Dateien für Anhänge und Maps |

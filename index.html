@@ -1,0 +1,1241 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IT Process Management Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" /></noscript>
+<style>
+/* ============================================================ tokens
+   Dieselbe Token-Basis wie dashboard/index.html - Board und Dashboard
+   sollen als ein Produkt gelesen werden.                              */
+:root{
+  color-scheme: light;
+  --ground:#eceff0; --surface:#fbfcfb; --surface-2:#f3f5f5; --surface-3:#e9edec;
+  --ink:#12161a; --ink-2:#48535d; --muted:#76818a;
+  --line:#dce1e0; --line-2:#c8cfce;
+  --accent:#17548c; --accent-soft:#e7eef6; --accent-ink:#17548c;
+  --shadow:0 1px 2px rgba(16,24,32,.06), 0 8px 24px -14px rgba(16,24,32,.22);
+  --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --c4:#eda100; --c5:#d03b3b;
+  --c1-soft:#dbe8fa; --c2-soft:#fbe3d9; --c3-soft:#d7f0e6; --c4-soft:#faedcf; --c5-soft:#f8dedd;
+  --good:#0ca30c; --warn:#b26a00;
+  --pin:#17548c;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#0d1013; --surface:#171a1d; --surface-2:#1d2226; --surface-3:#242a2e;
+    --ink:#f2f5f4; --ink-2:#b6bfc5; --muted:#8b959b;
+    --line:#272d31; --line-2:#39413f;
+    --accent:#77b0ec; --accent-soft:#1a2836; --accent-ink:#9cc7f5;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 28px -16px rgba(0,0,0,.7);
+    --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d03b3b;
+    --c1-soft:#16263a; --c2-soft:#32180f; --c3-soft:#0d2a21; --c4-soft:#2b2007; --c5-soft:#331516;
+    --good:#0ca30c; --warn:#fab219;
+    --pin:#77b0ec;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#0d1013; --surface:#171a1d; --surface-2:#1d2226; --surface-3:#242a2e;
+  --ink:#f2f5f4; --ink-2:#b6bfc5; --muted:#8b959b;
+  --line:#272d31; --line-2:#39413f;
+  --accent:#77b0ec; --accent-soft:#1a2836; --accent-ink:#9cc7f5;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 28px -16px rgba(0,0,0,.7);
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d03b3b;
+  --c1-soft:#16263a; --c2-soft:#32180f; --c3-soft:#0d2a21; --c4-soft:#2b2007; --c5-soft:#331516;
+  --good:#0ca30c; --warn:#fab219;
+  --pin:#77b0ec;
+}
+
+/* ============================================================ base */
+*,*::before,*::after{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:14.5px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column;
+}
+h1,h2,h3{font-family:Barlow,"IBM Plex Sans",system-ui,sans-serif;margin:0;text-wrap:balance;}
+button,input,select,textarea{font:inherit;color:inherit;}
+a{color:var(--accent-ink);}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+.tnum{font-variant-numeric:tabular-nums;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+/* ============================================================ header */
+.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;}
+.top-in{max-width:1680px;margin:0 auto;padding:12px 22px 0;display:flex;flex-direction:column;gap:10px;}
+.top-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.mark{
+  width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;font-family:Barlow;font-weight:700;font-size:15px;letter-spacing:-.3px;
+}
+:root[data-theme="dark"] .mark{color:#0d1013;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mark{color:#0d1013;}}
+.ttl h1{font-size:18px;font-weight:700;letter-spacing:-.2px;line-height:1.2;}
+.ttl p{margin:1px 0 0;font-size:12px;color:var(--muted);}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.btn{
+  background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:7px 12px;
+  font-size:12.5px;font-weight:500;color:var(--ink-2);cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent-ink);}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+:root[data-theme="dark"] .btn.primary{color:#0d1013;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.primary{color:#0d1013;}}
+.btn.primary:hover{filter:brightness(1.08);}
+.btn.sm{padding:5px 9px;font-size:12px;}
+.btn.danger:hover{border-color:var(--c5);color:var(--c5);}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;background:var(--surface);}
+.seg button{background:transparent;border:0;padding:6px 10px;font-size:12px;font-weight:500;color:var(--ink-2);cursor:pointer;}
+.seg button+button{border-left:1px solid var(--line);}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600;}
+
+/* tabs */
+.tabs{display:flex;gap:2px;flex-wrap:wrap;}
+.tab{
+  background:none;border:0;border-bottom:2px solid transparent;padding:9px 14px 11px;
+  font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+}
+.tab:hover{color:var(--ink);}
+.tab[aria-selected="true"]{color:var(--accent-ink);border-bottom-color:var(--accent);}
+.tab .n{
+  font-size:11px;font-weight:700;background:var(--surface-3);color:var(--ink-2);
+  border-radius:999px;padding:1px 7px;font-variant-numeric:tabular-nums;
+}
+.tab[aria-selected="true"] .n{background:var(--accent-soft);color:var(--accent-ink);}
+
+/* ============================================================ layout */
+main{flex:1;min-height:0;}
+.shell{max-width:1680px;margin:0 auto;padding:22px 22px 64px;}
+.view{display:none;}
+.view.on{display:block;}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:22px;align-items:start;}
+@media(max-width:1080px){.split{grid-template-columns:1fr;}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);}
+.sec-h{display:flex;align-items:baseline;gap:10px;margin:0 0 12px;}
+.sec-h h2{font-size:15px;font-weight:700;}
+.sec-h .rule{flex:1;height:1px;background:var(--line);}
+.sec-h .n{font-size:11.5px;color:var(--muted);}
+
+/* toolbar */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.search{position:relative;flex:0 0 auto;}
+.search input{width:250px;padding:8px 10px 8px 31px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);}
+.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);}
+.pillbtn{
+  border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:6px 12px;
+  font-size:12.5px;font-weight:500;color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+}
+.pillbtn:hover{border-color:var(--accent);}
+.pillbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+:root[data-theme="dark"] .pillbtn[aria-pressed="true"]{color:#0d1013;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pillbtn[aria-pressed="true"]{color:#0d1013;}}
+.pillbtn i{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+/* ============================================================ news */
+.feed{display:flex;flex-direction:column;gap:14px;}
+.post{padding:18px 20px;position:relative;overflow:hidden;}
+.post.pin{border-color:var(--line-2);}
+.post .pinflag{
+  position:absolute;top:0;right:0;background:var(--accent-soft);color:var(--accent-ink);
+  font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 11px;border-radius:0 11px 0 10px;
+}
+.post-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:7px;}
+.cat{
+  display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.04em;
+  border-radius:5px;padding:2px 8px;text-transform:uppercase;
+}
+.cat.k1{background:var(--c1-soft);color:var(--c1);} .cat.k2{background:var(--c2-soft);color:var(--c2);}
+.cat.k3{background:var(--c3-soft);color:var(--c3);} .cat.k4{background:var(--c4-soft);color:var(--c4);}
+.cat.k5{background:var(--c5-soft);color:var(--c5);}
+.post h3{font-size:19px;font-weight:700;letter-spacing:-.25px;margin-bottom:8px;}
+.rt{color:var(--ink-2);max-width:74ch;}
+.rt p{margin:0 0 10px;}
+.rt p:last-child{margin-bottom:0;}
+.rt h4{font-family:Barlow;font-size:14px;font-weight:700;color:var(--ink);margin:16px 0 6px;letter-spacing:.1px;}
+.rt ul{margin:0 0 10px;padding-left:20px;}
+.rt li{margin:3px 0;}
+.rt code{background:var(--surface-3);border-radius:4px;padding:1px 5px;font-size:12.5px;font-family:ui-monospace,"Cascadia Code",Consolas,monospace;}
+.rt strong{color:var(--ink);font-weight:600;}
+.rt hr{border:0;border-top:1px solid var(--line);margin:14px 0;}
+.post-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px;padding-top:13px;border-top:1px solid var(--line);}
+.flink{
+  display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);border-radius:8px;
+  padding:6px 11px;font-size:12.5px;font-weight:500;color:var(--ink-2);text-decoration:none;background:var(--surface-2);
+}
+.flink:hover{border-color:var(--accent);color:var(--accent-ink);}
+.flink .ic{font-size:13px;}
+
+/* side rail */
+.rail{display:flex;flex-direction:column;gap:14px;position:sticky;top:118px;}
+@media(max-width:1080px){.rail{position:static;}}
+.rail .card{padding:15px 16px;}
+.rail h3{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;}
+.jump{display:flex;flex-direction:column;gap:2px;}
+.jump a,.jump button{
+  display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:8px;text-decoration:none;
+  color:var(--ink);font-size:13.5px;border:0;background:none;cursor:pointer;text-align:left;width:100%;
+}
+.jump a:hover,.jump button:hover{background:var(--surface-2);}
+.jump .ic{
+  width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  background:var(--surface-3);font-size:13px;flex:0 0 auto;
+}
+.jump .sub{display:block;font-size:11.5px;color:var(--muted);}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:13px;border-bottom:1px solid var(--line);}
+.kv:last-child{border-bottom:0;}
+.kv .k{color:var(--muted);}
+.kv .v{font-weight:600;font-variant-numeric:tabular-nums;}
+
+/* ============================================================ grids */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
+.tile{padding:0;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit;cursor:pointer;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;box-shadow:var(--shadow);}
+.tile:hover{border-color:var(--accent);}
+.thumb{
+  height:150px;background:var(--surface-2);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;
+}
+.thumb img{width:100%;height:100%;object-fit:cover;}
+.thumb .ph{font-size:30px;color:var(--muted);}
+.thumb .badge{position:absolute;top:8px;left:8px;background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;color:var(--ink-2);}
+.tile .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:5px;flex:1;}
+.tile .body h3{font-size:14.5px;font-weight:600;}
+.tile .body .note{font-size:12.5px;color:var(--ink-2);}
+.tile .body .meta{font-size:11.5px;color:var(--muted);margin-top:auto;padding-top:6px;display:flex;gap:8px;flex-wrap:wrap;}
+.tags{display:flex;gap:5px;flex-wrap:wrap;}
+.tag{font-size:10.5px;font-weight:600;background:var(--surface-3);color:var(--ink-2);border-radius:5px;padding:1px 7px;}
+
+/* attachments list */
+.files{display:flex;flex-direction:column;}
+.file{
+  display:flex;align-items:center;gap:13px;padding:12px 16px;border-bottom:1px solid var(--line);
+  text-decoration:none;color:inherit;
+}
+.file:last-child{border-bottom:0;}
+.file:hover{background:var(--surface-2);}
+.file .ft{
+  width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:10.5px;font-weight:700;letter-spacing:.02em;flex:0 0 auto;background:var(--surface-3);color:var(--ink-2);
+}
+.file .ft.pdf{background:var(--c5-soft);color:var(--c5);}
+.file .ft.xls{background:var(--c3-soft);color:var(--c3);}
+.file .ft.doc{background:var(--c1-soft);color:var(--c1);}
+.file .ft.ppt{background:var(--c2-soft);color:var(--c2);}
+.file .ft.img{background:var(--c4-soft);color:var(--c4);}
+.file .fm{flex:1;min-width:0;}
+.file .fm .t{font-weight:600;font-size:14px;}
+.file .fm .n{font-size:12.5px;color:var(--ink-2);}
+.file .fm .p{font-size:11.5px;color:var(--muted);font-family:ui-monospace,Consolas,monospace;}
+.file .fd{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;}
+.grp-h{
+  padding:9px 16px;background:var(--surface-2);border-bottom:1px solid var(--line);
+  font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+}
+
+/* ============================================================ dashboard frame */
+.frame-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.frame-wrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);}
+.frame-wrap iframe{display:block;width:100%;height:calc(100vh - 250px);min-height:560px;border:0;background:var(--surface);}
+
+/* ============================================================ empty state */
+.empty{
+  border:1px dashed var(--line-2);border-radius:12px;padding:40px 26px;text-align:center;background:var(--surface);
+}
+.empty .ic{font-size:30px;margin-bottom:10px;}
+.empty h3{font-size:16px;font-weight:700;margin-bottom:7px;}
+.empty p{color:var(--ink-2);max-width:56ch;margin:0 auto 6px;font-size:13.5px;}
+.empty code{background:var(--surface-3);border-radius:4px;padding:1px 6px;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;}
+.empty .acts{margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+
+/* ============================================================ overlay / viewer */
+.ov{position:fixed;inset:0;z-index:100;background:rgba(8,12,16,.62);display:none;padding:26px;overflow:auto;}
+.ov.on{display:block;}
+.ov-box{
+  max-width:1120px;margin:0 auto;background:var(--surface);border:1px solid var(--line-2);border-radius:14px;
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.5);overflow:hidden;
+}
+.ov-head{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2;}
+.ov-head h2{font-size:16px;font-weight:700;flex:1;min-width:0;}
+.ov-body{padding:18px;}
+.ov-body img{max-width:100%;height:auto;display:block;margin:0 auto;border-radius:8px;}
+.ov-body iframe{width:100%;height:74vh;border:1px solid var(--line);border-radius:8px;background:var(--surface);}
+.x{background:none;border:0;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:2px 8px;border-radius:8px;}
+.x:hover{background:var(--surface-2);color:var(--ink);}
+
+/* ============================================================ editor */
+.ed-grid{display:grid;grid-template-columns:280px minmax(0,1fr);gap:0;min-height:520px;}
+@media(max-width:860px){.ed-grid{grid-template-columns:1fr;}}
+.ed-list{border-right:1px solid var(--line);background:var(--surface-2);display:flex;flex-direction:column;}
+.ed-list .h{padding:11px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;}
+.ed-items{overflow:auto;max-height:520px;flex:1;}
+.ed-item{
+  width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);
+  padding:10px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px;
+}
+.ed-item:hover{background:var(--surface-3);}
+.ed-item[aria-current="true"]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent);}
+.ed-item .t{font-size:13.5px;font-weight:600;color:var(--ink);}
+.ed-item .m{font-size:11.5px;color:var(--muted);}
+.ed-form{padding:16px 18px;display:flex;flex-direction:column;gap:12px;overflow:auto;max-height:600px;}
+.fld{display:flex;flex-direction:column;gap:5px;}
+.fld label{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.fld input,.fld select,.fld textarea{
+  border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;background:var(--surface);width:100%;
+}
+.fld textarea{min-height:190px;resize:vertical;font-family:ui-monospace,"Cascadia Code",Consolas,monospace;font-size:13px;line-height:1.55;}
+.fld .hint{font-size:11.5px;color:var(--muted);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:620px){.row2{grid-template-columns:1fr;}}
+.chk{display:flex;align-items:center;gap:8px;font-size:13.5px;}
+.chk input{width:auto;accent-color:var(--accent);}
+.ed-foot{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:13px 18px;border-top:1px solid var(--line);background:var(--surface-2);}
+.dirty{
+  display:none;align-items:center;gap:9px;background:var(--c4-soft);color:var(--warn);border:1px solid var(--c4);
+  border-radius:9px;padding:9px 13px;font-size:12.5px;font-weight:500;margin:0 18px 0 0;
+}
+.dirty.on{display:flex;}
+.codebox{
+  width:100%;min-height:230px;font-family:ui-monospace,Consolas,monospace;font-size:12px;line-height:1.5;
+  border:1px solid var(--line-2);border-radius:8px;padding:11px;background:var(--surface-2);white-space:pre;overflow:auto;
+}
+.linklist{display:flex;flex-direction:column;gap:7px;}
+.linkrow{display:grid;grid-template-columns:1fr 1.4fr auto;gap:7px;align-items:center;}
+@media(max-width:620px){.linkrow{grid-template-columns:1fr;}}
+
+footer{
+  max-width:1680px;margin:0 auto;padding:16px 22px 30px;color:var(--muted);font-size:11.5px;
+  display:flex;gap:18px;flex-wrap:wrap;border-top:1px solid var(--line);
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+@media print{.top-actions,.tabs,.toolbar,.rail{display:none;} .split{grid-template-columns:1fr;} .card{box-shadow:none;}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="top-row">
+      <div class="mark" id="mark">IT</div>
+      <div class="ttl">
+        <h1 id="bTitle">IT Process Management Board</h1>
+        <p id="bSub">Corporate IT – Prozessportfolio</p>
+      </div>
+      <div class="top-actions">
+        <button type="button" class="btn primary" id="edBtn">✎ <span data-i="edit">Redaktion</span></button>
+        <div class="seg" role="group" aria-label="Sprache / Language">
+          <button type="button" id="langDe" aria-pressed="true">DE</button>
+          <button type="button" id="langEn" aria-pressed="false">EN</button>
+        </div>
+        <button type="button" class="btn" id="themeBtn"><span id="themeIc">◐</span> <span data-i="theme">Ansicht</span></button>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Bereiche">
+      <button type="button" class="tab" role="tab" data-view="news" aria-selected="true">📰 <span data-i="tab.news">News</span> <span class="n" id="nNews">0</span></button>
+      <button type="button" class="tab" role="tab" data-view="dashboard" aria-selected="false">📊 <span data-i="tab.dash">Dashboard</span></button>
+      <button type="button" class="tab" role="tab" data-view="maps" aria-selected="false">🗺️ <span data-i="tab.maps">Rollout-Maps</span> <span class="n" id="nMaps">0</span></button>
+      <button type="button" class="tab" role="tab" data-view="files" aria-selected="false">📎 <span data-i="tab.files">Anhänge</span> <span class="n" id="nFiles">0</span></button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="shell">
+
+    <!-- ============================================ NEWS -->
+    <section class="view on" id="v-news" role="tabpanel">
+      <div class="toolbar">
+        <div class="search">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+          <input type="search" id="qNews" data-ph="ph.news" placeholder="News durchsuchen …" autocomplete="off" />
+        </div>
+        <div class="toolbar" id="catFilter" style="margin:0;gap:6px;"></div>
+      </div>
+      <div class="split">
+        <div>
+          <div class="feed" id="feed"></div>
+        </div>
+        <aside class="rail">
+          <div class="card">
+            <h3 data-i="rail.jump">Schnellzugriff</h3>
+            <div class="jump">
+              <button type="button" data-goto="dashboard"><span class="ic">📊</span><span><span data-i="rail.dash">Portfolio-Dashboard</span><span class="sub" id="railDashSub">124 Prozesse, alle Filter</span></span></button>
+              <button type="button" data-goto="maps"><span class="ic">🗺️</span><span><span data-i="tab.maps">Rollout-Maps</span><span class="sub" id="railMapsSub">–</span></span></button>
+              <button type="button" data-goto="files"><span class="ic">📎</span><span><span data-i="tab.files">Anhänge</span><span class="sub" id="railFilesSub">–</span></span></button>
+            </div>
+          </div>
+          <div class="card">
+            <h3 data-i="rail.board">Board</h3>
+            <div class="kv"><span class="k" data-i="rail.posts">Meldungen</span><span class="v tnum" id="kvPosts">0</span></div>
+            <div class="kv"><span class="k" data-i="rail.last">Letzte Meldung</span><span class="v" id="kvLast">–</span></div>
+            <div class="kv"><span class="k" data-i="rail.owner">Pflege</span><span class="v" id="kvOwner">–</span></div>
+          </div>
+          <div class="card">
+            <h3 data-i="rail.help">Meldung schreiben</h3>
+            <p style="margin:0 0 11px;font-size:13px;color:var(--ink-2);" data-i="rail.helpTxt">Über „Redaktion" schreibst du eine Meldung und erzeugst daraus die Datei <code>content/news.js</code>. Diese Datei im Ordner ersetzen – fertig.</p>
+            <button type="button" class="btn" id="edBtn2">✎ <span data-i="edit">Redaktion</span></button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============================================ DASHBOARD -->
+    <section class="view" id="v-dashboard" role="tabpanel">
+      <div class="frame-bar">
+        <div class="sec-h" style="margin:0;flex:1;"><h2 data-i="dash.title">Portfolio-Dashboard</h2><span class="n" data-i="dash.sub">eingebettet aus dashboard/index.html</span></div>
+        <button type="button" class="btn" id="dashReload">↻ <span data-i="dash.reload">Neu laden</span></button>
+        <a class="btn primary" id="dashOpen" href="dashboard/index.html" target="_blank" rel="noopener">↗ <span data-i="dash.open">In eigenem Tab öffnen</span></a>
+      </div>
+      <div class="frame-wrap" id="frameWrap"></div>
+    </section>
+
+    <!-- ============================================ MAPS -->
+    <section class="view" id="v-maps" role="tabpanel">
+      <div class="toolbar">
+        <div class="search">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+          <input type="search" id="qMaps" data-ph="ph.maps" placeholder="Maps durchsuchen …" autocomplete="off" />
+        </div>
+        <div class="toolbar" id="tagFilter" style="margin:0;gap:6px;"></div>
+        <button type="button" class="btn" id="edMaps" style="margin-left:auto;">✎ <span data-i="maps.add">Map ergänzen</span></button>
+      </div>
+      <div id="mapsBox"></div>
+    </section>
+
+    <!-- ============================================ FILES -->
+    <section class="view" id="v-files" role="tabpanel">
+      <div class="toolbar">
+        <div class="search">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+          <input type="search" id="qFiles" data-ph="ph.files" placeholder="Anhänge durchsuchen …" autocomplete="off" />
+        </div>
+        <div class="toolbar" id="fileCatFilter" style="margin:0;gap:6px;"></div>
+        <button type="button" class="btn" id="edFiles" style="margin-left:auto;">✎ <span data-i="files.add">Anhang ergänzen</span></button>
+      </div>
+      <div id="filesBox"></div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <span id="fOwner">–</span>
+  <span data-i="foot.local">Läuft vollständig aus diesem Ordner – ohne Server, ohne Installation.</span>
+  <span id="fCounts">–</span>
+</footer>
+
+<!-- ============================================ viewer overlay -->
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="ov-box">
+    <div class="ov-head">
+      <h2 id="ovTitle">–</h2>
+      <a class="btn sm" id="ovOpen" href="#" target="_blank" rel="noopener">↗ <span data-i="ov.open">Original öffnen</span></a>
+      <button type="button" class="x" id="ovClose" aria-label="Schließen">×</button>
+    </div>
+    <div class="ov-body" id="ovBody"></div>
+  </div>
+</div>
+
+<!-- ============================================ editor overlay -->
+<div class="ov" id="ed" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+  <div class="ov-box" style="max-width:1180px;">
+    <div class="ov-head">
+      <h2 id="edTitle" data-i="ed.title">Redaktion</h2>
+      <div class="seg" role="group" id="edTabs">
+        <button type="button" data-ed="news" aria-pressed="true" data-i="tab.news">News</button>
+        <button type="button" data-ed="maps" aria-pressed="false" data-i="tab.maps">Rollout-Maps</button>
+        <button type="button" data-ed="files" aria-pressed="false" data-i="tab.files">Anhänge</button>
+      </div>
+      <button type="button" class="x" id="edClose" aria-label="Schließen">×</button>
+    </div>
+    <div class="dirty" id="dirty" style="margin:14px 18px 0;">
+      <span>⬤</span><span data-i="ed.dirty">Ungespeicherte Änderungen – erzeuge die Datei und lege sie in den Ordner content/.</span>
+    </div>
+    <div class="ed-grid">
+      <div class="ed-list">
+        <div class="h">
+          <button type="button" class="btn sm primary" id="edNew">+ <span data-i="ed.new">Neu</span></button>
+          <button type="button" class="btn sm" id="edPick" style="display:none;">📁 <span data-i="ed.pick">Dateien wählen</span></button>
+          <input type="file" id="edFile" multiple style="display:none" />
+        </div>
+        <div class="ed-items" id="edItems"></div>
+      </div>
+      <div class="ed-form" id="edForm"></div>
+    </div>
+    <div class="ed-foot">
+      <button type="button" class="btn primary" id="edExport">↓ <span id="edExportLbl">content/news.js erzeugen</span></button>
+      <button type="button" class="btn" id="edSave" style="display:none;">💾 <span data-i="ed.save">Direkt speichern</span></button>
+      <button type="button" class="btn" id="edShow">&lt;/&gt; <span data-i="ed.show">Code anzeigen</span></button>
+      <button type="button" class="btn danger" id="edReset" style="margin-left:auto;">↺ <span data-i="ed.reset">Änderungen verwerfen</span></button>
+    </div>
+  </div>
+</div>
+
+<script src="content/settings.js"></script>
+<script src="content/news.js"></script>
+<script src="content/maps.js"></script>
+<script src="content/attachments.js"></script>
+<script>
+/* =============================================================================
+   IT Process Management Board - Oberfläche
+   Läuft ohne Server direkt aus dem Ordner (file://). Inhalte kommen aus
+   content/*.js, weil ein Browser lokale JSON-Dateien nicht nachladen darf.
+   ========================================================================== */
+"use strict";
+
+/* ------------------------------------------------------------------ i18n */
+const T = {
+  de: {
+    edit:"Redaktion", theme:"Ansicht",
+    "tab.news":"News", "tab.dash":"Dashboard", "tab.maps":"Rollout-Maps", "tab.files":"Anhänge",
+    "ph.news":"News durchsuchen …", "ph.maps":"Maps durchsuchen …", "ph.files":"Anhänge durchsuchen …",
+    "rail.jump":"Schnellzugriff", "rail.dash":"Portfolio-Dashboard", "rail.board":"Board",
+    "rail.posts":"Meldungen", "rail.last":"Letzte Meldung", "rail.owner":"Pflege",
+    "rail.help":"Meldung schreiben",
+    "rail.helpTxt":"Über „Redaktion“ schreibst du eine Meldung und erzeugst daraus die Datei content/news.js. Diese Datei im Ordner ersetzen – fertig.",
+    "dash.title":"Portfolio-Dashboard", "dash.sub":"eingebettet aus dashboard/index.html",
+    "dash.reload":"Neu laden", "dash.open":"In eigenem Tab öffnen",
+    "maps.add":"Map ergänzen", "files.add":"Anhang ergänzen",
+    "ov.open":"Original öffnen",
+    "ed.title":"Redaktion", "ed.new":"Neu", "ed.pick":"Dateien wählen", "ed.show":"Code anzeigen", "ed.save":"Direkt speichern",
+    "ed.reset":"Änderungen verwerfen",
+    "ed.dirty":"Ungespeicherte Änderungen – erzeuge die Datei und lege sie in den Ordner content/.",
+    "foot.local":"Läuft vollständig aus diesem Ordner – ohne Server, ohne Installation.",
+    all:"Alle", pinned:"Angeheftet", noNews:"Keine Meldung passt zur Suche.",
+    emptyNewsT:"Noch keine Meldungen", emptyNewsP:"Schreibe die erste Meldung über „Redaktion“ – oder trage sie direkt in content/news.js ein.",
+    emptyMapsT:"Noch keine Rollout-Maps", emptyMapsP:"Lege deine Karten als PNG, JPG, SVG, PDF oder HTML-Seite im Ordner rollout-maps/ ab und trage sie danach hier ein.",
+    emptyFilesT:"Noch keine Anhänge", emptyFilesP:"Lege Dokumente im Ordner anhaenge/ ab und trage sie danach hier ein.",
+    addNow:"Jetzt ergänzen", openFolderHint:"Ordner",
+    fType:"Typ", fTitle:"Titel", fDate:"Datum", fCat:"Kategorie", fNote:"Beschreibung",
+    fAuthor:"Autor", fShow:"Anzeige", fBody:"Text", fPin:"oben anheften", fPath:"Datei / Pfad", fTags:"Schlagworte",
+    fLinks:"Verweise", fLinkLabel:"Beschriftung", fLinkHref:"Ziel (Pfad oder URL)",
+    addLink:"Verweis hinzufügen", del:"Löschen", dup:"Duplizieren", noSel:"Links einen Eintrag wählen oder „Neu“ drücken.",
+    bodyHint:"**fett**, *kursiv*, ## Zwischenüberschrift, - Aufzählung, [Text](anhaenge/datei.pdf)",
+    pathHint:"Pfad relativ zu index.html, z. B. anhaenge/protokoll.pdf",
+    pickHint:"Die gewählten Dateien müssen zusätzlich in den Ordner kopiert werden – der Browser darf das nicht selbst tun.",
+    copy:"Kopieren", copied:"Kopiert", copyHint:"Inhalt kopieren und in die Datei einfügen, falls der Download nicht klappt.",
+    confirmReset:"Alle nicht exportierten Änderungen verwerfen?", confirmDel:"Diesen Eintrag löschen?",
+    exported:"Datei erzeugt – jetzt in den Ordner content/ legen und die Seite neu laden.",
+    savedDirect:"Gespeichert. Seite neu laden (F5), damit die Meldung für alle sichtbar ist.",
+    newsN:"Meldungen", mapsN:"Maps", filesN:"Anhänge", untitled:"Ohne Titel"
+  },
+  en: {
+    edit:"Editor", theme:"Theme",
+    "tab.news":"News", "tab.dash":"Dashboard", "tab.maps":"Rollout maps", "tab.files":"Attachments",
+    "ph.news":"Search news …", "ph.maps":"Search maps …", "ph.files":"Search attachments …",
+    "rail.jump":"Quick access", "rail.dash":"Portfolio dashboard", "rail.board":"Board",
+    "rail.posts":"Posts", "rail.last":"Latest post", "rail.owner":"Maintained by",
+    "rail.help":"Publish a post",
+    "rail.helpTxt":"Use “Editor” to write a post and generate the file content/news.js. Replace that file in the folder – done.",
+    "dash.title":"Portfolio dashboard", "dash.sub":"embedded from dashboard/index.html",
+    "dash.reload":"Reload", "dash.open":"Open in its own tab",
+    "maps.add":"Add map", "files.add":"Add attachment",
+    "ov.open":"Open original",
+    "ed.title":"Editor", "ed.new":"New", "ed.pick":"Choose files", "ed.show":"Show code", "ed.save":"Save directly",
+    "ed.reset":"Discard changes",
+    "ed.dirty":"Unsaved changes – generate the file and put it into the content/ folder.",
+    "foot.local":"Runs entirely from this folder – no server, no installation.",
+    all:"All", pinned:"Pinned", noNews:"No post matches the search.",
+    emptyNewsT:"No posts yet", emptyNewsP:"Write the first post via “Editor” – or add it directly to content/news.js.",
+    emptyMapsT:"No rollout maps yet", emptyMapsP:"Put your maps as PNG, JPG, SVG, PDF or HTML page into the rollout-maps/ folder, then list them here.",
+    emptyFilesT:"No attachments yet", emptyFilesP:"Put documents into the anhaenge/ folder, then list them here.",
+    addNow:"Add now", openFolderHint:"Folder",
+    fType:"Type", fTitle:"Title", fDate:"Date", fCat:"Category", fNote:"Description",
+    fAuthor:"Author", fShow:"Display", fBody:"Text", fPin:"pin to top", fPath:"File / path", fTags:"Tags",
+    fLinks:"Links", fLinkLabel:"Label", fLinkHref:"Target (path or URL)",
+    addLink:"Add link", del:"Delete", dup:"Duplicate", noSel:"Pick an entry on the left or press “New”.",
+    bodyHint:"**bold**, *italic*, ## subheading, - bullet, [text](anhaenge/file.pdf)",
+    pathHint:"Path relative to index.html, e.g. anhaenge/minutes.pdf",
+    pickHint:"The chosen files must also be copied into the folder – the browser is not allowed to do that itself.",
+    copy:"Copy", copied:"Copied", copyHint:"Copy the content into the file if the download does not work.",
+    confirmReset:"Discard all changes that were not exported?", confirmDel:"Delete this entry?",
+    exported:"File generated – put it into the content/ folder and reload the page.",
+    savedDirect:"Saved. Reload the page (F5) so everyone sees the post.",
+    newsN:"posts", mapsN:"maps", filesN:"attachments", untitled:"Untitled"
+  }
+};
+let LANG = (window.BOARD_SETTINGS && window.BOARD_SETTINGS.lang) === "en" ? "en" : "de";
+const t = k => (T[LANG] && T[LANG][k]) ?? T.de[k] ?? k;
+
+/* ------------------------------------------------------------------ utils */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const el = (tag, attrs, kids) => {
+  const n = document.createElement(tag);
+  if (attrs) for (const [k,v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v === true ? "" : v);
+  }
+  if (kids) for (const c of [].concat(kids)) if (c) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  return n;
+};
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeHref = h => {
+  const s = String(h ?? "").trim();
+  if (!s) return "";
+  if (/^\s*javascript:/i.test(s) || /^\s*data:/i.test(s) || /^\s*vbscript:/i.test(s)) return "";
+  return s;
+};
+const fmtD = iso => {
+  if (!iso) return "";
+  const d = new Date(String(iso) + "T00:00:00");
+  if (isNaN(d)) return String(iso);
+  return LANG === "de" ? d.toLocaleDateString("de-DE",{day:"2-digit",month:"long",year:"numeric"})
+                       : d.toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"});
+};
+const fmtDShort = iso => {
+  if (!iso) return "–";
+  const d = new Date(String(iso) + "T00:00:00");
+  if (isNaN(d)) return String(iso);
+  return LANG === "de" ? d.toLocaleDateString("de-DE") : d.toLocaleDateString("en-GB");
+};
+const todayISO = () => new Date().toISOString().slice(0,10);
+const hash = s => { let h = 5381; for (let i=0;i<s.length;i++) h = ((h<<5)+h+s.charCodeAt(i))|0; return String(h); };
+const ext = p => (String(p).split(".").pop() || "").toLowerCase().split(/[?#]/)[0];
+
+/* Sehr kleiner Markdown-Dialekt: erst escapen, dann formatieren. */
+function rich(src){
+  const lines = String(src ?? "").replace(/\r\n/g,"\n").split("\n");
+  let out = "", list = false;
+  const inline = s => esc(s)
+    .replace(/`([^`]+)`/g, (m,a) => "<code>"+a+"</code>")
+    .replace(/\*\*([^*]+)\*\*/g, (m,a) => "<strong>"+a+"</strong>")
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, (m,a,b) => a+"<em>"+b+"</em>")
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m,txt,href) => {
+      const h = safeHref(href.replace(/&amp;/g,"&"));
+      if (!h) return txt;
+      const extLink = /^https?:/i.test(h);
+      return '<a href="'+esc(h)+'"'+(extLink?' target="_blank" rel="noopener"':"")+'>'+txt+"</a>";
+    });
+  const closeList = () => { if (list) { out += "</ul>"; list = false; } };
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    if (/^\s*[-*]\s+/.test(line)) {
+      if (!list) { out += "<ul>"; list = true; }
+      out += "<li>" + inline(line.replace(/^\s*[-*]\s+/,"")) + "</li>";
+    } else if (/^\s*#{1,4}\s+/.test(line)) {
+      closeList(); out += "<h4>" + inline(line.replace(/^\s*#{1,4}\s+/,"")) + "</h4>";
+    } else if (/^\s*---+\s*$/.test(line)) {
+      closeList(); out += "<hr />";
+    } else if (line.trim() === "") {
+      closeList();
+    } else {
+      closeList(); out += "<p>" + inline(line) + "</p>";
+    }
+  }
+  closeList();
+  return out;
+}
+
+/* ------------------------------------------------------------------ data */
+const DEFAULT_SETTINGS = {
+  title:"Management Board", subtitle:"", owner:"", contact:"",
+  dashboardFile:"dashboard/index.html", lang:"de",
+  newsCategories:["Meilenstein","Entscheidung","Rollout","Termin","Achtung"]
+};
+const SET = Object.assign({}, DEFAULT_SETTINGS, window.BOARD_SETTINGS || {});
+const PUBLISHED = {
+  news:  Array.isArray(window.BOARD_NEWS) ? window.BOARD_NEWS : [],
+  maps:  Array.isArray(window.BOARD_MAPS) ? window.BOARD_MAPS : [],
+  files: Array.isArray(window.BOARD_ATTACHMENTS) ? window.BOARD_ATTACHMENTS : []
+};
+const KEY = k => "mgmtboard.v1." + k;
+const DATA = { news:[], maps:[], files:[] };
+const DIRTY = { news:false, maps:false, files:false };
+
+/* Ein Entwurf, der inzwischen als Datei im Ordner liegt, wird beim Laden
+   automatisch verworfen - erkannt an der Prüfsumme des Exports. */
+function loadDrafts(){
+  for (const k of ["news","maps","files"]) {
+    const pubHash = fingerprint(k, PUBLISHED[k]);
+    let draft = null;
+    try { draft = JSON.parse(localStorage.getItem(KEY(k+".draft")) || "null"); } catch(e){ draft = null; }
+    const handed = (() => { try { return localStorage.getItem(KEY(k+".exported")); } catch(e){ return null; } })();
+    if (draft && handed && handed === pubHash) {
+      try { localStorage.removeItem(KEY(k+".draft")); localStorage.removeItem(KEY(k+".exported")); } catch(e){}
+      draft = null;
+    }
+    DATA[k] = draft || JSON.parse(JSON.stringify(PUBLISHED[k]));
+    DIRTY[k] = !!draft;
+  }
+}
+function saveDraft(k){
+  DIRTY[k] = true;
+  try { localStorage.setItem(KEY(k+".draft"), JSON.stringify(DATA[k])); } catch(e){}
+  paintDirty();
+}
+function dropDraft(k){
+  DATA[k] = JSON.parse(JSON.stringify(PUBLISHED[k]));
+  DIRTY[k] = false;
+  try { localStorage.removeItem(KEY(k+".draft")); localStorage.removeItem(KEY(k+".exported")); } catch(e){}
+  paintDirty();
+}
+/* loadDrafts() wird in init() aufgerufen - es nutzt fingerprint() aus dem Editor-Teil. */
+
+/* ------------------------------------------------------------------ news */
+const catIndex = c => {
+  const i = (SET.newsCategories || []).indexOf(c);
+  return i < 0 ? 1 : (i % 5) + 1;
+};
+let newsQ = "", newsCat = "";
+function renderNews(){
+  const q = newsQ.trim().toLowerCase();
+  const all = DATA.news.slice().sort((a,b) => {
+    if (!!b.pinned !== !!a.pinned) return b.pinned ? 1 : -1;
+    return String(b.date||"").localeCompare(String(a.date||""));
+  });
+  const rows = all.filter(n => {
+    if (newsCat && n.category !== newsCat) return false;
+    if (!q) return true;
+    return [n.title, n.body, n.category, n.author].join(" ").toLowerCase().includes(q);
+  });
+
+  const cats = [...new Set(DATA.news.map(n => n.category).filter(Boolean))];
+  $("#catFilter").replaceChildren(
+    el("button",{type:"button",class:"pillbtn","aria-pressed":!newsCat,text:t("all"),
+      onclick:()=>{ newsCat=""; renderNews(); }}),
+    ...cats.map(c => el("button",{type:"button",class:"pillbtn","aria-pressed":newsCat===c,
+      onclick:()=>{ newsCat = newsCat===c ? "" : c; renderNews(); }},[
+      el("i",{style:"background:var(--c"+catIndex(c)+")"}), el("span",{text:c})]))
+  );
+
+  const feed = $("#feed"); feed.replaceChildren();
+  if (!DATA.news.length){
+    feed.appendChild(emptyState("📰", t("emptyNewsT"), t("emptyNewsP"), () => openEditor("news", true)));
+  } else if (!rows.length){
+    feed.appendChild(el("div",{class:"empty"},[el("p",{text:t("noNews")})]));
+  } else {
+    rows.forEach(n => feed.appendChild(postCard(n)));
+  }
+
+  $("#nNews").textContent = DATA.news.length;
+  $("#kvPosts").textContent = DATA.news.length;
+  const latest = all.slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))[0];
+  $("#kvLast").textContent = latest ? fmtDShort(latest.date) : "–";
+}
+function postCard(n){
+  const box = el("article",{class:"card post"+(n.pinned?" pin":"")});
+  if (n.pinned) box.appendChild(el("span",{class:"pinflag",text:t("pinned")}));
+  const meta = el("div",{class:"post-meta"});
+  if (n.category) meta.appendChild(el("span",{class:"cat k"+catIndex(n.category),text:n.category}));
+  if (n.date) meta.appendChild(el("span",{text:fmtD(n.date)}));
+  if (n.author) meta.appendChild(el("span",{text:"· "+n.author}));
+  box.appendChild(meta);
+  box.appendChild(el("h3",{text:n.title || t("untitled")}));
+  const body = el("div",{class:"rt"});
+  body.innerHTML = rich(n.body);           /* Inhalt ist escaped, siehe rich() */
+  box.appendChild(body);
+  const links = (n.links || []).filter(l => l && safeHref(l.href));
+  if (links.length){
+    box.appendChild(el("div",{class:"post-links"}, links.map(l => {
+      const isExt = /^https?:/i.test(l.href);
+      return el("a",{class:"flink",href:safeHref(l.href),target:isExt?"_blank":null,rel:isExt?"noopener":null},[
+        el("span",{class:"ic",text:fileIcon(l.href)}), el("span",{text:l.label || l.href})]);
+    })));
+  }
+  return box;
+}
+function emptyState(icon, title, text, onAdd){
+  const box = el("div",{class:"empty"},[
+    el("div",{class:"ic",text:icon}), el("h3",{text:title}), el("p",{text:text})
+  ]);
+  if (onAdd) box.appendChild(el("div",{class:"acts"},[
+    el("button",{type:"button",class:"btn primary",text:"✎ "+t("addNow"),onclick:onAdd})]));
+  return box;
+}
+
+/* ------------------------------------------------------------------ maps */
+const guessType = h => {
+  const e = ext(h);
+  if (["png","jpg","jpeg","gif","webp","svg","avif"].includes(e)) return "image";
+  if (e === "pdf") return "pdf";
+  return "page";
+};
+const fileIcon = h => {
+  const e = ext(h);
+  if (e === "pdf") return "📕";
+  if (["xlsx","xlsm","xls","csv"].includes(e)) return "📗";
+  if (["docx","doc","rtf","md","txt"].includes(e)) return "📄";
+  if (["pptx","ppt"].includes(e)) return "📙";
+  if (["png","jpg","jpeg","gif","webp","svg","avif"].includes(e)) return "🖼️";
+  if (["zip","7z","rar"].includes(e)) return "🗜️";
+  if (["html","htm"].includes(e)) return "🌐";
+  return "📎";
+};
+const fileKind = h => {
+  const e = ext(h);
+  if (e === "pdf") return "pdf";
+  if (["xlsx","xlsm","xls","csv"].includes(e)) return "xls";
+  if (["docx","doc","rtf","md","txt"].includes(e)) return "doc";
+  if (["pptx","ppt"].includes(e)) return "ppt";
+  if (["png","jpg","jpeg","gif","webp","svg","avif"].includes(e)) return "img";
+  return "";
+};
+let mapsQ = "", mapTag = "";
+function renderMaps(){
+  const q = mapsQ.trim().toLowerCase();
+  const tags = [...new Set(DATA.maps.flatMap(m => m.tags || []))];
+  $("#tagFilter").replaceChildren(
+    ...(tags.length ? [el("button",{type:"button",class:"pillbtn","aria-pressed":!mapTag,text:t("all"),
+      onclick:()=>{ mapTag=""; renderMaps(); }})] : []),
+    ...tags.map(tg => el("button",{type:"button",class:"pillbtn","aria-pressed":mapTag===tg,text:tg,
+      onclick:()=>{ mapTag = mapTag===tg ? "" : tg; renderMaps(); }}))
+  );
+  const rows = DATA.maps.filter(m => {
+    if (mapTag && !(m.tags||[]).includes(mapTag)) return false;
+    if (!q) return true;
+    return [m.title, m.note, (m.tags||[]).join(" "), m.href].join(" ").toLowerCase().includes(q);
+  }).sort((a,b) => String(b.date||"").localeCompare(String(a.date||"")));
+
+  const box = $("#mapsBox"); box.replaceChildren();
+  if (!DATA.maps.length){
+    box.appendChild(emptyState("🗺️", t("emptyMapsT"), t("emptyMapsP"), () => openEditor("maps", true)));
+  } else if (!rows.length){
+    box.appendChild(el("div",{class:"empty"},[el("p",{text:t("noNews")})]));
+  } else {
+    box.appendChild(el("div",{class:"grid"}, rows.map(m => {
+      const type = m.type || guessType(m.href);
+      const thumb = el("div",{class:"thumb"});
+      if (type === "image" && safeHref(m.href)) thumb.appendChild(el("img",{src:safeHref(m.href),alt:m.title||"",loading:"lazy"}));
+      else thumb.appendChild(el("span",{class:"ph",text:type==="pdf"?"📕":"🌐"}));
+      thumb.appendChild(el("span",{class:"badge",text:type}));
+      return el("button",{type:"button",class:"tile",onclick:()=>openViewer(m)},[
+        thumb,
+        el("div",{class:"body"},[
+          el("h3",{text:m.title || m.href}),
+          m.note ? el("p",{class:"note",text:m.note}) : null,
+          el("div",{class:"meta"},[
+            el("span",{text:fmtDShort(m.date)}),
+            (m.tags||[]).length ? el("span",{class:"tags"}, (m.tags||[]).map(x=>el("span",{class:"tag",text:x}))) : null
+          ])
+        ])
+      ]);
+    })));
+  }
+  $("#nMaps").textContent = DATA.maps.length;
+  $("#railMapsSub").textContent = DATA.maps.length + " " + t("mapsN");
+}
+function openViewer(m){
+  const type = m.type || guessType(m.href);
+  const href = safeHref(m.href);
+  $("#ovTitle").textContent = m.title || href;
+  $("#ovOpen").href = href || "#";
+  const body = $("#ovBody"); body.replaceChildren();
+  if (!href) body.appendChild(el("p",{text:"–"}));
+  else if (type === "image") body.appendChild(el("img",{src:href,alt:m.title||""}));
+  else body.appendChild(el("iframe",{src:href,title:m.title||""}));
+  if (m.note) body.appendChild(el("p",{style:"color:var(--ink-2);margin-top:14px;",text:m.note}));
+  $("#ov").classList.add("on");
+}
+
+/* ------------------------------------------------------------------ files */
+let filesQ = "", fileCat = "";
+function renderFiles(){
+  const q = filesQ.trim().toLowerCase();
+  const cats = [...new Set(DATA.files.map(f => f.category).filter(Boolean))];
+  $("#fileCatFilter").replaceChildren(
+    ...(cats.length ? [el("button",{type:"button",class:"pillbtn","aria-pressed":!fileCat,text:t("all"),
+      onclick:()=>{ fileCat=""; renderFiles(); }})] : []),
+    ...cats.map(c => el("button",{type:"button",class:"pillbtn","aria-pressed":fileCat===c,text:c,
+      onclick:()=>{ fileCat = fileCat===c ? "" : c; renderFiles(); }}))
+  );
+  const rows = DATA.files.filter(f => {
+    if (fileCat && f.category !== fileCat) return false;
+    if (!q) return true;
+    return [f.title, f.note, f.category, f.href].join(" ").toLowerCase().includes(q);
+  });
+  const box = $("#filesBox"); box.replaceChildren();
+  if (!DATA.files.length){
+    box.appendChild(emptyState("📎", t("emptyFilesT"), t("emptyFilesP"), () => openEditor("files", true)));
+  } else if (!rows.length){
+    box.appendChild(el("div",{class:"empty"},[el("p",{text:t("noNews")})]));
+  } else {
+    const groups = new Map();
+    rows.forEach(f => { const g = f.category || "–"; if (!groups.has(g)) groups.set(g,[]); groups.get(g).push(f); });
+    const card = el("div",{class:"card",style:"overflow:hidden;"});
+    [...groups.entries()].forEach(([g, list]) => {
+      card.appendChild(el("div",{class:"grp-h",text:g}));
+      card.appendChild(el("div",{class:"files"}, list
+        .sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))
+        .map(f => {
+          const isExt = /^https?:/i.test(f.href||"");
+          return el("a",{class:"file",href:safeHref(f.href)||"#",target:isExt?"_blank":null,rel:isExt?"noopener":null},[
+            el("span",{class:"ft "+fileKind(f.href),text:(ext(f.href)||"?").toUpperCase().slice(0,4)}),
+            el("span",{class:"fm"},[
+              el("span",{class:"t",text:f.title || f.href}),
+              f.note ? el("span",{class:"n",text:f.note}) : null,
+              el("span",{class:"p",text:f.href})
+            ]),
+            el("span",{class:"fd",text:fmtDShort(f.date)})
+          ]);
+        })));
+    });
+    box.appendChild(card);
+  }
+  $("#nFiles").textContent = DATA.files.length;
+  $("#railFilesSub").textContent = DATA.files.length + " " + t("filesN");
+}
+
+/* ------------------------------------------------------------------ views */
+let dashLoaded = false, dashTheme = "";
+function resolvedTheme(){
+  const stamp = document.documentElement.getAttribute("data-theme");
+  if (stamp) return stamp;
+  return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function mountDash(force){
+  const want = resolvedTheme() + "|" + LANG;
+  if (dashLoaded && dashTheme === want && !force) return;
+  dashTheme = want;
+  const src = SET.dashboardFile + "?theme=" + resolvedTheme() + "&lang=" + LANG;
+  $("#frameWrap").replaceChildren(el("iframe",{src, title:t("dash.title"), loading:"lazy"}));
+  $("#dashOpen").href = SET.dashboardFile;
+  dashLoaded = true;
+}
+function show(view){
+  $$(".view").forEach(v => v.classList.toggle("on", v.id === "v-"+view));
+  $$(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.view === view));
+  if (view === "dashboard") mountDash(false);
+  if (location.hash.slice(1) !== view) history.replaceState(null,"","#"+view);
+  window.scrollTo({top:0, behavior:"instant"});
+}
+
+/* ------------------------------------------------------------------ editor */
+const FILEMETA = {
+  news: {
+    out:"news.js", global:"BOARD_NEWS", folder:"", label:"content/news.js",
+    header:
+`/* =============================================================================
+   News des Management Boards
+   -----------------------------------------------------------------------------
+   Erzeugt über "Redaktion" im Board. Diese Datei ersetzt content/news.js.
+   Von Hand bearbeiten ist ebenso möglich - Pflichtfelder sind date und title.
+   ========================================================================== */`
+  },
+  maps: {
+    out:"maps.js", global:"BOARD_MAPS", folder:"rollout-maps/", label:"content/maps.js",
+    header:
+`/* =============================================================================
+   Rollout-Maps
+   -----------------------------------------------------------------------------
+   Erzeugt über "Redaktion" im Board. Diese Datei ersetzt content/maps.js.
+   Die Dateien selbst liegen im Ordner rollout-maps/.
+   ========================================================================== */`
+  },
+  files: {
+    out:"attachments.js", global:"BOARD_ATTACHMENTS", folder:"anhaenge/", label:"content/attachments.js",
+    header:
+`/* =============================================================================
+   Anhänge des Management Boards
+   -----------------------------------------------------------------------------
+   Erzeugt über "Redaktion" im Board. Diese Datei ersetzt content/attachments.js.
+   Die Dateien selbst liegen im Ordner anhaenge/.
+   ========================================================================== */`
+  }
+};
+const FIELDS = {
+  news: ["date","title","category","pinned","author","body","links"],
+  maps: ["href","type","title","date","note","tags"],
+  files:["href","title","category","date","note"]
+};
+/* Feste Schlüsselreihenfolge - so bleibt die erzeugte Datei stabil und die
+   Prüfsumme nach dem Ersetzen vergleichbar. */
+function normalize(type, item){
+  const o = {};
+  const src = item || {};
+  for (const f of FIELDS[type]) {
+    if (f === "links") o.links = (src.links || []).filter(l => l && (l.label || l.href))
+      .map(l => ({label: String(l.label||""), href: String(l.href||"")}));
+    else if (f === "tags") o.tags = (src.tags || []).map(String).filter(Boolean);
+    else if (f === "pinned") o.pinned = !!src.pinned;
+    else o[f] = src[f] === undefined || src[f] === null ? "" : String(src[f]);
+  }
+  return o;
+}
+const fingerprint = (type, arr) => hash(JSON.stringify((arr||[]).map(x => normalize(type, x))));
+
+function jsLit(v, ind){
+  const pad = " ".repeat(ind), pad2 = " ".repeat(ind + 2);
+  if (Array.isArray(v)) {
+    if (!v.length) return "[]";
+    return "[\n" + v.map(x => pad2 + jsLit(x, ind + 2)).join(",\n") + "\n" + pad + "]";
+  }
+  if (v && typeof v === "object") {
+    const keys = Object.keys(v);
+    if (!keys.length) return "{}";
+    return "{\n" + keys.map(k => pad2 + k + ": " + jsLit(v[k], ind + 2)).join(",\n") + "\n" + pad + "}";
+  }
+  if (typeof v === "string") {
+    if (v.includes("\n")) return "`" + v.replace(/\\/g,"\\\\").replace(/`/g,"\\`").replace(/\$\{/g,"\\${") + "`";
+    return JSON.stringify(v);
+  }
+  return JSON.stringify(v);
+}
+function buildFile(type){
+  const m = FILEMETA[type];
+  const items = DATA[type].map(x => normalize(type, x));
+  return m.header + "\nwindow." + m.global + " = " + jsLit(items, 0) + ";\n";
+}
+function downloadText(name, text){
+  const blob = new Blob([text], {type:"text/javascript;charset=utf-8"});
+  const a = el("a",{href:URL.createObjectURL(blob), download:name});
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function toast(msg){
+  const n = el("div",{text:msg,style:
+    "position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:300;"+
+    "background:var(--surface);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;"+
+    "box-shadow:var(--shadow);padding:11px 16px;font-size:13px;max-width:90vw;text-align:center;"});
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 4200);
+}
+function markExported(type){
+  try { localStorage.setItem(KEY(type+".exported"), fingerprint(type, DATA[type])); } catch(e){}
+}
+/* Standardweg: Datei herunterladen und im Ordner content/ ersetzen. */
+function exportFile(type){
+  const m = FILEMETA[type];
+  downloadText(m.out, buildFile(type));
+  markExported(type);
+  toast(t("exported"));
+}
+/* Komfortweg, wenn der Browser das Speichern in einen Ordner erlaubt:
+   direkt über content/<datei>.js schreiben. Schlägt das fehl, greift der Download. */
+async function exportDirect(type){
+  const m = FILEMETA[type];
+  try {
+    const h = await window.showSaveFilePicker({ suggestedName: m.out,
+      types:[{description:"JavaScript", accept:{"text/javascript":[".js"]}}] });
+    const w = await h.createWritable(); await w.write(buildFile(type)); await w.close();
+    markExported(type);
+    toast(t("savedDirect"));
+  } catch (e) {
+    if (e && e.name === "AbortError") return;
+    exportFile(type);
+  }
+}
+
+let edType = "news", edSel = -1;
+function openEditor(type, fresh){
+  edType = type || "news";
+  $$("#edTabs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.ed === edType));
+  $("#edPick").style.display = edType === "news" ? "none" : "";
+  $("#edExportLbl").textContent = FILEMETA[edType].label + (LANG === "de" ? " erzeugen" : " – generate");
+  edSel = fresh ? -1 : (DATA[edType].length ? 0 : -1);
+  if (fresh) addEntry();
+  else { paintEdList(); paintEdForm(); }
+  $("#ed").classList.add("on");
+  paintDirty();
+}
+function paintDirty(){
+  $("#dirty").classList.toggle("on", !!DIRTY[edType]);
+  $$(".tab").forEach(b => {
+    const v = b.dataset.view, k = v === "files" ? "files" : v;
+    const badge = b.querySelector(".n");
+    if (badge && DIRTY[k]) badge.style.boxShadow = "0 0 0 2px var(--c4)";
+    else if (badge) badge.style.boxShadow = "";
+  });
+}
+function addEntry(){
+  const blank = { news:{date:todayISO(), title:"", category:(SET.newsCategories||[])[0]||"", pinned:false, author:SET.owner||"", body:"", links:[]},
+                  maps:{href:"rollout-maps/", type:"", title:"", date:todayISO(), note:"", tags:[]},
+                  files:{href:"anhaenge/", title:"", category:"", date:todayISO(), note:""} }[edType];
+  DATA[edType].unshift(JSON.parse(JSON.stringify(blank)));
+  edSel = 0; saveDraft(edType); paintEdList(); paintEdForm(); renderAll();
+}
+function paintEdList(){
+  const box = $("#edItems"); box.replaceChildren();
+  DATA[edType].forEach((it, i) => {
+    box.appendChild(el("button",{type:"button",class:"ed-item","aria-current":i===edSel,
+      onclick:()=>{ edSel=i; paintEdList(); paintEdForm(); }},[
+      el("span",{class:"t",text:it.title || it.href || t("untitled")}),
+      el("span",{class:"m",text:[fmtDShort(it.date), it.category || it.type || ""].filter(Boolean).join(" · ")})
+    ]));
+  });
+}
+function field(label, node, hint){
+  return el("div",{class:"fld"},[el("label",{text:label}), node, hint ? el("span",{class:"hint",text:hint}) : null]);
+}
+function paintEdForm(){
+  const box = $("#edForm"); box.replaceChildren();
+  if (edSel < 0 || !DATA[edType][edSel]) { box.appendChild(el("p",{style:"color:var(--muted)",text:t("noSel")})); return; }
+  const it = DATA[edType][edSel];
+  const upd = (k, v) => { it[k] = v; saveDraft(edType); paintEdList(); renderAll(); };
+  const input = (k, type) => el("input",{type:type||"text",value:it[k]||"",oninput:e=>upd(k,e.target.value)});
+
+  if (edType === "news") {
+    const catSel = el("select",{onchange:e=>upd("category",e.target.value)});
+    [...new Set([...(SET.newsCategories||[]), it.category].filter(Boolean))].forEach(c =>
+      catSel.appendChild(el("option",{value:c,text:c,selected:c===it.category})));
+    box.append(
+      field(t("fTitle"), input("title")),
+      el("div",{class:"row2"},[ field(t("fDate"), input("date","date")), field(t("fCat"), catSel) ]),
+      el("div",{class:"row2"},[ field(t("fAuthor"), input("author")),
+        el("div",{class:"fld"},[el("label",{text:t("fShow")}),
+          el("label",{class:"chk"},[
+            (()=>{ const c = el("input",{type:"checkbox"}); c.checked = !!it.pinned;
+                   c.addEventListener("change", e => upd("pinned", e.target.checked)); return c; })(),
+            el("span",{text:t("fPin")})])])
+      ]),
+      field(t("fBody"), el("textarea",{oninput:e=>upd("body",e.target.value)}, [document.createTextNode(it.body||"")]), t("bodyHint"))
+    );
+    const links = el("div",{class:"linklist"});
+    (it.links || []).forEach((l, li) => links.appendChild(el("div",{class:"linkrow"},[
+      el("input",{type:"text",value:l.label||"",placeholder:t("fLinkLabel"),
+        oninput:e=>{ it.links[li].label = e.target.value; saveDraft(edType); renderAll(); }}),
+      el("input",{type:"text",value:l.href||"",placeholder:t("fLinkHref"),
+        oninput:e=>{ it.links[li].href = e.target.value; saveDraft(edType); renderAll(); }}),
+      el("button",{type:"button",class:"btn sm danger",text:"×",
+        onclick:()=>{ it.links.splice(li,1); saveDraft(edType); paintEdForm(); renderAll(); }})
+    ])));
+    links.appendChild(el("button",{type:"button",class:"btn sm",text:"+ "+t("addLink"),
+      onclick:()=>{ it.links = it.links || []; it.links.push({label:"",href:""}); saveDraft(edType); paintEdForm(); }}));
+    box.append(field(t("fLinks"), links));
+  }
+
+  if (edType === "maps") {
+    const typeSel = el("select",{onchange:e=>upd("type",e.target.value)});
+    [["","auto"],["image","image"],["pdf","pdf"],["page","page"]].forEach(([v,lbl]) =>
+      typeSel.appendChild(el("option",{value:v,text:lbl,selected:(it.type||"")===v})));
+    box.append(
+      field(t("fPath"), input("href"), t("pathHint")),
+      el("div",{class:"row2"},[ field(t("fTitle"), input("title")), field(t("fType"), typeSel) ]),
+      el("div",{class:"row2"},[ field(t("fDate"), input("date","date")),
+        field(t("fTags"), el("input",{type:"text",value:(it.tags||[]).join(", "),
+          oninput:e=>upd("tags", e.target.value.split(",").map(s=>s.trim()).filter(Boolean))}), "LIS, 2026") ]),
+      field(t("fNote"), input("note"))
+    );
+  }
+
+  if (edType === "files") {
+    box.append(
+      field(t("fPath"), input("href"), t("pathHint")),
+      field(t("fTitle"), input("title")),
+      el("div",{class:"row2"},[ field(t("fCat"), input("category")), field(t("fDate"), input("date","date")) ]),
+      field(t("fNote"), input("note"))
+    );
+  }
+
+  box.append(el("div",{style:"display:flex;gap:8px;flex-wrap:wrap;padding-top:4px;"},[
+    el("button",{type:"button",class:"btn sm",text:"⧉ "+t("dup"),
+      onclick:()=>{ DATA[edType].splice(edSel,0, JSON.parse(JSON.stringify(it))); saveDraft(edType); paintEdList(); renderAll(); }}),
+    el("button",{type:"button",class:"btn sm danger",text:"🗑 "+t("del"),
+      onclick:()=>{ if (!confirm(t("confirmDel"))) return;
+        DATA[edType].splice(edSel,1); edSel = Math.min(edSel, DATA[edType].length-1);
+        saveDraft(edType); paintEdList(); paintEdForm(); renderAll(); }})
+  ]));
+}
+function showCode(){
+  const box = $("#edForm"); box.replaceChildren();
+  const ta = el("textarea",{class:"codebox",readonly:true},[document.createTextNode(buildFile(edType))]);
+  const btn = el("button",{type:"button",class:"btn sm",text:"⧉ "+t("copy"),onclick:async()=>{
+    try { await navigator.clipboard.writeText(ta.value); } catch(e){ ta.select(); document.execCommand("copy"); }
+    btn.textContent = "✓ " + t("copied"); setTimeout(()=>btn.textContent = "⧉ "+t("copy"), 1800);
+  }});
+  box.append(el("div",{class:"fld"},[el("label",{text:FILEMETA[edType].label}), ta,
+    el("span",{class:"hint",text:t("copyHint")})]), el("div",{},[btn]));
+}
+
+/* ------------------------------------------------------------------ wiring */
+function renderAll(){
+  renderNews(); renderMaps(); renderFiles();
+  $("#fCounts").textContent = DATA.news.length + " " + t("newsN") + " · " +
+    DATA.maps.length + " " + t("mapsN") + " · " + DATA.files.length + " " + t("filesN");
+}
+function applyLang(){
+  document.documentElement.lang = LANG;
+  $$("[data-i]").forEach(n => n.textContent = t(n.dataset.i));
+  $$("[data-ph]").forEach(n => n.placeholder = t(n.dataset.ph));
+  $("#langDe").setAttribute("aria-pressed", LANG === "de");
+  $("#langEn").setAttribute("aria-pressed", LANG === "en");
+  $("#edExportLbl").textContent = FILEMETA[edType].label + (LANG === "de" ? " erzeugen" : " – generate");
+  renderAll();
+  if (dashLoaded) mountDash(false);
+}
+let themeMode = "system";
+function applyTheme(){
+  const r = document.documentElement;
+  if (themeMode === "system") r.removeAttribute("data-theme"); else r.setAttribute("data-theme", themeMode);
+  $("#themeIc").textContent = themeMode === "dark" ? "●" : themeMode === "light" ? "○" : "◐";
+  try { localStorage.setItem(KEY("theme"), themeMode); } catch(e){}
+  if (dashLoaded) mountDash(false);
+}
+function init(){
+  loadDrafts();
+  $("#bTitle").textContent = SET.title;
+  $("#bSub").textContent = SET.subtitle;
+  document.title = SET.title;
+  const w = (SET.title || "Board").trim().split(/\s+/);
+  $("#mark").textContent = (/^[A-ZÄÖÜ]{2,3}$/.test(w[0]) ? w[0]
+    : w.slice(0,2).map(x => x[0] || "").join("")).toUpperCase().slice(0,3);
+  $("#kvOwner").textContent = SET.owner || "–";
+  $("#fOwner").textContent = SET.owner ? (LANG === "de" ? "Pflege: " : "Maintained by: ") + SET.owner : "";
+  $("#dashOpen").href = SET.dashboardFile;
+
+  try { const s = localStorage.getItem(KEY("theme")); if (s) themeMode = s; } catch(e){}
+  applyTheme();
+
+  $$(".tab").forEach(b => b.addEventListener("click", () => show(b.dataset.view)));
+  $$("[data-goto]").forEach(b => b.addEventListener("click", () => show(b.dataset.goto)));
+  $("#qNews").addEventListener("input", e => { newsQ = e.target.value; renderNews(); });
+  $("#qMaps").addEventListener("input", e => { mapsQ = e.target.value; renderMaps(); });
+  $("#qFiles").addEventListener("input", e => { filesQ = e.target.value; renderFiles(); });
+  $("#dashReload").addEventListener("click", () => mountDash(true));
+
+  $("#edBtn").addEventListener("click", () => openEditor("news"));
+  $("#edBtn2").addEventListener("click", () => openEditor("news"));
+  $("#edMaps").addEventListener("click", () => openEditor("maps"));
+  $("#edFiles").addEventListener("click", () => openEditor("files"));
+  $$("#edTabs button").forEach(b => b.addEventListener("click", () => openEditor(b.dataset.ed)));
+  $("#edNew").addEventListener("click", addEntry);
+  $("#edShow").addEventListener("click", showCode);
+  $("#edExport").addEventListener("click", () => exportFile(edType));
+  if (window.showSaveFilePicker) {
+    $("#edSave").style.display = "";
+    $("#edSave").addEventListener("click", () => exportDirect(edType));
+  }
+  $("#edReset").addEventListener("click", () => { if (!confirm(t("confirmReset"))) return;
+    dropDraft(edType); edSel = DATA[edType].length ? 0 : -1; paintEdList(); paintEdForm(); renderAll(); });
+  $("#edPick").addEventListener("click", () => $("#edFile").click());
+  $("#edFile").addEventListener("change", e => {
+    const folder = FILEMETA[edType].folder;
+    [...e.target.files].forEach(f => {
+      const entry = edType === "maps"
+        ? {href:folder+f.name, type:"", title:f.name.replace(/\.[^.]+$/,""), date:todayISO(), note:"", tags:[]}
+        : {href:folder+f.name, title:f.name.replace(/\.[^.]+$/,""), category:"", date:todayISO(), note:""};
+      DATA[edType].unshift(entry);
+    });
+    e.target.value = ""; edSel = 0; saveDraft(edType); paintEdList(); paintEdForm(); renderAll();
+    toast(t("pickHint"));
+  });
+  $("#edClose").addEventListener("click", () => $("#ed").classList.remove("on"));
+  $("#ovClose").addEventListener("click", () => $("#ov").classList.remove("on"));
+  [["#ed"],["#ov"]].forEach(([s]) => $(s).addEventListener("click", e => { if (e.target === $(s)) $(s).classList.remove("on"); }));
+  addEventListener("keydown", e => { if (e.key === "Escape") { $("#ed").classList.remove("on"); $("#ov").classList.remove("on"); } });
+
+  $("#langDe").addEventListener("click", () => { LANG = "de"; applyLang(); });
+  $("#langEn").addEventListener("click", () => { LANG = "en"; applyLang(); });
+  $("#themeBtn").addEventListener("click", () => {
+    themeMode = themeMode === "system" ? "dark" : themeMode === "dark" ? "light" : "system"; applyTheme(); });
+  addEventListener("hashchange", () => show((location.hash.slice(1) || "news")));
+
+  applyLang();
+  paintDirty();
+  show(["news","dashboard","maps","files"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "news");
+}
+init();
+</script>
+</body>
+</html>

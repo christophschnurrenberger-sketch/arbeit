@@ -843,6 +843,10 @@ function setPreset(p){
   render();
 }
 function init(){
+  /* Vom Management Board eingebettet: ?theme=dark&lang=en übernimmt dessen Ansicht. */
+  const qs = new URLSearchParams(location.search);
+  if (["dark","light","system"].includes(qs.get("theme"))) themeMode = qs.get("theme");
+  if (["de","en"].includes(qs.get("lang"))) LANG = qs.get("lang");
   $("#asOf").value = S.asOf;
   applyTheme();
   on("#q","input", e => { S.q = e.target.value; render(); });

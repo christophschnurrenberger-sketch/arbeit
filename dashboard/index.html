@@ -7,7 +7,9 @@
 <meta name="description" content="Management-Cockpit für das Corporate-IT-Prozessportfolio: Status, Verzögerungen, Auslastung und Timeline über alle Prozessgruppen." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" /></noscript>
 <style>
 /* ============================================================ tokens */
 :root{
@@ -1386,6 +1388,10 @@ function setPreset(p){
   render();
 }
 function init(){
+  /* Vom Management Board eingebettet: ?theme=dark&lang=en übernimmt dessen Ansicht. */
+  const qs = new URLSearchParams(location.search);
+  if (["dark","light","system"].includes(qs.get("theme"))) themeMode = qs.get("theme");
+  if (["de","en"].includes(qs.get("lang"))) LANG = qs.get("lang");
   $("#asOf").value = S.asOf;
   applyTheme();
   on("#q","input", e => { S.q = e.target.value; render(); });
