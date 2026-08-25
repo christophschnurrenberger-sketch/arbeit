@@ -1,0 +1,190 @@
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <h1 data-i18n="title">IT Process Portfolio Cockpit</h1>
+      <span class="sub"><span data-i18n="snapshot">Datenstand</span> <b id="snapLabel">–</b> · <span id="nodeTotal" class="tnum">0</span> <span data-i18n="processes">Prozesse</span></span>
+    </div>
+    <div class="top-actions">
+      <div class="seg" role="group" aria-label="Sprache / Language">
+        <button type="button" id="langDe" aria-pressed="true">DE</button>
+        <button type="button" id="langEn" aria-pressed="false">EN</button>
+      </div>
+      <button type="button" class="btn" id="themeBtn" aria-pressed="false"><span id="themeIc">◐</span> <span data-i18n="theme">Ansicht</span></button>
+      <button type="button" class="btn" id="csvBtn">↓ <span data-i18n="csv">CSV Export</span></button>
+      <button type="button" class="btn" id="printBtn">⎙ <span data-i18n="print">Drucken / PDF</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ============================================ filters -->
+  <section class="filters" aria-label="Filter">
+    <div class="frow">
+      <div class="fgrp">
+        <label class="flabel" for="q" data-i18n="f.search">Suche</label>
+        <div class="search">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+          <input id="q" type="search" autocomplete="off" data-i18n-ph="f.searchPh" placeholder="Prozess, Person, Initiative …" />
+        </div>
+      </div>
+      <div class="fgrp" id="ms-group"></div>
+      <div class="fgrp" id="ms-initiative"></div>
+      <div class="fgrp" id="ms-l1"></div>
+      <div class="fgrp" id="ms-level"></div>
+      <div class="fgrp" id="ms-status"></div>
+      <div class="fsep" aria-hidden="true"></div>
+      <div class="fgrp" id="ms-phase"></div>
+      <div class="fgrp" id="ms-actual"></div>
+      <div class="fgrp" id="ms-planned"></div>
+      <div class="fgrp" id="ms-lead"></div>
+      <div class="fgrp" id="ms-manager"></div>
+      <div class="fgrp" id="ms-consultant"></div>
+    </div>
+
+    <div class="frow" style="margin-top:11px;">
+      <div class="fgrp">
+        <span class="flabel" data-i18n="f.period">Zeitraum (Überschneidung)</span>
+        <div class="range">
+          <input class="dateIn" type="date" id="dFrom" aria-label="von" />
+          <span style="color:var(--muted)">–</span>
+          <input class="dateIn" type="date" id="dTo" aria-label="bis" />
+        </div>
+      </div>
+      <div class="fgrp">
+        <span class="flabel" data-i18n="f.presets">Schnellauswahl</span>
+        <div class="toggles">
+          <button type="button" class="tgl" data-preset="all" data-i18n="p.all">Gesamt</button>
+          <button type="button" class="tgl" data-preset="q" data-i18n="p.q">Lfd. Quartal</button>
+          <button type="button" class="tgl" data-preset="90" data-i18n="p.90">Nächste 90 T</button>
+          <button type="button" class="tgl" data-preset="year" data-i18n="p.year">Lfd. Jahr</button>
+        </div>
+      </div>
+      <div class="fgrp">
+        <label class="flabel" for="asOf" data-i18n="f.asof">Stichtag</label>
+        <input class="dateIn" type="date" id="asOf" />
+      </div>
+      <div class="fgrp">
+        <span class="flabel" data-i18n="f.progress">Fortschritt</span>
+        <div class="range">
+          <input type="range" id="pMin" min="0" max="100" step="5" value="0" aria-label="min %" />
+          <input type="range" id="pMax" min="0" max="100" step="5" value="100" aria-label="max %" />
+          <span class="rangeVal tnum" id="pVal">0 – 100 %</span>
+        </div>
+      </div>
+      <div class="fsep" aria-hidden="true"></div>
+      <div class="fgrp">
+        <span class="flabel" data-i18n="f.quick">Fokus</span>
+        <div class="toggles">
+          <button type="button" class="tgl" id="tDelayed" aria-pressed="false"><span class="dot"></span><span data-i18n="t.delayed">Nur verzögert</span></button>
+          <button type="button" class="tgl" id="tOverdue" aria-pressed="false"><span data-i18n="t.overdue">Nur überfällig</span></button>
+          <button type="button" class="tgl" id="tDated" aria-pressed="false"><span data-i18n="t.dated">Nur mit Termin</span></button>
+          <button type="button" class="tgl" id="tUndated" aria-pressed="true"><span data-i18n="t.undated">Ohne Termin einbeziehen</span></button>
+        </div>
+      </div>
+      <div class="fgrp" style="margin-left:auto;">
+        <span class="flabel">&nbsp;</span>
+        <button type="button" class="btn" id="resetBtn">↺ <span data-i18n="f.reset">Filter zurücksetzen</span></button>
+      </div>
+    </div>
+
+    <div class="chips empty" id="chips" aria-live="polite"></div>
+  </section>
+
+  <!-- ============================================ kpis -->
+  <section class="kpis" id="kpis" aria-label="Kennzahlen"></section>
+
+  <!-- ============================================ charts -->
+  <div class="sec"><h2 data-i18n="s.overview">Portfolio-Überblick</h2><span class="n" id="scopeNote"></span><span class="rule"></span></div>
+
+  <section class="grid2">
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="c.status">Status der Prozesse</h2><span class="hint" data-i18n="c.clickHint">klicken = filtern</span></div>
+      <div class="card-sub" data-i18n="c.statusSub">Verzögerung hat Vorrang vor allen anderen Zuständen</div>
+      <div id="chStatus"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="c.group">Status je Prozessgruppe</h2><span class="hint" data-i18n="c.clickHint">klicken = filtern</span></div>
+      <div class="card-sub" data-i18n="c.groupSub">Anteile je Management-, Kern- und Support-Prozessen</div>
+      <div id="chGroup"></div>
+      <div class="legend" id="lgStatus"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="c.funnel">Roll-out-Trichter</h2></div>
+      <div class="card-sub" data-i18n="c.funnelSub">Prozesse je Phase: terminiert · abgeschlossen</div>
+      <div id="chFunnel"></div>
+    </div>
+
+    <div class="card wide">
+      <div class="card-h"><h2 data-i18n="c.load">Phasenauslastung im Zeitverlauf</h2><span class="hint" id="loadHint"></span></div>
+      <div class="card-sub" data-i18n="c.loadSub">Anzahl gleichzeitig laufender Prozesse je Phase (Wochenraster)</div>
+      <div id="chLoad"></div>
+      <div class="legend" id="lgPhase"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="c.hot">Verzögerungs-Hotspots</h2></div>
+      <div class="card-sub" data-i18n="c.hotSub">L1-Prozessbereiche mit den meisten verzögerten Phasen</div>
+      <div id="chHot"></div>
+    </div>
+
+    <div class="card wide">
+      <div class="card-h"><h2 data-i18n="c.init">Fortschritt je Initiative</h2><span class="hint" data-i18n="c.clickHint">klicken = filtern</span></div>
+      <div class="card-sub" data-i18n="c.initSub">Ø Arbeitsfortschritt, Balkenbreite = Anzahl Prozesse</div>
+      <div id="chInit"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="c.owner">Portfolio je Process Manager</h2></div>
+      <div class="card-sub" data-i18n="c.ownerSub">Verantwortungsumfang und Verzögerungsquote</div>
+      <div id="chOwner"></div>
+    </div>
+  </section>
+
+  <!-- ============================================ gantt -->
+  <div class="sec"><h2 data-i18n="s.timeline">Portfolio-Timeline</h2><span class="n" id="ganttNote"></span><span class="rule"></span></div>
+  <section class="gantt-wrap">
+    <div class="tbl-head" style="border:1px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0;background:var(--surface);">
+      <div class="toggles">
+        <button type="button" class="btn" id="gExpand" data-i18n="g.expand">Alle aufklappen</button>
+        <button type="button" class="btn" id="gCollapse" data-i18n="g.collapse">Auf L1 reduzieren</button>
+      </div>
+      <div class="toggles" style="margin-left:auto;">
+        <button type="button" class="tgl" id="gScaleM" aria-pressed="false" data-i18n="g.month">Monate</button>
+        <button type="button" class="tgl" id="gScaleQ" aria-pressed="true" data-i18n="g.quarter">Quartale</button>
+      </div>
+    </div>
+    <div class="gantt" id="gantt" style="border-radius:0 0 12px 12px;">
+      <div class="g-lab-head"><span class="th" data-i18n="g.process">Prozess</span><span class="th" style="margin-left:auto;" data-i18n="g.done">% fertig</span></div>
+      <div class="g-time-head g-scroll" id="gAxisScroll"><div class="g-pane" id="gAxis"></div></div>
+      <div class="g-labels" id="gLabels"></div>
+      <div class="g-scroll" id="gBarsScroll" style="overflow-y:hidden;"><div class="g-pane" id="gBars"></div></div>
+    </div>
+    <div class="g-foot" id="gFoot"></div>
+  </section>
+
+  <!-- ============================================ table -->
+  <div class="sec"><h2 data-i18n="s.detail">Detailtabelle</h2><span class="n" id="tblNote"></span><span class="rule"></span></div>
+  <section class="tbl-wrap">
+    <div class="tbl-head">
+      <div class="seg" role="group">
+        <button type="button" id="rowProc" aria-pressed="true" data-i18n="d.byProcess">Je Prozess</button>
+        <button type="button" id="rowPhase" aria-pressed="false" data-i18n="d.byPhase">Je Phase</button>
+      </div>
+      <span class="card-sub" style="margin:0;" id="tblCount"></span>
+      <button type="button" class="btn" id="csvBtn2" style="margin-left:auto;">↓ <span data-i18n="csv">CSV Export</span></button>
+    </div>
+    <div class="tbl-scroll">
+      <table id="tbl"><thead id="tblHead"></thead><tbody id="tblBody"></tbody></table>
+    </div>
+  </section>
+
+  <footer>
+    <span><b data-i18n="f.source">Quelle</b>: <span id="srcFile">–</span> · <span id="srcSheet">–</span></span>
+    <span data-i18n="f.note">Alle Kennzahlen, Diagramme und die Timeline reagieren auf dieselbe Filterauswahl.</span>
+    <span id="genLabel"></span>
+  </footer>
+</div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
