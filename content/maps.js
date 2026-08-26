@@ -1,10 +1,17 @@
 /* =============================================================================
-   Rollout-Maps
+   Rollout-Maps und Roadmaps
    -----------------------------------------------------------------------------
-   Ablauf: Datei in den Ordner rollout-maps/ legen, danach hier einen Eintrag
-   ergänzen – oder bequemer über "Redaktion" > "Rollout-Maps" im Board.
+   Zwei Arten von Einträgen:
 
-   Felder
+   1) ROADMAP - im Board selbst gebaut.
+      Im Reiter "Rollout-Maps" auf "Roadmap erstellen" klicken, Spuren und
+      Einträge anlegen, dann "content/maps.js erzeugen" und die Datei hier
+      ersetzen. Balken lassen sich im Diagramm direkt ziehen.
+
+   2) DATEI - eine fertige Karte aus dem Ordner rollout-maps/.
+      Datei dort ablegen, danach über "Map ergänzen" eintragen.
+
+   Felder einer Datei-Karte
       href   Pfad relativ zu index.html, z. B. "rollout-maps/lis-2026.png"
       type   "image" (PNG, JPG, SVG, WEBP) | "pdf" | "page" (eigene HTML-Seite)
       title  Anzeigename
@@ -12,8 +19,7 @@
       note   optionale Beschreibung
       tags   optionale Liste, z. B. ["LIS", "2026"]
 
-   Beispiel:
-      { href: "rollout-maps/lis-2026.png", type: "image", title: "Rollout LIS 2026",
-        date: "2026-09-01", note: "Wellenplanung je Standort", tags: ["LIS"] }
+   Eine Roadmap trägt zusätzlich type:"roadmap" und ein Feld roadmap mit
+   start, end, scale ("quarter"|"month"), colorBy ("status"|"lane") und lanes.
    ========================================================================== */
 window.BOARD_MAPS = [];

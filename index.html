@@ -26,9 +26,10 @@
   --accent:#FFCC00; --accent-soft:#FFF3C7; --accent-ink:#7A5E00; --accent-line:#7A5E00;
   --focus:#7A5E00;
   --shadow:0 1px 2px rgba(26,29,30,.07), 0 8px 24px -14px rgba(26,29,30,.26);
-  --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --c4:#7c5cd6; --c5:#d03b3b;
+  --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --c4:#7c5cd6; --c5:#d03b3b; --c6:#e87ba4;
   --c1-soft:#dce8fa; --c2-soft:#fbe4da; --c3-soft:#d8f0e7; --c4-soft:#e6e0fa; --c5-soft:#f9dedd;
   --good:#0ca30c; --warn:#8a6400;
+  --grid:#EBEAE3; --axis:#CFCEC6; --gantt-band:#F8F7F3; --today:#1A1D1E;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -41,9 +42,10 @@
     --accent:#FFCC00; --accent-soft:#3A2F06; --accent-ink:#FFD84D; --accent-line:#FFCC00;
     --focus:#FFCC00;
     --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 28px -16px rgba(0,0,0,.7);
-    --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#9085e9; --c5:#d03b3b;
+    --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#9085e9; --c5:#d03b3b; --c6:#d55181;
     --c1-soft:#17273A; --c2-soft:#331910; --c3-soft:#0E2B22; --c4-soft:#241F3D; --c5-soft:#341617;
     --good:#0ca30c; --warn:#FFCC00;
+    --grid:#282C2E; --axis:#3E4345; --gantt-band:#1E2223; --today:#FFCC00;
   }
 }
 :root[data-theme="dark"]{
@@ -56,9 +58,10 @@
   --accent:#FFCC00; --accent-soft:#3A2F06; --accent-ink:#FFD84D; --accent-line:#FFCC00;
   --focus:#FFCC00;
   --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 28px -16px rgba(0,0,0,.7);
-  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#9085e9; --c5:#d03b3b;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#9085e9; --c5:#d03b3b; --c6:#d55181;
   --c1-soft:#17273A; --c2-soft:#331910; --c3-soft:#0E2B22; --c4-soft:#241F3D; --c5-soft:#341617;
   --good:#0ca30c; --warn:#FFCC00;
+  --grid:#282C2E; --axis:#3E4345; --gantt-band:#1E2223; --today:#FFCC00;
 }
 
 /* ============================================================ base */
@@ -314,12 +317,46 @@ main{flex:1;min-height:0;}
 .linkrow{display:grid;grid-template-columns:1fr 1.4fr auto;gap:7px;align-items:center;}
 @media(max-width:620px){.linkrow{grid-template-columns:1fr;}}
 
+/* ============================================================ roadmap */
+.rm-box{max-width:1340px;}
+.rm-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface-2);}
+.rm-bar .fld input,.rm-bar .fld select{min-width:130px;}
+.rm-bar .fld:first-child input{min-width:230px;}
+.rm-prev{padding:14px 18px 6px;overflow-x:auto;background:var(--surface);}
+.rm-prev svg{user-select:none;}
+.rm-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-2);padding:0 18px 12px;border-bottom:1px solid var(--line);}
+.rm-legend span{display:inline-flex;align-items:center;gap:5px;}
+.rm-legend i{width:12px;height:8px;border-radius:3px;display:inline-block;}
+.rm-grid{display:grid;grid-template-columns:310px minmax(0,1fr);}
+@media(max-width:900px){.rm-grid{grid-template-columns:1fr;}}
+.rm-side{border-right:1px solid var(--line);background:var(--surface-2);overflow:auto;max-height:340px;}
+.rm-lane{border-bottom:1px solid var(--line);}
+.rm-lane-h{display:flex;align-items:center;gap:6px;padding:7px 10px;}
+.rm-lane-h .sw{width:10px;height:10px;border-radius:3px;flex:0 0 auto;}
+.rm-lane-h .lanein{flex:1;min-width:0;border:1px solid transparent;background:none;border-radius:6px;padding:3px 6px;font-weight:600;font-size:13px;}
+.rm-lane-h .lanein:hover{border-color:var(--line-2);}
+.rm-lane-h .lanein:focus{border-color:var(--accent-line);background:var(--surface);}
+.rm-lane-h .btn.sm{padding:2px 7px;}
+.rm-it{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;padding:6px 12px 6px 26px;cursor:pointer;font-size:12.5px;color:var(--ink-2);}
+.rm-it:hover{background:var(--surface-3);}
+.rm-it[aria-current="true"]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--brand);color:var(--ink);}
+.rm-it .d{margin-left:auto;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.rm-form{padding:14px 18px;overflow:auto;max-height:340px;display:flex;flex-direction:column;gap:12px;}
+.rm-hint{font-size:11.5px;color:var(--muted);}
+.rmthumb{width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px;}
+
 footer{
   max-width:1680px;margin:0 auto;padding:16px 22px 30px;color:var(--muted);font-size:11.5px;
   display:flex;gap:18px;flex-wrap:wrap;border-top:1px solid var(--line);
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
-@media print{.top-actions,.tabs,.toolbar,.rail{display:none;} .split{grid-template-columns:1fr;} .card{box-shadow:none;}}
+@media print{
+  .top-actions,.tabs,.toolbar,.rail{display:none;} .split{grid-template-columns:1fr;} .card{box-shadow:none;}
+  .ov{position:static;background:none;padding:0;overflow:visible;} .ov:not(.on){display:none;}
+  .ov-box{max-width:none;border:0;box-shadow:none;}
+  .rm-bar,.rm-grid,.ed-foot,.ov-head .btn,.ov-head .x,.ov-head .seg{display:none;}
+  .rm-prev{overflow:visible;}
+}
 </style>
 </head>
 <body>
@@ -408,7 +445,8 @@ footer{
           <input type="search" id="qMaps" data-ph="ph.maps" placeholder="Maps durchsuchen …" autocomplete="off" />
         </div>
         <div class="toolbar" id="tagFilter" style="margin:0;gap:6px;"></div>
-        <button type="button" class="btn" id="edMaps" style="margin-left:auto;">✎ <span data-i="maps.add">Map ergänzen</span></button>
+        <button type="button" class="btn primary" id="rmNewBtn" style="margin-left:auto;">＋ <span data-i="rm.new">Roadmap erstellen</span></button>
+        <button type="button" class="btn" id="edMaps">✎ <span data-i="maps.add">Map ergänzen</span></button>
       </div>
       <div id="mapsBox"></div>
     </section>
@@ -482,6 +520,31 @@ footer{
   </div>
 </div>
 
+
+<!-- ============================================ roadmap editor -->
+<div class="ov" id="rm" role="dialog" aria-modal="true" aria-labelledby="rmTitle">
+  <div class="ov-box rm-box">
+    <div class="ov-head">
+      <h2 id="rmTitle" data-i="rm.title">Roadmap bearbeiten</h2>
+      <button type="button" class="btn sm" id="rmPngBtn">🖼 <span data-i="rm.png">Als PNG</span></button>
+      <button type="button" class="btn sm" id="rmPrintBtn">⎙ <span data-i="rm.print">Drucken</span></button>
+      <button type="button" class="x" id="rmCloseBtn" aria-label="Schließen">×</button>
+    </div>
+    <div class="rm-bar" id="rmBar"></div>
+    <div class="rm-prev" id="rmPrev"></div>
+    <div class="rm-legend" id="rmLegend"></div>
+    <div class="rm-grid">
+      <div class="rm-side" id="rmSide"></div>
+      <div class="rm-form" id="rmForm"></div>
+    </div>
+    <div class="ed-foot">
+      <button type="button" class="btn primary" id="rmExport">↓ <span data-i="rm.export">content/maps.js erzeugen</span></button>
+      <span class="rm-hint" data-i="rm.dragHint">Balken ziehen verschiebt, Kanten ziehen ändert die Dauer, Doppelklick legt einen Eintrag an.</span>
+      <button type="button" class="btn danger" id="rmDelete" style="margin-left:auto;">🗑 <span data-i="rm.delete">Roadmap löschen</span></button>
+    </div>
+  </div>
+</div>
+
 <script src="content/settings.js"></script>
 <script src="content/news.js"></script>
 <script src="content/maps.js"></script>
@@ -512,9 +575,24 @@ const T = {
     "ed.reset":"Änderungen verwerfen",
     "ed.dirty":"Ungespeicherte Änderungen – erzeuge die Datei und lege sie in den Ordner content/.",
     "foot.local":"Läuft vollständig aus diesem Ordner – ohne Server, ohne Installation.",
+    "rm.title":"Roadmap bearbeiten", "rm.new":"Roadmap erstellen", "rm.newTitle":"Neue Roadmap",
+    "rm.newItem":"Neuer Eintrag", "rm.lane":"Spur", "rm.addLane":"Spur hinzufügen", "rm.addItem":"Eintrag hinzufügen",
+    "rm.from":"Von", "rm.to":"Bis", "rm.scale":"Raster", "rm.quarter":"Quartale", "rm.month":"Monate",
+    "rm.colorBy":"Einfärben nach", "rm.byStatus":"Status", "rm.byLane":"Spur",
+    "rm.laneCap":"Ab sechs Spuren wird nach Status eingefärbt.",
+    "rm.status":"Status", "rm.kind":"Art", "rm.milestone":"Meilenstein", "rm.progress":"Fortschritt",
+    "rm.msNote":"Ein Meilenstein hat nur ein Datum.",
+    "rm.pick":"Links einen Eintrag wählen – oder im Diagramm doppelklicken, um einen anzulegen.",
+    "rm.st.plan":"Geplant", "rm.st.active":"Läuft", "rm.st.done":"Erledigt", "rm.st.risk":"Risiko",
+    "rm.up":"nach oben", "rm.down":"nach unten", "rm.delLane":"Diese Spur mit allen Einträgen löschen?",
+    "rm.delete":"Roadmap löschen", "rm.confirmDel":"Diese Roadmap löschen?",
+    "rm.export":"content/maps.js erzeugen", "rm.png":"Als PNG", "rm.print":"Drucken",
+    "rm.dragHint":"Balken ziehen verschiebt, Kanten ziehen ändert die Dauer, Doppelklick legt einen Eintrag an.",
+    "rm.edit":"Roadmap bearbeiten", "rm.pngFail":"PNG ließ sich nicht erzeugen – bitte Drucken verwenden.",
+    "rm.entries":"Einträge", "rm.lanes":"Spuren", today:"Stichtag",
     all:"Alle", pinned:"Angeheftet", noNews:"Keine Meldung passt zur Suche.",
     emptyNewsT:"Noch keine Meldungen", emptyNewsP:"Schreibe die erste Meldung über „Redaktion“ – oder trage sie direkt in content/news.js ein.",
-    emptyMapsT:"Noch keine Rollout-Maps", emptyMapsP:"Lege deine Karten als PNG, JPG, SVG, PDF oder HTML-Seite im Ordner rollout-maps/ ab und trage sie danach hier ein.",
+    emptyMapsT:"Noch keine Rollout-Maps", emptyMapsP:"Baue eine Roadmap direkt hier im Board – mit Spuren, Balken und Meilensteinen. Oder verknüpfe eine fertige Karte aus dem Ordner rollout-maps/ als PNG, JPG, SVG, PDF oder HTML-Seite.",
     emptyFilesT:"Noch keine Anhänge", emptyFilesP:"Lege Dokumente im Ordner anhaenge/ ab und trage sie danach hier ein.",
     addNow:"Jetzt ergänzen", openFolderHint:"Ordner",
     fType:"Typ", fTitle:"Titel", fDate:"Datum", fCat:"Kategorie", fNote:"Beschreibung",
@@ -546,9 +624,24 @@ const T = {
     "ed.reset":"Discard changes",
     "ed.dirty":"Unsaved changes – generate the file and put it into the content/ folder.",
     "foot.local":"Runs entirely from this folder – no server, no installation.",
+    "rm.title":"Edit roadmap", "rm.new":"Create roadmap", "rm.newTitle":"New roadmap",
+    "rm.newItem":"New entry", "rm.lane":"Lane", "rm.addLane":"Add lane", "rm.addItem":"Add entry",
+    "rm.from":"From", "rm.to":"To", "rm.scale":"Grid", "rm.quarter":"Quarters", "rm.month":"Months",
+    "rm.colorBy":"Colour by", "rm.byStatus":"Status", "rm.byLane":"Lane",
+    "rm.laneCap":"From six lanes on, colouring falls back to status.",
+    "rm.status":"Status", "rm.kind":"Kind", "rm.milestone":"Milestone", "rm.progress":"Progress",
+    "rm.msNote":"A milestone has a single date.",
+    "rm.pick":"Pick an entry on the left – or double-click the chart to create one.",
+    "rm.st.plan":"Planned", "rm.st.active":"Running", "rm.st.done":"Done", "rm.st.risk":"At risk",
+    "rm.up":"move up", "rm.down":"move down", "rm.delLane":"Delete this lane and all its entries?",
+    "rm.delete":"Delete roadmap", "rm.confirmDel":"Delete this roadmap?",
+    "rm.export":"generate content/maps.js", "rm.png":"As PNG", "rm.print":"Print",
+    "rm.dragHint":"Drag a bar to move it, drag its edges to change duration, double-click to add an entry.",
+    "rm.edit":"Edit roadmap", "rm.pngFail":"PNG could not be generated – please use Print instead.",
+    "rm.entries":"entries", "rm.lanes":"lanes", today:"Reference date",
     all:"All", pinned:"Pinned", noNews:"No post matches the search.",
     emptyNewsT:"No posts yet", emptyNewsP:"Write the first post via “Editor” – or add it directly to content/news.js.",
-    emptyMapsT:"No rollout maps yet", emptyMapsP:"Put your maps as PNG, JPG, SVG, PDF or HTML page into the rollout-maps/ folder, then list them here.",
+    emptyMapsT:"No rollout maps yet", emptyMapsP:"Build a roadmap right here in the board – lanes, bars and milestones. Or link a finished map from the rollout-maps/ folder as PNG, JPG, SVG, PDF or HTML page.",
     emptyFilesT:"No attachments yet", emptyFilesP:"Put documents into the anhaenge/ folder, then list them here.",
     addNow:"Add now", openFolderHint:"Folder",
     fType:"Type", fTitle:"Title", fDate:"Date", fCat:"Category", fNote:"Description",
@@ -603,7 +696,9 @@ const fmtDShort = iso => {
   if (isNaN(d)) return String(iso);
   return LANG === "de" ? d.toLocaleDateString("de-DE") : d.toLocaleDateString("en-GB");
 };
-const todayISO = () => new Date().toISOString().slice(0,10);
+/* Lokales Datum - toISOString() liefert in UTC+X vor 02:00 den Vortag. */
+const todayISO = () => { const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
 const hash = s => { let h = 5381; for (let i=0;i<s.length;i++) h = ((h<<5)+h+s.charCodeAt(i))|0; return String(h); };
 const ext = p => (String(p).split(".").pop() || "").toLowerCase().split(/[?#]/)[0];
 
@@ -749,12 +844,14 @@ function postCard(n){
   }
   return box;
 }
-function emptyState(icon, title, text, onAdd){
+function emptyState(icon, title, text, onAdd, extra){
   const box = el("div",{class:"empty"},[
     el("div",{class:"ic",text:icon}), el("h3",{text:title}), el("p",{text:text})
   ]);
-  if (onAdd) box.appendChild(el("div",{class:"acts"},[
-    el("button",{type:"button",class:"btn primary",text:"✎ "+t("addNow"),onclick:onAdd})]));
+  const acts = [];
+  if (onAdd) acts.push(el("button",{type:"button",class:"btn primary",text:"✎ "+t("addNow"),onclick:onAdd}));
+  (extra || []).forEach(([label, fn]) => acts.push(el("button",{type:"button",class:"btn",text:label,onclick:fn})));
+  if (acts.length) box.appendChild(el("div",{class:"acts"}, acts));
   return box;
 }
 
@@ -798,19 +895,24 @@ function renderMaps(){
   const rows = DATA.maps.filter(m => {
     if (mapTag && !(m.tags||[]).includes(mapTag)) return false;
     if (!q) return true;
-    return [m.title, m.note, (m.tags||[]).join(" "), m.href].join(" ").toLowerCase().includes(q);
+    return [m.title, m.note, (m.tags||[]).join(" "), m.href,
+      ...(m.roadmap ? (m.roadmap.lanes||[]).flatMap(l => [l.name, ...(l.items||[]).map(i => i.title)]) : [])
+    ].join(" ").toLowerCase().includes(q);
   }).sort((a,b) => String(b.date||"").localeCompare(String(a.date||"")));
 
   const box = $("#mapsBox"); box.replaceChildren();
   if (!DATA.maps.length){
-    box.appendChild(emptyState("🗺️", t("emptyMapsT"), t("emptyMapsP"), () => openEditor("maps", true)));
+    box.appendChild(emptyState("🗺️", t("emptyMapsT"), t("emptyMapsP"),
+      null, [["＋ "+t("rm.new"), rmNew], ["✎ "+t("maps.add"), () => openEditor("maps", true)]]));
   } else if (!rows.length){
     box.appendChild(el("div",{class:"empty"},[el("p",{text:t("noNews")})]));
   } else {
     box.appendChild(el("div",{class:"grid"}, rows.map(m => {
       const type = m.type || guessType(m.href);
       const thumb = el("div",{class:"thumb"});
-      if (type === "image" && safeHref(m.href)) thumb.appendChild(el("img",{src:safeHref(m.href),alt:m.title||"",loading:"lazy"}));
+      if (type === "roadmap" && m.roadmap)
+        thumb.appendChild(el("div",{class:"rmthumb"},[roadmapSVG(m.roadmap,{width:250,compact:true})]));
+      else if (type === "image" && safeHref(m.href)) thumb.appendChild(el("img",{src:safeHref(m.href),alt:m.title||"",loading:"lazy"}));
       else thumb.appendChild(el("span",{class:"ph",text:type==="pdf"?"📕":"🌐"}));
       thumb.appendChild(el("span",{class:"badge",text:type}));
       return el("button",{type:"button",class:"tile",onclick:()=>openViewer(m)},[
@@ -829,9 +931,30 @@ function renderMaps(){
   $("#nMaps").textContent = DATA.maps.length;
   $("#railMapsSub").textContent = DATA.maps.length + " " + t("mapsN");
 }
+/* Ansicht einer Roadmap - lesen, drucken, exportieren; Bearbeiten auf Wunsch. */
+function rmView(m){
+  const idx = DATA.maps.indexOf(m);
+  $("#ovTitle").textContent = m.title || t("rm.title");
+  $("#ovOpen").style.display = "none";
+  const body = $("#ovBody"); body.replaceChildren();
+  const holder = el("div",{style:"overflow-x:auto"});
+  body.appendChild(holder);
+  holder.appendChild(roadmapSVG(m.roadmap, {width: Math.max(720, holder.clientWidth - 4)}));
+  body.appendChild(el("div",{class:"rm-legend",style:"padding:12px 0 0;border:0"}, rmLegendNodes(m.roadmap)));
+  if (m.note) body.appendChild(el("p",{style:"color:var(--ink-2);margin-top:10px",text:m.note}));
+  body.appendChild(el("div",{style:"display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)"},[
+    el("button",{type:"button",class:"btn primary",text:"✎ "+t("rm.edit"),
+      onclick:()=>{ $("#ov").classList.remove("on"); rmOpen(idx); }}),
+    el("button",{type:"button",class:"btn",text:"🖼 "+t("rm.png"),onclick:()=>rmPNG(m.roadmap, m.title)}),
+    el("button",{type:"button",class:"btn",text:"⎙ "+t("rm.print"),onclick:()=>window.print()})
+  ]));
+  $("#ov").classList.add("on");
+}
 function openViewer(m){
   const type = m.type || guessType(m.href);
+  if (type === "roadmap" && m.roadmap) { rmView(m); return; }
   const href = safeHref(m.href);
+  $("#ovOpen").style.display = "";
   $("#ovTitle").textContent = m.title || href;
   $("#ovOpen").href = href || "#";
   const body = $("#ovBody"); body.replaceChildren();
@@ -964,6 +1087,7 @@ function normalize(type, item){
     else if (f === "pinned") o.pinned = !!src.pinned;
     else o[f] = src[f] === undefined || src[f] === null ? "" : String(src[f]);
   }
+  if (type === "maps" && o.type === "roadmap") o.roadmap = normRoadmap(src.roadmap);
   return o;
 }
 const fingerprint = (type, arr) => hash(JSON.stringify((arr||[]).map(x => normalize(type, x))));
@@ -1109,8 +1233,11 @@ function paintEdForm(){
   }
 
   if (edType === "maps") {
+    if (it.type === "roadmap")
+      box.append(el("button",{type:"button",class:"btn primary",text:"✎ "+t("rm.edit"),
+        onclick:()=>{ $("#ed").classList.remove("on"); rmOpen(edSel); }}));
     const typeSel = el("select",{onchange:e=>upd("type",e.target.value)});
-    [["","auto"],["image","image"],["pdf","pdf"],["page","page"]].forEach(([v,lbl]) =>
+    [["","auto"],["image","image"],["pdf","pdf"],["page","page"],["roadmap","roadmap"]].forEach(([v,lbl]) =>
       typeSel.appendChild(el("option",{value:v,text:lbl,selected:(it.type||"")===v})));
     box.append(
       field(t("fPath"), input("href"), t("pathHint")),
@@ -1149,6 +1276,442 @@ function showCode(){
   }});
   box.append(el("div",{class:"fld"},[el("label",{text:FILEMETA[edType].label}), ta,
     el("span",{class:"hint",text:t("copyHint")})]), el("div",{},[btn]));
+}
+
+
+/* ================================================================== roadmap
+   Roadmaps werden im Board selbst gebaut und liegen als Datenstruktur in
+   content/maps.js - kein Bild, keine externe Datei. Gerendert wird als SVG,
+   damit dieselbe Ansicht für Kachel, Vollbild, Druck und PNG dient.        */
+const RDAY = 864e5;
+const RD = iso => new Date(String(iso || "") + "T00:00:00");
+const rIso = d => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+const rAdd = (d, n) => new Date(d.getTime() + n*RDAY);
+const rClamp = (iso, lo, hi) => iso < lo ? lo : iso > hi ? hi : iso;
+
+const RM_STATUS = ["plan","active","done","risk"];
+const RM_ST_COLOR = {plan:"var(--muted)", active:"var(--c1)", done:"var(--good)", risk:"var(--c5)"};
+const RM_ST_ICON  = {plan:"○", active:"◐", done:"✓", risk:"▲"};
+/* Fünf geprüfte Spurenfarben; darüber hinaus wird nach Status eingefärbt. */
+const RM_LANE_COLOR = ["var(--c1)","var(--c2)","var(--c3)","var(--c4)","var(--c6)"];
+const RM_MAX_LANE_COLORS = RM_LANE_COLOR.length;
+
+function blankRoadmap(){
+  const y = new Date().getFullYear();
+  return {
+    start: y + "-01-01", end: (y+1) + "-06-30", scale: "quarter", colorBy: "status",
+    lanes: [{ name: t("rm.lane") + " 1", items: [] }]
+  };
+}
+function normRoadmap(src){
+  const r = src && typeof src === "object" ? src : {};
+  const lanes = Array.isArray(r.lanes) ? r.lanes : [];
+  return {
+    start: String(r.start || ""), end: String(r.end || ""),
+    scale: r.scale === "month" ? "month" : "quarter",
+    colorBy: r.colorBy === "lane" ? "lane" : "status",
+    lanes: lanes.map(l => ({
+      name: String((l && l.name) || ""),
+      items: (Array.isArray(l && l.items) ? l.items : []).map(i => ({
+        title: String(i.title || ""),
+        start: String(i.start || ""),
+        end: String(i.end || ""),
+        status: RM_STATUS.includes(i.status) ? i.status : "plan",
+        progress: Math.max(0, Math.min(1, Number(i.progress) || 0)),
+        milestone: !!i.milestone,
+        note: String(i.note || "")
+      }))
+    }))
+  };
+}
+const rmItems = rm => (rm.lanes || []).flatMap(l => l.items || []);
+
+/* Einträge einer Spur so auf Unterzeilen verteilen, dass nichts überlappt. */
+function packLane(items, xOf, textW){
+  const rows = [];
+  const placed = [];
+  items.slice().sort((a,b) => String(a.start).localeCompare(String(b.start))).forEach(it => {
+    const x0 = xOf(it.start);
+    const x1 = it.milestone ? x0 + 10 + textW(it.title) : Math.max(xOf(it.end), x0 + 6);
+    const need = x1 + 14;
+    let r = rows.findIndex(end => end <= x0 - 6);
+    if (r < 0) { rows.push(0); r = rows.length - 1; }
+    rows[r] = need;
+    placed.push({ it, row: r, x0, x1 });
+  });
+  return { placed, rowCount: Math.max(1, rows.length) };
+}
+
+function roadmapSVG(rm, o){
+  o = o || {};
+  const compact = !!o.compact;
+  const W = Math.max(240, o.width || 900);
+  const labW = compact ? 0 : (o.labW || 138);
+  const axisH = compact ? 6 : 40;
+  const barH = compact ? 6 : 15;
+  const rowH = compact ? 9 : 25;
+  const lanePad = compact ? 3 : 9;
+  const fs = compact ? 0 : 11.5;
+  const start = rm.start || rIso(new Date()), end = rm.end || rIso(rAdd(new Date(), 365));
+  const d0 = RD(start), d1 = RD(end);
+  const days = Math.max(1, (d1 - d0) / RDAY);
+  const plotW = Math.max(50, W - labW - 10);
+  const xOf = iso => { const d = RD(iso); return labW + Math.max(0, Math.min(1, (d - d0)/RDAY/days)) * plotW; };
+  const textW = s => String(s || "").length * (compact ? 0 : 6.1);
+
+  const lanes = (rm.lanes || []).filter(Boolean);
+  const shown = compact ? lanes.slice(0, 4) : lanes;
+  const laneColor = i => (rm.colorBy === "lane" && lanes.length <= RM_MAX_LANE_COLORS)
+    ? RM_LANE_COLOR[i % RM_MAX_LANE_COLORS] : null;
+
+  const packs = shown.map(l => packLane(l.items || [], xOf, textW));
+  const laneH = packs.map(p => p.rowCount * rowH + lanePad*2);
+  const bodyH = laneH.reduce((a,b) => a+b, 0);
+  const H = axisH + Math.max(rowH, bodyH) + 2;
+
+  const g = sv("svg", {width:W, height:H, viewBox:`0 0 ${W} ${H}`,
+    style:"font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;display:block"});
+  g.appendChild(sv("rect",{x:0,y:0,width:W,height:H,fill:"var(--surface)"}));
+
+  /* Zeitachse */
+  const cur = new Date(d0.getFullYear(), d0.getMonth(), 1);
+  while (cur <= d1) {
+    const isQ = cur.getMonth() % 3 === 0;
+    const x = xOf(rIso(cur));
+    if (x > labW && (rm.scale === "month" || isQ))
+      g.appendChild(sv("line",{x1:x,x2:x,y1:axisH-(compact?4:8),y2:H,stroke:"var(--grid)","stroke-width":1}));
+    if (!compact && (rm.scale === "month" ? true : isQ) && x < W - 18)
+      g.appendChild(sv("text",{x:x+5, y:axisH-11, "font-size":10.5, "font-weight":600, fill:"var(--muted)",
+        text: rm.scale === "month"
+          ? cur.toLocaleDateString(LANG==="de"?"de-DE":"en-GB",{month:"short"}) + (cur.getMonth()===0 ? " " + cur.getFullYear() : "")
+          : "Q" + (Math.floor(cur.getMonth()/3)+1) + " " + cur.getFullYear()}));
+    cur.setMonth(cur.getMonth()+1);
+  }
+  if (!compact) g.appendChild(sv("line",{x1:labW,x2:W-4,y1:axisH-4,y2:axisH-4,stroke:"var(--axis)","stroke-width":1}));
+
+  /* Spuren, Balken und Meilensteine */
+  let y = axisH;
+  shown.forEach((lane, li) => {
+    const h = laneH[li];
+    if (li % 2) g.appendChild(sv("rect",{x:labW,y:y,width:W-labW-4,height:h,fill:"var(--gantt-band)"}));
+    if (li) g.appendChild(sv("line",{x1:compact?0:4,x2:W-4,y1:y,y2:y,stroke:"var(--line)","stroke-width":1}));
+    if (!compact) {
+      const c = laneColor(li);
+      if (c) g.appendChild(sv("rect",{x:6,y:y+lanePad+3,width:4,height:Math.max(10,h-lanePad*2-6),rx:2,fill:c}));
+      g.appendChild(sv("text",{x:c?16:8, y:y+lanePad+13, "font-size":12, "font-weight":600, fill:"var(--ink)",
+        text: lane.name.length > 20 ? lane.name.slice(0,19) + "…" : lane.name}));
+    }
+    packs[li].placed.forEach(({it, row, x0, x1}) => {
+      const by = y + lanePad + row*rowH + (rowH - barH)/2;
+      const col = laneColor(li) || RM_ST_COLOR[it.status] || "var(--muted)";
+      const grp = sv("g", {"data-lane":li, "data-title":it.title, style:o.interactive?"cursor:grab":""});
+      if (it.milestone) {
+        const s = compact ? 4 : 7, cy = by + barH/2;
+        grp.appendChild(sv("polygon",{points:`${x0},${cy-s} ${x0+s},${cy} ${x0},${cy+s} ${x0-s},${cy}`,
+          fill:col, stroke:"var(--surface)", "stroke-width":1.5}));
+        if (!compact) {
+          const fitsRight = x0 + s + 5 + textW(it.title) < W - 4;
+          grp.appendChild(sv("text",{x: fitsRight ? x0+s+5 : x0-s-5, y:cy+4, "font-size":fs,
+            "text-anchor": fitsRight ? "start" : "end", fill:"var(--ink)", text:it.title}));
+        }
+      } else {
+        const w = Math.max(4, x1 - x0);
+        grp.appendChild(sv("rect",{x:x0, y:by, width:w, height:barH, rx:4, fill:col, "fill-opacity":.28}));
+        grp.appendChild(sv("rect",{x:x0+.75, y:by+.75, width:Math.max(2,w-1.5), height:barH-1.5, rx:3.5,
+          fill:"none", stroke:col, "stroke-width":1.5}));
+        if (it.progress > 0)
+          grp.appendChild(sv("rect",{x:x0, y:by, width:Math.max(2, w*it.progress), height:barH, rx:4, fill:col}));
+        if (!compact) {
+          const tw = textW(it.title);
+          const inside = w > tw + 16, fitsRight = x1 + 7 + tw < W - 4;
+          grp.appendChild(sv("text",{
+            x: inside ? x0+8 : fitsRight ? x1+7 : x0-6,
+            y: by+barH-4, "font-size":fs, "font-weight":500, fill:"var(--ink)",
+            "text-anchor": (inside || fitsRight) ? "start" : "end", text:it.title}));
+        }
+      }
+      if (o.interactive) rmDragify(grp, it, {x0, x1, xOf, labW, plotW, days, d0, start, end});
+      if (o.onPick) grp.addEventListener("click", e => { e.stopPropagation(); o.onPick(li, it); });
+      g.appendChild(grp);
+    });
+    y += h;
+  });
+
+  /* Stichtag */
+  const today = todayISO();
+  if (today >= start && today <= end) {
+    const tx = xOf(today);
+    g.appendChild(sv("line",{x1:tx,x2:tx,y1:axisH-(compact?4:8),y2:H,stroke:"var(--today)","stroke-width":2}));
+    if (!compact) {
+      const lab = t("today"), lw = lab.length*6 + 12;
+      g.appendChild(sv("rect",{x:Math.min(tx+3, W-lw-4), y:1, width:lw, height:15, rx:3, fill:"var(--brand)"}));
+      g.appendChild(sv("text",{x:Math.min(tx+9, W-lw+2), y:12, "font-size":10, "font-weight":700,
+        fill:"var(--on-accent)", text:lab}));
+    }
+  }
+  if (o.interactive) g.addEventListener("dblclick", e => {
+    if (e.target !== g && e.target.tagName !== "rect") return;
+    const bb = g.getBoundingClientRect(), rx = e.clientX - bb.left;
+    if (rx < labW) return;
+    let acc = axisH, lane = 0;
+    const ry = e.clientY - bb.top;
+    for (let i=0;i<shown.length;i++){ if (ry >= acc && ry < acc + laneH[i]) { lane = i; break; } acc += laneH[i]; }
+    const dayAt = Math.round((rx - labW)/plotW*days);
+    const s = rClamp(rIso(rAdd(d0, dayAt)), start, end);
+    o.onCreate && o.onCreate(lane, s, rClamp(rIso(rAdd(RD(s), 30)), start, end));
+  });
+  return g;
+}
+
+/* Balken lassen sich ziehen und an den Kanten in der Länge ändern.
+   Die Listener hängen am Fenster, nicht am Balken: die Vorschau wird während
+   des Zugs neu gezeichnet, wodurch das gezogene Element ersetzt wird. */
+function rmDragify(grp, it, ctx){
+  grp.addEventListener("pointerdown", ev => {
+    if (ev.button !== 0) return;
+    ev.preventDefault();
+    const bb = grp.ownerSVGElement.getBoundingClientRect();
+    const rel = ev.clientX - bb.left;
+    const mode = it.milestone ? "move"
+      : rel - ctx.x0 < 7 ? "s" : ctx.x1 - rel < 7 ? "e" : "move";
+    const perDay = ctx.plotW / ctx.days;
+    const s0 = RD(it.start), e0 = RD(it.end || it.start);
+    let moved = false, frame = 0;
+    document.body.style.cursor = mode === "move" ? "grabbing" : "ew-resize";
+    document.body.style.userSelect = "none";
+    const apply = e2 => {
+      const dd = Math.round((e2.clientX - ev.clientX) / perDay);
+      if (!dd && !moved) return;
+      moved = true;
+      if (mode === "move") {
+        it.start = rClamp(rIso(rAdd(s0, dd)), ctx.start, ctx.end);
+        if (!it.milestone) it.end = rClamp(rIso(rAdd(e0, dd)), ctx.start, ctx.end);
+      } else if (mode === "s") {
+        it.start = rClamp(rIso(rAdd(s0, dd)), ctx.start, it.end || ctx.end);
+      } else {
+        it.end = rClamp(rIso(rAdd(e0, dd)), it.start, ctx.end);
+      }
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => rmPaint(true));
+    };
+    const onUp = () => {
+      removeEventListener("pointermove", apply);
+      removeEventListener("pointerup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      cancelAnimationFrame(frame);
+      if (moved) { saveDraft("maps"); rmPaint(); renderAll(); }
+    };
+    addEventListener("pointermove", apply);
+    addEventListener("pointerup", onUp);
+  });
+}
+
+/* ------------------------------------------------------------ SVG-Helfer */
+const SVGNS = "http://www.w3.org/2000/svg";
+function sv(tag, attrs, kids){
+  const n = document.createElementNS(SVGNS, tag);
+  if (attrs) for (const [k,v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v);
+  }
+  if (kids) for (const c of [].concat(kids)) if (c) n.appendChild(c);
+  return n;
+}
+
+/* ------------------------------------------------------------ Editor */
+let RM = { idx:-1, lane:0, item:-1 };
+const rmData = () => (DATA.maps[RM.idx] || {}).roadmap;
+
+function rmNew(){
+  DATA.maps.unshift({ href:"", type:"roadmap", title:t("rm.newTitle"), date:todayISO(),
+    note:"", tags:[], roadmap:blankRoadmap() });
+  saveDraft("maps"); renderAll(); rmOpen(0);
+}
+function rmOpen(idx){
+  RM = { idx, lane:0, item:-1 };
+  const m = DATA.maps[idx];
+  if (!m) return;
+  if (!m.roadmap || !m.roadmap.lanes) m.roadmap = blankRoadmap();
+  $("#rm").classList.add("on");
+  rmPaint();
+}
+function rmClose(){ $("#rm").classList.remove("on"); renderAll(); }
+
+function rmPaint(previewOnly){
+  const m = DATA.maps[RM.idx], rm = m && m.roadmap;
+  if (!rm) return;
+  const host = $("#rmPrev");
+  const w = Math.max(420, host.clientWidth - 4);
+  host.replaceChildren(roadmapSVG(rm, {
+    width: rm.scale === "month" ? Math.max(w, 90 * monthsBetween(rm.start, rm.end)) : w,
+    interactive: true,
+    onPick: (lane, it) => { RM.lane = lane; RM.item = (rm.lanes[lane].items || []).indexOf(it); rmPaint(); },
+    onCreate: (lane, s, e) => {
+      rm.lanes[lane].items.push({title:t("rm.newItem"), start:s, end:e, status:"plan", progress:0, milestone:false, note:""});
+      RM.lane = lane; RM.item = rm.lanes[lane].items.length - 1;
+      saveDraft("maps"); rmPaint(); renderAll();
+    }
+  }));
+  if (previewOnly) return;
+  rmHeader(m, rm); rmSide(rm); rmForm(rm);
+}
+const monthsBetween = (a,b) => Math.max(3, Math.round((RD(b) - RD(a)) / RDAY / 30.4));
+
+function rmHeader(m, rm){
+  const set = (k, v) => { m[k] = v; saveDraft("maps"); rmPaint(); renderAll(); };
+  const setR = (k, v) => { rm[k] = v; saveDraft("maps"); rmPaint(); renderAll(); };
+  const scale = el("select",{onchange:e=>setR("scale", e.target.value)});
+  [["quarter",t("rm.quarter")],["month",t("rm.month")]].forEach(([v,l]) =>
+    scale.appendChild(el("option",{value:v,text:l,selected:rm.scale===v})));
+  const cby = el("select",{onchange:e=>setR("colorBy", e.target.value)});
+  [["status",t("rm.byStatus")],["lane",t("rm.byLane")]].forEach(([v,l]) =>
+    cby.appendChild(el("option",{value:v,text:l,selected:rm.colorBy===v})));
+  const tooMany = rm.lanes.length > RM_MAX_LANE_COLORS;
+  $("#rmBar").replaceChildren(
+    field(t("fTitle"), el("input",{type:"text",value:m.title||"",oninput:e=>{ m.title=e.target.value;
+      saveDraft("maps"); rmSide(rm); renderAll(); }}), null),
+    field(t("rm.from"), el("input",{type:"date",value:rm.start||"",onchange:e=>setR("start", e.target.value)})),
+    field(t("rm.to"), el("input",{type:"date",value:rm.end||"",onchange:e=>setR("end", e.target.value)})),
+    field(t("rm.scale"), scale),
+    field(t("rm.colorBy"), cby, tooMany && rm.colorBy === "lane" ? t("rm.laneCap") : null),
+    field(t("fNote"), el("input",{type:"text",value:m.note||"",oninput:e=>{ m.note=e.target.value;
+      saveDraft("maps"); renderAll(); }})),
+    field(t("fTags"), el("input",{type:"text",value:(m.tags||[]).join(", "),
+      oninput:e=>{ m.tags = e.target.value.split(",").map(s=>s.trim()).filter(Boolean); saveDraft("maps"); renderAll(); }}))
+  );
+  $("#rmLegend").replaceChildren(...rmLegendNodes(rm));
+}
+
+function rmLegendNodes(rm){
+  const byLane = rm.colorBy === "lane" && (rm.lanes || []).length <= RM_MAX_LANE_COLORS;
+  return byLane
+    ? rm.lanes.map((l,i) => el("span",{},[el("i",{style:"background:"+RM_LANE_COLOR[i%RM_MAX_LANE_COLORS]}), el("span",{text:l.name})]))
+    : RM_STATUS.map(s => el("span",{},[el("i",{style:"background:"+RM_ST_COLOR[s]}), el("span",{text:RM_ST_ICON[s]+" "+t("rm.st."+s)})]));
+}
+function rmSide(rm){
+  const box = $("#rmSide"); box.replaceChildren();
+  const commit = () => { saveDraft("maps"); rmPaint(); renderAll(); };
+  rm.lanes.forEach((lane, li) => {
+    const wrap = el("div",{class:"rm-lane"});
+    const color = rm.colorBy === "lane" && rm.lanes.length <= RM_MAX_LANE_COLORS ? RM_LANE_COLOR[li%RM_MAX_LANE_COLORS] : null;
+    wrap.appendChild(el("div",{class:"rm-lane-h"},[
+      color ? el("span",{class:"sw",style:"background:"+color}) : null,
+      el("input",{class:"lanein",type:"text",value:lane.name,
+        oninput:e=>{ lane.name = e.target.value; saveDraft("maps"); rmPaint(true); renderAll(); }}),
+      el("button",{type:"button",class:"btn sm",title:t("rm.addItem"),text:"+",onclick:()=>{
+        const s = rm.start, e2 = rIso(rAdd(RD(rm.start), 60));
+        lane.items.push({title:t("rm.newItem"), start:s, end:rClamp(e2, rm.start, rm.end),
+          status:"plan", progress:0, milestone:false, note:""});
+        RM.lane = li; RM.item = lane.items.length-1; commit(); }}),
+      el("button",{type:"button",class:"btn sm",title:t("rm.up"),text:"↑",onclick:()=>{
+        if (!li) return; rm.lanes.splice(li-1, 0, rm.lanes.splice(li,1)[0]); RM.lane = li-1; commit(); }}),
+      el("button",{type:"button",class:"btn sm",title:t("rm.down"),text:"↓",onclick:()=>{
+        if (li >= rm.lanes.length-1) return; rm.lanes.splice(li+1, 0, rm.lanes.splice(li,1)[0]); RM.lane = li+1; commit(); }}),
+      el("button",{type:"button",class:"btn sm danger",title:t("del"),text:"×",onclick:()=>{
+        if (!confirm(t("rm.delLane"))) return;
+        rm.lanes.splice(li,1); if (!rm.lanes.length) rm.lanes.push({name:t("rm.lane")+" 1", items:[]});
+        RM.lane = 0; RM.item = -1; commit(); }})
+    ]));
+    (lane.items || []).forEach((it, ii) => wrap.appendChild(
+      el("button",{type:"button",class:"rm-it","aria-current":RM.lane===li && RM.item===ii,
+        onclick:()=>{ RM.lane=li; RM.item=ii; rmPaint(); }},[
+        el("span",{style:"color:"+(RM_ST_COLOR[it.status]||"var(--muted)"),text:it.milestone?"◆":RM_ST_ICON[it.status]}),
+        el("span",{style:"flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap",text:it.title||t("untitled")}),
+        el("span",{class:"d",text:fmtDShort(it.start)})
+      ])));
+    box.appendChild(wrap);
+  });
+  box.appendChild(el("div",{style:"padding:10px 12px;"},[
+    el("button",{type:"button",class:"btn sm",text:"+ "+t("rm.addLane"),onclick:()=>{
+      rm.lanes.push({name:t("rm.lane")+" "+(rm.lanes.length+1), items:[]});
+      RM.lane = rm.lanes.length-1; RM.item = -1; commit(); }})
+  ]));
+}
+
+function rmForm(rm){
+  const box = $("#rmForm"); box.replaceChildren();
+  const lane = rm.lanes[RM.lane];
+  const it = lane && lane.items[RM.item];
+  if (!it) { box.appendChild(el("p",{class:"rm-hint",text:t("rm.pick")})); return; }
+  const commit = () => { saveDraft("maps"); rmPaint(); renderAll(); };
+  const upd = (k,v) => { it[k] = v; commit(); };
+  const st = el("select",{onchange:e=>upd("status", e.target.value)});
+  RM_STATUS.forEach(s => st.appendChild(el("option",{value:s,text:RM_ST_ICON[s]+" "+t("rm.st."+s),selected:it.status===s})));
+  const ms = el("input",{type:"checkbox"}); ms.checked = !!it.milestone;
+  ms.addEventListener("change", e => { it.milestone = e.target.checked; if (it.milestone) it.end = it.start; commit(); });
+  const prog = el("input",{type:"range",min:0,max:100,step:5,value:Math.round((it.progress||0)*100),
+    style:"accent-color:var(--accent-line)",
+    oninput:e=>{ it.progress = (+e.target.value)/100; saveDraft("maps"); rmPaint(true);
+      $("#rmProgVal").textContent = e.target.value + " %"; }});
+  box.append(
+    field(t("fTitle"), el("input",{type:"text",value:it.title||"",oninput:e=>{ it.title=e.target.value;
+      saveDraft("maps"); rmPaint(true); rmSide(rm); }})),
+    el("div",{class:"row2"},[
+      field(t("rm.from"), el("input",{type:"date",value:it.start||"",min:rm.start,max:rm.end,
+        onchange:e=>{ it.start = e.target.value; if (it.milestone || it.end < it.start) it.end = it.start; commit(); }})),
+      it.milestone ? el("div",{class:"fld"},[el("label",{text:t("rm.to")}), el("span",{class:"rm-hint",text:t("rm.msNote")})])
+        : field(t("rm.to"), el("input",{type:"date",value:it.end||"",min:it.start,max:rm.end,
+            onchange:e=>upd("end", e.target.value)}))
+    ]),
+    el("div",{class:"row2"},[
+      field(t("rm.status"), st),
+      el("div",{class:"fld"},[el("label",{text:t("rm.kind")}),
+        el("label",{class:"chk"},[ms, el("span",{text:t("rm.milestone")})])])
+    ]),
+    it.milestone ? null : el("div",{class:"fld"},[el("label",{text:t("rm.progress")}),
+      el("div",{style:"display:flex;align-items:center;gap:10px"},[prog,
+        el("span",{id:"rmProgVal",class:"tnum",style:"font-size:12.5px;color:var(--ink-2)",
+          text:Math.round((it.progress||0)*100)+" %"})])]),
+    field(t("fNote"), el("input",{type:"text",value:it.note||"",oninput:e=>{ it.note=e.target.value; saveDraft("maps"); }})),
+    el("div",{style:"display:flex;gap:8px;flex-wrap:wrap"},[
+      el("button",{type:"button",class:"btn sm",text:"⧉ "+t("dup"),onclick:()=>{
+        lane.items.splice(RM.item, 0, JSON.parse(JSON.stringify(it))); commit(); }}),
+      el("button",{type:"button",class:"btn sm danger",text:"🗑 "+t("del"),onclick:()=>{
+        lane.items.splice(RM.item,1); RM.item = -1; commit(); }})
+    ])
+  );
+}
+
+/* ------------------------------------------------------------ PNG-Export */
+function cssVal(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#888"; }
+function inlineVars(node){
+  node.querySelectorAll("*").forEach(n => {
+    ["fill","stroke"].forEach(a => {
+      const v = n.getAttribute(a);
+      const m = v && v.match(/^var\((--[\w-]+)\)$/);
+      if (m) n.setAttribute(a, cssVal(m[1]));
+    });
+    const s = n.getAttribute("style");
+    if (s && s.includes("var(")) n.setAttribute("style", s.replace(/var\((--[\w-]+)\)/g, (_,v) => cssVal(v)));
+  });
+  return node;
+}
+function rmPNG(rm, title){
+  const svg = inlineVars(roadmapSVG(rm, {width:1600}));
+  svg.setAttribute("xmlns", SVGNS);
+  svg.setAttribute("style", "font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif");
+  const w = +svg.getAttribute("width"), h = +svg.getAttribute("height"), scale = 2;
+  const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)], {type:"image/svg+xml;charset=utf-8"}));
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement("canvas");
+    c.width = w*scale; c.height = h*scale;
+    const x = c.getContext("2d");
+    x.fillStyle = cssVal("--surface"); x.fillRect(0,0,c.width,c.height);
+    x.drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(url);
+    c.toBlob(bl => {
+      const a = el("a",{href:URL.createObjectURL(bl),
+        download:(title||"roadmap").replace(/[^\wäöüÄÖÜß -]/g,"").trim().replace(/\s+/g,"_") + ".png"});
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    }, "image/png");
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); toast(t("rm.pngFail")); };
+  img.src = url;
 }
 
 /* ------------------------------------------------------------------ wiring */
@@ -1223,10 +1786,21 @@ function init(){
     e.target.value = ""; edSel = 0; saveDraft(edType); paintEdList(); paintEdForm(); renderAll();
     toast(t("pickHint"));
   });
+  $("#rmNewBtn").addEventListener("click", rmNew);
+  $("#rmCloseBtn").addEventListener("click", rmClose);
+  $("#rmExport").addEventListener("click", () => exportFile("maps"));
+  $("#rmPngBtn").addEventListener("click", () => { const m = DATA.maps[RM.idx];
+    if (m && m.roadmap) rmPNG(m.roadmap, m.title); });
+  $("#rmPrintBtn").addEventListener("click", () => window.print());
+  $("#rmDelete").addEventListener("click", () => { if (!confirm(t("rm.confirmDel"))) return;
+    DATA.maps.splice(RM.idx,1); saveDraft("maps"); rmClose(); });
   $("#edClose").addEventListener("click", () => $("#ed").classList.remove("on"));
   $("#ovClose").addEventListener("click", () => $("#ov").classList.remove("on"));
   [["#ed"],["#ov"]].forEach(([s]) => $(s).addEventListener("click", e => { if (e.target === $(s)) $(s).classList.remove("on"); }));
-  addEventListener("keydown", e => { if (e.key === "Escape") { $("#ed").classList.remove("on"); $("#ov").classList.remove("on"); } });
+  $("#rm").addEventListener("click", e => { if (e.target === $("#rm")) rmClose(); });
+  addEventListener("keydown", e => { if (e.key === "Escape") {
+    $("#ed").classList.remove("on"); $("#ov").classList.remove("on");
+    if ($("#rm").classList.contains("on")) rmClose(); } });
 
   $("#langDe").addEventListener("click", () => { LANG = "de"; applyLang(); });
   $("#langEn").addEventListener("click", () => { LANG = "en"; applyLang(); });

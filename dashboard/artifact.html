@@ -674,7 +674,9 @@ const sv = (tag, attrs, kids) => {
   return n;
 };
 const D = iso => iso ? new Date(iso + "T00:00:00") : null;
-const isoOf = d => d.toISOString().slice(0,10);
+/* Lokales Datum: toISOString() verschiebt in UTC+X um einen Tag zurück und
+   hätte Stichtag und Wochenraster um einen Tag versetzt. */
+const isoOf = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const DAY = 864e5;
 const addDays = (d,n) => new Date(d.getTime() + n*DAY);
 const fmtD = iso => { if (!iso) return "–"; const d = D(iso);

@@ -8,7 +8,7 @@ News, Anhänge und Maps steht in [`ANLEITUNG.md`](ANLEITUNG.md).
 |---|---|---|
 | News | Meldungen ans Management | `content/news.js` bzw. „Redaktion" im Board |
 | Dashboard | das Portfolio-Cockpit (siehe unten) | `python3 build/build.py --extract` |
-| Rollout-Maps | Karten als Bild, PDF oder HTML-Seite | `content/maps.js` + Ordner `rollout-maps/` |
+| Rollout-Maps | **Roadmaps im Board selbst bauen** (Spuren, Balken, Meilensteine, PNG-Export) sowie Karten als Bild, PDF oder HTML-Seite | Roadmap-Editor im Board bzw. `content/maps.js` + Ordner `rollout-maps/` |
 | Anhänge | Dokumente aus dem Ordner | `content/attachments.js` + Ordner `anhaenge/` |
 
 Inhalte liegen als JavaScript-Dateien in `content/` und nicht als JSON, weil ein

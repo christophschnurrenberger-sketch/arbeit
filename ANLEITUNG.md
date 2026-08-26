@@ -82,10 +82,55 @@ Handarbeit. Verlinken lässt sich alles, was im Ordner liegt, auch Dateien aus
 
 ---
 
-## 4. Rollout-Maps ergänzen
+## 4. Roadmaps direkt im Board bauen
 
-Genauso wie Anhänge, nur im Ordner **`rollout-maps/`** und über
-**Redaktion → Rollout-Maps**. Unterstützt werden:
+Im Reiter **Rollout-Maps** auf **Roadmap erstellen** klicken. Es öffnet sich ein
+Editor mit einer Vorschau, die sich sofort mitverändert.
+
+**Aufbau**
+
+1. Oben **Titel**, **Von**, **Bis** setzen und das **Raster** wählen –
+   Quartale für den Jahresblick, Monate für die Feinplanung.
+2. Links **Spuren** anlegen: eine je Gesellschaft, Standort oder Workstream.
+   Der Name lässt sich direkt in der Liste überschreiben, die Pfeile
+   verschieben eine Spur nach oben oder unten.
+3. Mit **+** an der Spur einen Eintrag anlegen – oder **im Diagramm an die
+   gewünschte Stelle doppelklicken**, dann entsteht der Eintrag gleich dort.
+4. Rechts den gewählten Eintrag beschreiben: Titel, Zeitraum, Status,
+   Fortschritt. Ein Häkchen bei **Meilenstein** macht daraus eine Raute mit
+   einem einzigen Datum.
+
+**Mit der Maus arbeiten**
+
+| Geste | Wirkung |
+|---|---|
+| Balken in der Mitte ziehen | verschiebt den ganzen Eintrag |
+| Balken an einer Kante ziehen | ändert Anfang oder Ende |
+| Auf einen Balken klicken | wählt ihn rechts im Formular aus |
+| Doppelklick auf freie Fläche | legt dort einen neuen Eintrag an |
+
+**Einfärben nach** entscheidet, ob die Balken den Status zeigen (geplant,
+läuft, erledigt, Risiko) oder die Spur. Spurenfarben gibt es bis sechs Spuren;
+darüber färbt das Board wieder nach Status, weil sich mehr Farben nicht mehr
+zuverlässig unterscheiden lassen.
+
+**Fertig?** Unten **content/maps.js erzeugen** drücken und die Datei wie bei
+den News in den Ordner `content/` legen. Erst dann sehen die anderen die
+Roadmap.
+
+**Für Präsentationen** liefert **Als PNG** ein Bild in doppelter Auflösung zum
+Einfügen in Folien, **Drucken** eine saubere Seite ohne Bedienelemente.
+
+Ein Klick auf eine Roadmap-Kachel öffnet sie zunächst nur zum **Ansehen** –
+zum Ändern dort auf *Roadmap bearbeiten*.
+
+---
+
+## 5. Fertige Karten als Datei verknüpfen
+
+Für Karten, die woanders entstanden sind: Datei in den Ordner
+**`rollout-maps/`** legen und über **Redaktion → Rollout-Maps** eintragen.
+Unterstützt werden:
 
 | Typ | Formate | Darstellung im Board |
 |---|---|---|
@@ -98,7 +143,7 @@ Das Feld **Typ** kann auf *auto* bleiben – es wird an der Dateiendung erkannt.
 
 ---
 
-## 5. Dashboard aktualisieren
+## 6. Dashboard aktualisieren
 
 Das Dashboard im gleichnamigen Reiter wird aus `dashboard/index.html` geladen.
 Kommt eine neue Excel-Version:
@@ -116,7 +161,7 @@ Details stehen in `README.md`.
 
 ---
 
-## 6. Was wo liegt
+## 7. Was wo liegt
 
 | Ordner / Datei | Inhalt |
 |---|---|
@@ -136,7 +181,7 @@ gebraucht. Wer einen aufgeräumten Ordner verteilen möchte, kann sie weglassen 
 
 ---
 
-## 7. Wenn etwas nicht klappt
+## 8. Wenn etwas nicht klappt
 
 **Das Board zeigt keine News, obwohl die Datei ersetzt wurde.**
 Der Browser hält die alte Fassung im Zwischenspeicher. Mit `Strg` + `F5` neu
@@ -149,6 +194,10 @@ verwerfen* klicken – die Datei im Ordner ist maßgeblich.
 **Der Reiter Dashboard bleibt leer.**
 Prüfen, ob `dashboard/index.html` im Ordner liegt. Sonst über *In eigenem Tab
 öffnen* prüfen, ob die Datei für sich funktioniert.
+
+**Eine Roadmap ist nach dem Neuladen wieder weg.**
+Dann wurde `content/maps.js` noch nicht ersetzt. Der Entwurf liegt weiter im
+Browser – Editor öffnen, *content/maps.js erzeugen*, Datei in `content/` legen.
 
 **Eine Meldung sieht seltsam formatiert aus.**
 Meist ein fehlendes Sternchen-Paar. In der Redaktion nachsehen und
