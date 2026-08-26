@@ -342,20 +342,20 @@ function renderKPIs(rows){
   const share = v => n ? Math.round(v/n*100)+" %" : "0 %";
 
   const tile = (o) => el("div",{class:"kpi"},[
-    el("i",{class:"stripe",style:"background:"+(o.color||"var(--accent)")}),
+    el("i",{class:"stripe",style:"background:"+(o.color||"var(--accent-line)")}),
     el("span",{class:"lab",text:o.lab}),
     el("span",{class:"val tnum",text:o.val}),
-    o.meter !== undefined ? el("span",{class:"meter"},[el("i",{style:"width:"+Math.round(o.meter*100)+"%;background:"+(o.color||"var(--accent)")})]) : null,
+    o.meter !== undefined ? el("span",{class:"meter"},[el("i",{style:"width:"+Math.round(o.meter*100)+"%;background:"+(o.color||"var(--accent-line)")})]) : null,
     el("span",{class:"sub",text:o.sub})
   ]);
   $("#kpis").replaceChildren(
-    tile({lab:t("kpi.count"), val:nf(n), sub:t("kpi.of")+" "+nf(total), color:"var(--accent)", meter:n/total}),
+    tile({lab:t("kpi.count"), val:nf(n), sub:t("kpi.of")+" "+nf(total), color:"var(--accent-line)", meter:n/total}),
     tile({lab:t("kpi.avg"), val:pctS(avg), sub:t("kpi.avgSub")+" "+nf(n)+" "+t("processesN"), color:"var(--st-prog)", meter:avg}),
     tile({lab:t("st.delayed"), val:nf(del), sub:ST_ICON.delayed+" "+share(del)+" "+t("kpi.share"), color:"var(--st-delay)", meter:n?del/n:0}),
     tile({lab:t("kpi.overdue"), val:nf(ovd), sub:t("kpi.overdueSub"), color:"var(--warn)", meter:n?ovd/n:0}),
     tile({lab:t("kpi.elab"), val:nf(elab), sub:ST_ICON.done+" "+share(elab)+" "+t("kpi.share"), color:"var(--st-done)", meter:n?elab/n:0}),
     tile({lab:t("kpi.impl"), val:nf(impl), sub:ST_ICON.inprogress+" "+share(impl)+" "+t("kpi.share"), color:"var(--ph2)", meter:n?impl/n:0}),
-    tile({lab:t("kpi.due"), val:nf(due), sub:t("kpi.dueSub")+" "+fmtD(S.asOf), color:"var(--ph4)"})
+    tile({lab:t("kpi.due"), val:nf(due), sub:t("kpi.dueSub")+" "+fmtD(S.asOf), color:"var(--ink)"})
   );
 }
 
@@ -559,7 +559,9 @@ function chartLoad(rows){
   const aoi = weeks.findIndex(w => isoOf(w) >= S.asOf);
   if (aoi >= 0){
     g.appendChild(sv("line",{x1:x(aoi),x2:x(aoi),y1:m.t-2,y2:m.t+ph,stroke:"var(--today)","stroke-width":2}));
-    g.appendChild(sv("text",{x:x(aoi)+4,y:m.t+8,style:"font-size:10px;font-weight:600;fill:var(--today)",text:t("today")}));
+    const lab = t("today"), lw = lab.length*5.6 + 12;
+    g.appendChild(sv("rect",{x:x(aoi)+3,y:m.t-2,width:lw,height:15,rx:3,fill:"var(--brand)"}));
+    g.appendChild(sv("text",{x:x(aoi)+9,y:m.t+9,style:"font-size:10px;font-weight:700;fill:var(--on-accent)",text:lab}));
   }
   const hair = sv("line",{x1:0,x2:0,y1:m.t,y2:m.t+ph,stroke:"var(--axis)","stroke-width":1,opacity:0});
   g.appendChild(hair);
