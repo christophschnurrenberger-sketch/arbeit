@@ -3,7 +3,7 @@
     <div class="brand">
       <span class="bmark" aria-hidden="true">IT</span>
       <h1 data-i18n="title">IT Process Portfolio Cockpit</h1>
-      <span class="sub"><span data-i18n="snapshot">Datenstand</span> <b id="snapLabel">–</b> · <span id="nodeTotal" class="tnum">0</span> <span data-i18n="processes">Prozesse</span></span>
+      <span class="sub"><span data-i18n="snapshot">Datenstand</span> <b id="snapLabel">–</b> &nbsp;/&nbsp; <b id="nodeTotal">0</b> <span data-i18n="processes">Prozesse</span></span>
     </div>
     <div class="top-actions">
       <div class="seg" role="group" aria-label="Sprache / Language">
@@ -11,8 +11,8 @@
         <button type="button" id="langEn" aria-pressed="false">EN</button>
       </div>
       <button type="button" class="btn" id="themeBtn" aria-pressed="false"><span id="themeIc">◐</span> <span data-i18n="theme">Ansicht</span></button>
-      <button type="button" class="btn" id="csvBtn">↓ <span data-i18n="csv">CSV Export</span></button>
-      <button type="button" class="btn" id="printBtn">⎙ <span data-i18n="print">Drucken / PDF</span></button>
+      <button type="button" class="btn" id="csvBtn"><span data-i18n="csv">CSV Export</span></button>
+      <button type="button" class="btn" id="printBtn"><span data-i18n="print">Drucken / PDF</span></button>
     </div>
   </div>
 </header>
@@ -85,7 +85,7 @@
       </div>
       <div class="fgrp" style="margin-left:auto;">
         <span class="flabel">&nbsp;</span>
-        <button type="button" class="btn" id="resetBtn">↺ <span data-i18n="f.reset">Filter zurücksetzen</span></button>
+        <button type="button" class="btn" id="resetBtn"><span data-i18n="f.reset">Filter zurücksetzen</span></button>
       </div>
     </div>
 
@@ -96,7 +96,7 @@
   <section class="kpis" id="kpis" aria-label="Kennzahlen"></section>
 
   <!-- ============================================ charts -->
-  <div class="sec"><h2 data-i18n="s.overview">Portfolio-Überblick</h2><span class="n" id="scopeNote"></span><span class="rule"></span></div>
+  <div class="sec"><span class="lbl" data-i18n="s.k.eval">–</span><div><h2 data-i18n="s.overview">Portfolio-Überblick</h2><span class="n" id="scopeNote"></span></div></div>
 
   <section class="grid2">
     <div class="card">
@@ -145,7 +145,7 @@
   </section>
 
   <!-- ============================================ gantt -->
-  <div class="sec"><h2 data-i18n="s.timeline">Portfolio-Timeline</h2><span class="n" id="ganttNote"></span><span class="rule"></span></div>
+  <div class="sec"><span class="lbl" data-i18n="s.k.plan">–</span><div><h2 data-i18n="s.timeline">Portfolio-Timeline</h2><span class="n" id="ganttNote"></span></div></div>
   <section class="gantt-wrap">
     <div class="tbl-head" style="border:1px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0;background:var(--surface);">
       <div class="toggles">
@@ -167,7 +167,7 @@
   </section>
 
   <!-- ============================================ table -->
-  <div class="sec"><h2 data-i18n="s.detail">Detailtabelle</h2><span class="n" id="tblNote"></span><span class="rule"></span></div>
+  <div class="sec"><span class="lbl" data-i18n="s.k.data">–</span><div><h2 data-i18n="s.detail">Detailtabelle</h2><span class="n" id="tblNote"></span></div></div>
   <section class="tbl-wrap">
     <div class="tbl-head">
       <div class="seg" role="group">
@@ -175,7 +175,7 @@
         <button type="button" id="rowPhase" aria-pressed="false" data-i18n="d.byPhase">Je Phase</button>
       </div>
       <span class="card-sub" style="margin:0;" id="tblCount"></span>
-      <button type="button" class="btn" id="csvBtn2" style="margin-left:auto;">↓ <span data-i18n="csv">CSV Export</span></button>
+      <button type="button" class="btn" id="csvBtn2" style="margin-left:auto;"><span data-i18n="csv">CSV Export</span></button>
     </div>
     <div class="tbl-scroll">
       <table id="tbl"><thead id="tblHead"></thead><tbody id="tblBody"></tbody></table>

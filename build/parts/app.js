@@ -10,6 +10,7 @@ const T = {
     "p.all":"Gesamt","p.q":"Lfd. Quartal","p.90":"Nächste 90 T","p.year":"Lfd. Jahr",
     "t.delayed":"Nur verzögert","t.overdue":"Nur überfällig","t.dated":"Nur mit Termin","t.undated":"Ohne Termin einbeziehen",
     "s.overview":"Portfolio-Überblick","s.timeline":"Portfolio-Timeline","s.detail":"Detailtabelle",
+    "s.k.eval":"Auswertung","s.k.plan":"Planung","s.k.data":"Datenbasis",
     "c.status":"Status der Prozesse","c.statusSub":"Verzögerung hat Vorrang vor allen anderen Zuständen",
     "c.group":"Status je Prozessgruppe","c.groupSub":"Anteile je Management-, Kern- und Support-Prozessen",
     "c.funnel":"Roll-out-Trichter","c.funnelSub":"Prozesse je Phase: terminiert · abgeschlossen",
@@ -50,6 +51,7 @@ const T = {
     "p.all":"All time","p.q":"This quarter","p.90":"Next 90 days","p.year":"This year",
     "t.delayed":"Delayed only","t.overdue":"Overdue only","t.dated":"Scheduled only","t.undated":"Include undated",
     "s.overview":"Portfolio overview","s.timeline":"Portfolio timeline","s.detail":"Detail table",
+    "s.k.eval":"Analysis","s.k.plan":"Schedule","s.k.data":"Source data",
     "c.status":"Process status","c.statusSub":"Delay outranks every other state",
     "c.group":"Status by process group","c.groupSub":"Split across management, core and support processes",
     "c.funnel":"Roll-out funnel","c.funnelSub":"Processes per phase: scheduled · completed",
@@ -130,6 +132,8 @@ const fmtMon = d => d.toLocaleDateString(LANG === "de" ? "de-DE" : "en-GB", {mon
 const pctS = v => Math.round(v*100) + " %";
 const nf = n => n.toLocaleString(LANG === "de" ? "de-DE" : "en-GB");
 
+const shortP = p => String(p).replace(/\(([^)]+)\)/, (m,o) => "(" + o.trim().split(/\s+/)[0].replace(/[,;]$/,"") + ")");
+const people = a => (a||[]).map(shortP).join(", ") || "–";
 const STATUSES = ["delayed","inprogress","scheduled","done","notplanned"];
 const ST_COLOR = {delayed:"var(--st-delay)",inprogress:"var(--st-prog)",scheduled:"var(--st-sched)",done:"var(--st-done)",notplanned:"var(--st-none)",none:"var(--st-none)"};
 const ST_ICON  = {delayed:"▲",inprogress:"◐",scheduled:"○",done:"✓",notplanned:"–",none:"–"};
@@ -245,7 +249,7 @@ function tipBody(title, rows, meta){
   const f = document.createDocumentFragment();
   f.appendChild(el("div",{class:"t",text:title}));
   (rows||[]).forEach(r => f.appendChild(el("div",{class:"r"},[
-    el("i",{class:"k"+(r.sq?" sq":""),style:"background:"+(r.color||"var(--muted)")}),
+    el("i",{class:"k"+(r.sq?" sq":""),style:"background:"+(r.color||"var(--ink-3)")}),
     el("span",{class:"n",text:r.name}), el("span",{class:"v",text:r.value})
   ])));
   if (meta) f.appendChild(el("div",{class:"meta",text:meta}));
@@ -343,21 +347,30 @@ function renderKPIs(rows){
   let due = 0; rows.forEach(r => scopedPhases(r).forEach(p => { if (p.end && p.end >= S.asOf && p.end <= horizon) due++; }));
   const share = v => n ? Math.round(v/n*100)+" %" : "0 %";
 
-  const tile = (o) => el("div",{class:"kpi"},[
-    el("i",{class:"stripe",style:"background:"+(o.color||"var(--accent-line)")}),
+  /* Zwei Leitzahlen tragen den Abschnitt; die übrigen begleiten sie in einer
+     feinen Reihe. Farbe trägt nur, wo sie etwas bedeutet. */
+  const tile = (o) => el("div",{class:"kpi" + (o.hero ? " hero" : "")},[
     el("span",{class:"lab",text:o.lab}),
-    el("span",{class:"val tnum",text:o.val}),
-    o.meter !== undefined ? el("span",{class:"meter"},[el("i",{style:"width:"+Math.round(o.meter*100)+"%;background:"+(o.color||"var(--accent-line)")})]) : null,
+    (() => {
+      const m = String(o.val).match(/^(.*?)\s*(%)$/);
+      const v = el("span",{class:"val" + (o.alert ? " warn" : "")});
+      v.appendChild(document.createTextNode(m ? m[1] : String(o.val)));
+      if (m) v.appendChild(el("span",{class:"u",text:m[2]}));
+      return v;
+    })(),
+    o.hero && o.meter !== undefined
+      ? el("span",{class:"meter"},[el("i",{style:"width:"+Math.round(o.meter*100)+"%"})]) : null,
     el("span",{class:"sub",text:o.sub})
   ]);
   $("#kpis").replaceChildren(
-    tile({lab:t("kpi.count"), val:nf(n), sub:t("kpi.of")+" "+nf(total), color:"var(--accent-line)", meter:n/total}),
-    tile({lab:t("kpi.avg"), val:pctS(avg), sub:t("kpi.avgSub")+" "+nf(n)+" "+t("processesN"), color:"var(--st-prog)", meter:avg}),
-    tile({lab:t("st.delayed"), val:nf(del), sub:ST_ICON.delayed+" "+share(del)+" "+t("kpi.share"), color:"var(--st-delay)", meter:n?del/n:0}),
-    tile({lab:t("kpi.overdue"), val:nf(ovd), sub:t("kpi.overdueSub"), color:"var(--warn)", meter:n?ovd/n:0}),
-    tile({lab:t("kpi.elab"), val:nf(elab), sub:ST_ICON.done+" "+share(elab)+" "+t("kpi.share"), color:"var(--st-done)", meter:n?elab/n:0}),
-    tile({lab:t("kpi.impl"), val:nf(impl), sub:ST_ICON.inprogress+" "+share(impl)+" "+t("kpi.share"), color:"var(--ph2)", meter:n?impl/n:0}),
-    tile({lab:t("kpi.due"), val:nf(due), sub:t("kpi.dueSub")+" "+fmtD(S.asOf), color:"var(--ink)"})
+    tile({hero:true, lab:t("kpi.avg"), val:pctS(avg), meter:avg,
+          sub:t("kpi.avgSub")+" "+nf(n)+" "+t("processesN")+" "+t("kpi.of")+" "+nf(total)}),
+    tile({hero:true, alert:del>0, lab:t("st.delayed"), val:nf(del), meter:n?del/n:0,
+          sub:ST_ICON.delayed+" "+share(del)+" "+t("kpi.share")}),
+    tile({lab:t("kpi.overdue"), val:nf(ovd), sub:t("kpi.overdueSub")}),
+    tile({lab:t("kpi.elab"), val:nf(elab), sub:ST_ICON.done+" "+share(elab)}),
+    tile({lab:t("kpi.impl"), val:nf(impl), sub:ST_ICON.inprogress+" "+share(impl)}),
+    tile({lab:t("kpi.due"), val:nf(due), sub:t("kpi.dueSub")+" "+fmtD(S.asOf)})
   );
 }
 
@@ -382,7 +395,7 @@ function hBars(sel, rows, o){
     segs.forEach(s => {
       const w = Math.max(0, s.value/max*plotW);
       if (w > 0.4){
-        const rect = sv("rect",{class:"mark",x:x,y:y+3,width:Math.max(2,w-2),height:rowH-6,rx:4,fill:s.color,
+        const rect = sv("rect",{class:"mark",x:x,y:y+3,width:Math.max(2,w-2),height:rowH-6,rx:1,fill:s.color,
           style:o.onClick?"cursor:pointer":""});
         rect.addEventListener("pointerenter", e => tipShow(e, tipBody(r.tipTitle||r.label,
           (r.segs?segs:[]).map(ss=>({name:ss.name,value:nf(ss.value)+(o.unit||""),color:ss.color,sq:true}))
@@ -449,11 +462,11 @@ function chartFunnel(rows){
   stats.forEach((s,i) => {
     const y = i*(rowH+gap), wAll = s.planned/max*plotW, wDone = s.done/max*plotW;
     g.appendChild(sv("text",{class:"catlab",x:0,y:y+rowH/2+4,text:PH_SHORT[s.ph]||s.ph}));
-    g.appendChild(sv("rect",{x:labW,y:y+6,width:Math.max(2,wAll),height:rowH-12,rx:4,fill:"var(--surface-3)"}));
-    if (wDone > 1) g.appendChild(sv("rect",{class:"mark",x:labW,y:y+6,width:Math.max(2,wDone-2),height:rowH-12,rx:4,fill:ramp[i]}));
+    g.appendChild(sv("rect",{x:labW,y:y+6,width:Math.max(2,wAll),height:rowH-14,rx:1,fill:"var(--paper-3)"}));
+    if (wDone > 1) g.appendChild(sv("rect",{class:"mark",x:labW,y:y+6,width:Math.max(2,wDone-2),height:rowH-14,rx:1,fill:ramp[i]}));
     const hit = sv("rect",{class:"hit",x:labW,y:y,width:Math.max(4,wAll),height:rowH,style:"cursor:pointer"});
     hit.addEventListener("pointerenter", e => tipShow(e, tipBody(s.ph, [
-      {name:t("scheduledN"), value:nf(s.planned), color:"var(--muted)", sq:true},
+      {name:t("scheduledN"), value:nf(s.planned), color:"var(--ink-3)", sq:true},
       {name:t("doneN"), value:nf(s.done), color:ramp[i], sq:true},
       {name:t("st.delayed"), value:nf(s.delayed), color:"var(--st-delay)", sq:true}
     ])));
@@ -544,7 +557,7 @@ function chartLoad(rows){
   });
   bands.forEach((top,i) => { if (!series[i].some(v=>v>0)) return;
     g.appendChild(sv("polyline",{points:top.map((v,w)=>`${x(w).toFixed(1)},${y(v).toFixed(1)}`).join(" "),
-      fill:"none",stroke:"var(--surface)","stroke-width":2,"stroke-linejoin":"round"}));
+      fill:"none",stroke:"var(--paper)","stroke-width":2,"stroke-linejoin":"round"}));
     g.appendChild(sv("polyline",{points:top.map((v,w)=>`${x(w).toFixed(1)},${y(v).toFixed(1)}`).join(" "),
       fill:"none",stroke:PH_COLOR[i],"stroke-width":1.4,"stroke-linejoin":"round"}));
   });
@@ -575,7 +588,7 @@ function chartLoad(rows){
     hair.setAttribute("x1",x(i)); hair.setAttribute("x2",x(i)); hair.setAttribute("opacity",1);
     tipShow(e, tipBody(t("weekOf")+" "+fmtD(isoOf(weeks[i])),
       PHASES.map((p,k)=>({name:PH_SHORT[p]||p, value:nf(series[k][i]), color:PH_COLOR[k]}))
-        .concat([{name:"Σ "+t("running"), value:nf(series.reduce((a,s)=>a+s[i],0)), color:"var(--muted)"}]) ));
+        .concat([{name:"Σ "+t("running"), value:nf(series.reduce((a,s)=>a+s[i],0)), color:"var(--ink-3)"}]) ));
   });
   over.addEventListener("pointerleave", () => { hair.setAttribute("opacity",0); tipHide(); });
   g.appendChild(over);
@@ -643,7 +656,8 @@ function renderGantt(rows){
   /* rows */
   const labs = $("#gLabels"), bars = $("#gBars");
   labs.replaceChildren(); bars.replaceChildren();
-  bars.style.width = paneW+"px"; bars.style.height = (order.length*30)+"px";
+  const G_ROW = 28;   /* muss zu .g-row/.g-track im Stylesheet passen */
+  bars.style.width = paneW+"px"; bars.style.height = (order.length*G_ROW)+"px";
   const cur2 = new Date(d0.getFullYear(), d0.getMonth(), 1);
   while (cur2 <= d1){
     const left = (cur2 - d0)/DAY*ppd;
@@ -684,7 +698,7 @@ function renderGantt(rows){
       b.addEventListener("pointerenter", e => tipShow(e, tipBody(n.name+" · "+(PH_SHORT[p.phase]||p.phase), [
         {name:t("tbl.start"), value:fmtD(p.start), color:PH_COLOR[i], sq:true},
         {name:t("tbl.end"), value:fmtD(p.end), color:PH_COLOR[i], sq:true},
-        {name:t("tbl.dur"), value:p.duration!=null?nf(p.duration):"–", color:"var(--muted)", sq:true},
+        {name:t("tbl.dur"), value:p.duration!=null?nf(p.duration):"–", color:"var(--ink-3)", sq:true},
         {name:t("tbl.status"), value:ST_ICON[p.status]+" "+t("st."+p.status), color:ST_COLOR[p.status], sq:true}
       ], [p.planned?t("tbl.planned")+": "+p.planned:null, p.actual?t("tbl.actual")+": "+p.actual:null]
          .filter(Boolean).join("  ·  ") || n.path)));
@@ -720,9 +734,9 @@ const COLS_PROC = () => [
       el("span",{text:fmtD(n.spanEnd), style:isOverdue(n)?"color:var(--st-delay);font-weight:600":""})])},
   {k:"dur", h:t("tbl.dur"), v:n=>n.duration||0, cell:n=>el("td",{class:"num",text:n.duration!=null?nf(n.duration):"–"})},
   {k:"elab", h:t("tbl.elab"), v:n=>STATUSES.indexOf(n.elabStatus), cell:n=>el("td",{},[pill(n.elabStatus)])},
-  {k:"lead", h:t("tbl.lead"), v:n=>n.lead.join(", "), cell:n=>el("td",{text:n.lead.join(", ")||"–"})},
-  {k:"manager", h:t("tbl.manager"), v:n=>n.manager.join(", "), cell:n=>el("td",{text:n.manager.join(", ")||"–"})},
-  {k:"consultant", h:t("tbl.consultant"), v:n=>n.consultant.join(", "), cell:n=>el("td",{text:n.consultant.join(", ")||"–"})},
+  {k:"lead", h:t("tbl.lead"), v:n=>n.lead.join(", "), cell:n=>el("td",{class:"person",text:people(n.lead),title:n.lead.join(", ")})},
+  {k:"manager", h:t("tbl.manager"), v:n=>n.manager.join(", "), cell:n=>el("td",{class:"person",text:people(n.manager),title:n.manager.join(", ")})},
+  {k:"consultant", h:t("tbl.consultant"), v:n=>n.consultant.join(", "), cell:n=>el("td",{class:"person",text:people(n.consultant),title:n.consultant.join(", ")})},
   {k:"approval", h:t("tbl.approval"), v:n=>n.approval||"", cell:n=>el("td",{class:"num",text:n.approval?fmtD(n.approval):"–"})},
   {k:"comment", h:t("tbl.comment"), v:n=>n.comment||"", cell:n=>el("td",{text:n.comment||"–"})}
 ];
@@ -740,9 +754,9 @@ const COLS_PHASE = () => [
   {k:"dur", h:t("tbl.dur"), v:r=>r.p.duration||0, cell:r=>el("td",{class:"num",text:r.p.duration!=null?nf(r.p.duration):"–"})},
   {k:"pct", h:t("tbl.pct"), v:r=>r.p.pct, cell:r=>el("td",{class:"num",text:Math.round(r.p.pct*100)+"%"})},
   {k:"initiative", h:t("tbl.initiative"), v:r=>r.n.initiative, cell:r=>el("td",{text:r.n.initiative})},
-  {k:"lead", h:t("tbl.lead"), v:r=>r.p.lead.join(", "), cell:r=>el("td",{text:r.p.lead.join(", ")||"–"})},
-  {k:"manager", h:t("tbl.manager"), v:r=>r.p.manager.join(", "), cell:r=>el("td",{text:r.p.manager.join(", ")||"–"})},
-  {k:"consultant", h:t("tbl.consultant"), v:r=>r.p.consultant.join(", "), cell:r=>el("td",{text:r.p.consultant.join(", ")||"–"})}
+  {k:"lead", h:t("tbl.lead"), v:r=>r.p.lead.join(", "), cell:r=>el("td",{class:"person",text:people(r.p.lead),title:r.p.lead.join(", ")})},
+  {k:"manager", h:t("tbl.manager"), v:r=>r.p.manager.join(", "), cell:r=>el("td",{class:"person",text:people(r.p.manager),title:r.p.manager.join(", ")})},
+  {k:"consultant", h:t("tbl.consultant"), v:r=>r.p.consultant.join(", "), cell:r=>el("td",{class:"person",text:people(r.p.consultant),title:r.p.consultant.join(", ")})}
 ];
 const pill = s => el("span",{class:"pill "+s},[el("span",{class:"ic",text:ST_ICON[s]}), el("span",{text:t("st."+s)})]);
 
