@@ -24,11 +24,40 @@ an die Taskleiste heften, dann ist das Board ein Klick entfernt.
 
 ---
 
-## 2. News veröffentlichen
+## 2. Die Redaktion entsperren
+
+Alles, was etwas anlegt oder ändert – News, Anhänge, Rollout-Maps, Roadmaps –
+läuft ausschließlich über den Knopf **Redaktion** oben rechts. Er fragt nach
+einem Passwort. Voreingestellt ist **123456**.
+
+Nach dem Entsperren bleibt die Redaktion offen, bis du sie über **Sperren**
+wieder schließt oder den Browser-Tab beendest. Ein Neuladen der Seite hebt die
+Entsperrung nicht auf – praktisch, weil du nach dem Ersetzen einer Datei ja neu
+lädst. Im gesperrten Zustand ist das Board reine Lesefassung: alle Reiter,
+Diagramme, Roadmaps, PNG-Export und Drucken funktionieren, nur die
+Bearbeitungsknöpfe sind nicht da.
+
+**Passwort ändern**: Redaktion öffnen, unten auf *Passwort ändern* klicken, neues
+Passwort eingeben. Es erscheint eine fertige Zeile – diese in
+`content/settings.js` ersetzen und die Seite neu laden. In der Datei steht nur
+der Abdruck (SHA-256) des Passworts, nie das Passwort selbst.
+
+> **Was diese Sperre leistet – und was nicht.**
+> Sie verhindert, dass jemand versehentlich etwas ändert. Sie ist **keine
+> Zugriffskontrolle**: Das Passwort wird im Browser geprüft, und wer den Ordner
+> öffnen kann, kann die Sperre umgehen.
+> Verbindlich sind allein die **Freigaberechte des OneDrive-Ordners**. Wer dort
+> nur Leserechte hat, kann `content/*.js` nicht ersetzen und deshalb auch nichts
+> veröffentlichen – ganz unabhängig von der Sperre. Gib den Ordner also
+> schreibend nur denen frei, die wirklich pflegen sollen.
+
+---
+
+## 3. News veröffentlichen
 
 Der bequeme Weg, ganz ohne Dateien anzufassen:
 
-1. Im Board oben rechts auf **Redaktion** klicken.
+1. Im Board oben rechts auf **Redaktion** klicken und das Passwort eingeben.
 2. **+ Neu** drücken und die Meldung ausfüllen: Titel, Datum, Kategorie,
    optional Autor, Text und Verweise.
 3. Unten auf **content/news.js erzeugen** klicken. Der Browser lädt die Datei
@@ -67,10 +96,10 @@ Kategorien werden in `content/settings.js` gepflegt und bestimmen die Farbe.
 
 ---
 
-## 3. Anhänge ergänzen
+## 4. Anhänge ergänzen
 
 1. Die Datei in den Ordner **`anhaenge/`** legen.
-2. Im Board **Redaktion → Anhänge** öffnen, **Dateien wählen** drücken und die
+2. Im Board **Redaktion** entsperren, auf **Anhänge** wechseln, **Dateien wählen** drücken und die
    Datei auswählen – Pfad, Titel und Datum werden vorausgefüllt. Kategorie und
    Beschreibung ergänzen.
 3. **content/attachments.js erzeugen** und die Datei wie bei den News nach
@@ -82,10 +111,12 @@ Handarbeit. Verlinken lässt sich alles, was im Ordner liegt, auch Dateien aus
 
 ---
 
-## 4. Roadmaps direkt im Board bauen
+## 5. Roadmaps direkt im Board bauen
 
-Im Reiter **Rollout-Maps** auf **Roadmap erstellen** klicken. Es öffnet sich ein
-Editor mit einer Vorschau, die sich sofort mitverändert.
+**Redaktion** entsperren, auf **Rollout-Maps** wechseln und **Neu** drücken. Es
+öffnet sich ein Editor mit einer Vorschau, die sich sofort mitverändert. (Ist
+noch keine Map vorhanden, führt auch der Knopf im Leerzustand des Reiters
+dorthin – sobald die Redaktion offen ist.)
 
 **Aufbau**
 
@@ -126,7 +157,7 @@ zum Ändern dort auf *Roadmap bearbeiten*.
 
 ---
 
-## 5. Fertige Karten als Datei verknüpfen
+## 6. Fertige Karten als Datei verknüpfen
 
 Für Karten, die woanders entstanden sind: Datei in den Ordner
 **`rollout-maps/`** legen und über **Redaktion → Rollout-Maps** eintragen.
@@ -143,7 +174,7 @@ Das Feld **Typ** kann auf *auto* bleiben – es wird an der Dateiendung erkannt.
 
 ---
 
-## 6. Dashboard aktualisieren
+## 7. Dashboard aktualisieren
 
 Das Dashboard im gleichnamigen Reiter wird aus `dashboard/index.html` geladen.
 Kommt eine neue Excel-Version:
@@ -161,7 +192,7 @@ Details stehen in `README.md`.
 
 ---
 
-## 7. Was wo liegt
+## 8. Was wo liegt
 
 | Ordner / Datei | Inhalt |
 |---|---|
@@ -181,7 +212,7 @@ gebraucht. Wer einen aufgeräumten Ordner verteilen möchte, kann sie weglassen 
 
 ---
 
-## 8. Wenn etwas nicht klappt
+## 9. Wenn etwas nicht klappt
 
 **Das Board zeigt keine News, obwohl die Datei ersetzt wurde.**
 Der Browser hält die alte Fassung im Zwischenspeicher. Mit `Strg` + `F5` neu
@@ -190,6 +221,14 @@ laden.
 **Nach dem Ersetzen erscheint die Meldung doppelt.**
 Dann liegt im Browser noch der alte Entwurf. In der Redaktion auf *Änderungen
 verwerfen* klicken – die Datei im Ordner ist maßgeblich.
+
+**Der Knopf zum Anlegen fehlt.**
+Dann ist die Redaktion gesperrt. Oben rechts auf *Redaktion* klicken und das
+Passwort eingeben.
+
+**Passwort vergessen.**
+In `content/settings.js` die Zeile `editorPasswordHash: "..."` auf `""` setzen –
+dann ist die Sperre aus. Danach im Board ein neues Passwort setzen.
 
 **Der Reiter Dashboard bleibt leer.**
 Prüfen, ob `dashboard/index.html` im Ordner liegt. Sonst über *In eigenem Tab

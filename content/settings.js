@@ -17,5 +17,20 @@ window.BOARD_SETTINGS = {
   lang: "de",
 
   /* Kategorien für News – Reihenfolge bestimmt die Farbe (1–5) */
-  newsCategories: ["Meilenstein", "Entscheidung", "Rollout", "Termin", "Achtung"]
+  newsCategories: ["Meilenstein", "Entscheidung", "Rollout", "Termin", "Achtung"],
+
+  /* ---------------------------------------------------------------------
+     Schutz der Redaktion
+     Hinterlegt ist der SHA-256-Abdruck des Passworts, nicht das Passwort
+     selbst. Zum Ändern im Board auf "Redaktion" > "Passwort ändern" – dort
+     wird die neue Zeile erzeugt, die hier einzusetzen ist.
+     Ein leerer Wert ("") schaltet den Schutz ganz ab.
+
+     Wichtig: Das ist ein Schutz gegen versehentliches Ändern, keine
+     Zugriffskontrolle. Wer den Ordner öffnen kann, kann die Sperre umgehen.
+     Verbindlich sind allein die Freigaberechte des OneDrive-Ordners: Wer dort
+     nur Leserechte hat, kann content/*.js nicht ersetzen und damit nichts
+     veröffentlichen.
+     --------------------------------------------------------------------- */
+  editorPasswordHash: "sha256:8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
 };

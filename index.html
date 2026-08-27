@@ -368,7 +368,8 @@ footer{
         <p id="bSub">Corporate IT – Prozessportfolio</p>
       </div>
       <div class="top-actions">
-        <button type="button" class="btn primary" id="edBtn"><span data-i="edit">Redaktion</span></button>
+        <button type="button" class="btn" id="edBtn"><span data-i="edit">Redaktion</span></button>
+        <button type="button" class="btn" id="lockBtn" style="display:none;"><span data-i="lock.lock">Sperren</span></button>
         <div class="seg" role="group" aria-label="Sprache / Language">
           <button type="button" id="langDe" aria-pressed="true">DE</button>
           <button type="button" id="langEn" aria-pressed="false">EN</button>
@@ -419,7 +420,7 @@ footer{
           <div class="card">
             <h3 data-i="rail.help">Meldung schreiben</h3>
             <p style="margin:0 0 11px;font-size:13px;color:var(--ink-2);" data-i="rail.helpTxt">Über „Redaktion" schreibst du eine Meldung und erzeugst daraus die Datei <code>content/news.js</code>. Diese Datei im Ordner ersetzen – fertig.</p>
-            <button type="button" class="btn" id="edBtn2"><span data-i="edit">Redaktion</span></button>
+    
           </div>
         </aside>
       </div>
@@ -443,8 +444,7 @@ footer{
           <input type="search" id="qMaps" data-ph="ph.maps" placeholder="Maps durchsuchen …" autocomplete="off" />
         </div>
         <div class="toolbar" id="tagFilter" style="margin:0;gap:6px;"></div>
-        <button type="button" class="btn primary" id="rmNewBtn" style="margin-left:auto;"><span data-i="rm.new">Roadmap erstellen</span></button>
-        <button type="button" class="btn" id="edMaps"><span data-i="maps.add">Map ergänzen</span></button>
+
       </div>
       <div id="mapsBox"></div>
     </section>
@@ -457,7 +457,7 @@ footer{
           <input type="search" id="qFiles" data-ph="ph.files" placeholder="Anhänge durchsuchen …" autocomplete="off" />
         </div>
         <div class="toolbar" id="fileCatFilter" style="margin:0;gap:6px;"></div>
-        <button type="button" class="btn" id="edFiles" style="margin-left:auto;"><span data-i="files.add">Anhang ergänzen</span></button>
+
       </div>
       <div id="filesBox"></div>
     </section>
@@ -513,7 +513,8 @@ footer{
       <button type="button" class="btn primary" id="edExport"><span id="edExportLbl">content/news.js erzeugen</span></button>
       <button type="button" class="btn" id="edSave" style="display:none;"><span data-i="ed.save">Direkt speichern</span></button>
       <button type="button" class="btn" id="edShow">&lt;/&gt; <span data-i="ed.show">Code anzeigen</span></button>
-      <button type="button" class="btn danger" id="edReset" style="margin-left:auto;"><span data-i="ed.reset">Änderungen verwerfen</span></button>
+      <button type="button" class="linkbtn" id="edPw" style="margin-left:auto;" data-i="lock.change">Passwort ändern</button>
+      <button type="button" class="btn danger" id="edReset"><span data-i="ed.reset">Änderungen verwerfen</span></button>
     </div>
   </div>
 </div>
@@ -543,6 +544,28 @@ footer{
   </div>
 </div>
 
+
+<!-- ============================================ password gate -->
+<div class="ov" id="lock" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <div class="ov-box" style="max-width:430px;">
+    <div class="ov-head">
+      <h2 id="lockTitle" data-i="lock.title">Redaktion entsperren</h2>
+      <button type="button" class="x" id="lockClose" aria-label="Schließen">×</button>
+    </div>
+    <div class="ov-body">
+      <p style="margin:0 0 16px;color:var(--ink-2);font-size:13.5px;" data-i="lock.hint">Anlegen und Ändern ist mit einem Passwort geschützt.</p>
+      <div class="fld">
+        <label for="lockPw" data-i="lock.pw">Passwort</label>
+        <input type="password" id="lockPw" autocomplete="current-password" />
+        <span class="hint" id="lockErr" style="color:var(--c5);"></span>
+      </div>
+      <div style="display:flex;gap:9px;margin-top:16px;">
+        <button type="button" class="btn primary" id="lockGo"><span data-i="lock.open">Entsperren</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="content/settings.js"></script>
 <script src="content/news.js"></script>
 <script src="content/maps.js"></script>
@@ -564,7 +587,7 @@ const T = {
     "rail.jump":"Schnellzugriff", "rail.dash":"Portfolio-Dashboard", "rail.board":"Board",
     "rail.posts":"Meldungen", "rail.last":"Letzte Meldung", "rail.owner":"Pflege",
     "rail.help":"Meldung schreiben",
-    "rail.helpTxt":"Über „Redaktion“ schreibst du eine Meldung und erzeugst daraus die Datei content/news.js. Diese Datei im Ordner ersetzen – fertig.",
+    "rail.helpTxt":"Über „Redaktion“ oben rechts – nach Eingabe des Passworts – schreibst du eine Meldung und erzeugst daraus die Datei content/news.js. Diese Datei im Ordner ersetzen, fertig.",
     "dash.title":"Portfolio-Dashboard", "dash.sub":"eingebettet aus dashboard/index.html",
     "dash.reload":"Neu laden", "dash.open":"In eigenem Tab öffnen",
     "maps.add":"Map ergänzen", "files.add":"Anhang ergänzen",
@@ -588,6 +611,14 @@ const T = {
     "rm.dragHint":"Balken ziehen verschiebt, Kanten ziehen ändert die Dauer, Doppelklick legt einen Eintrag an.",
     "rm.edit":"Roadmap bearbeiten", "rm.pngFail":"PNG ließ sich nicht erzeugen – bitte Drucken verwenden.",
     "rm.entries":"Einträge", "rm.lanes":"Spuren", today:"Stichtag",
+    "lock.title":"Redaktion entsperren",
+    "lock.hint":"Anlegen und Ändern ist mit einem Passwort geschützt.",
+    "lock.pw":"Passwort", "lock.open":"Entsperren", "lock.wrong":"Passwort stimmt nicht.",
+    "lock.lock":"Sperren", "lock.open2":"Redaktion",
+    "lock.nocrypto":"Dieser Browser stellt keine Prüffunktion bereit. Bitte Edge, Chrome oder Firefox verwenden.",
+    "lock.change":"Passwort ändern", "lock.newpw":"Neues Passwort eingeben:",
+    "lock.changeHint":"Diese Zeile in content/settings.js ersetzen und die Seite neu laden.",
+    "lock.readonly":"Zum Anlegen und Ändern oben auf „Redaktion“ klicken.",
     all:"Alle", pinned:"Angeheftet", noNews:"Keine Meldung passt zur Suche.",
     emptyNewsT:"Noch keine Meldungen", emptyNewsP:"Schreibe die erste Meldung über „Redaktion“ – oder trage sie direkt in content/news.js ein.",
     emptyMapsT:"Noch keine Rollout-Maps", emptyMapsP:"Baue eine Roadmap direkt hier im Board – mit Spuren, Balken und Meilensteinen. Oder verknüpfe eine fertige Karte aus dem Ordner rollout-maps/ als PNG, JPG, SVG, PDF oder HTML-Seite.",
@@ -613,7 +644,7 @@ const T = {
     "rail.jump":"Quick access", "rail.dash":"Portfolio dashboard", "rail.board":"Board",
     "rail.posts":"Posts", "rail.last":"Latest post", "rail.owner":"Maintained by",
     "rail.help":"Publish a post",
-    "rail.helpTxt":"Use “Editor” to write a post and generate the file content/news.js. Replace that file in the folder – done.",
+    "rail.helpTxt":"Use “Editor” at the top right – after entering the password – to write a post and generate content/news.js. Replace that file in the folder, done.",
     "dash.title":"Portfolio dashboard", "dash.sub":"embedded from dashboard/index.html",
     "dash.reload":"Reload", "dash.open":"Open in its own tab",
     "maps.add":"Add map", "files.add":"Add attachment",
@@ -637,6 +668,14 @@ const T = {
     "rm.dragHint":"Drag a bar to move it, drag its edges to change duration, double-click to add an entry.",
     "rm.edit":"Edit roadmap", "rm.pngFail":"PNG could not be generated – please use Print instead.",
     "rm.entries":"entries", "rm.lanes":"lanes", today:"Reference date",
+    "lock.title":"Unlock the editor",
+    "lock.hint":"Creating and changing entries is password protected.",
+    "lock.pw":"Password", "lock.open":"Unlock", "lock.wrong":"That password does not match.",
+    "lock.lock":"Lock", "lock.open2":"Editor",
+    "lock.nocrypto":"This browser exposes no digest function. Please use Edge, Chrome or Firefox.",
+    "lock.change":"Change password", "lock.newpw":"Enter the new password:",
+    "lock.changeHint":"Replace this line in content/settings.js and reload the page.",
+    "lock.readonly":"Use “Editor” at the top to create or change entries.",
     all:"All", pinned:"Pinned", noNews:"No post matches the search.",
     emptyNewsT:"No posts yet", emptyNewsP:"Write the first post via “Editor” – or add it directly to content/news.js.",
     emptyMapsT:"No rollout maps yet", emptyMapsP:"Build a roadmap right here in the board – lanes, bars and milestones. Or link a finished map from the rollout-maps/ folder as PNG, JPG, SVG, PDF or HTML page.",
@@ -738,6 +777,7 @@ function rich(src){
 const DEFAULT_SETTINGS = {
   title:"Management Board", subtitle:"", owner:"", contact:"",
   dashboardFile:"dashboard/index.html", lang:"de",
+  editorPasswordHash:"sha256:8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
   newsCategories:["Meilenstein","Entscheidung","Rollout","Termin","Achtung"]
 };
 const SET = Object.assign({}, DEFAULT_SETTINGS, window.BOARD_SETTINGS || {});
@@ -846,6 +886,11 @@ function emptyState(icon, title, text, onAdd, extra){
   const box = el("div",{class:"empty"},[
     el("div",{class:"ic",text:icon}), el("h3",{text:title}), el("p",{text:text})
   ]);
+  /* Ohne entsperrte Redaktion bleibt der Leerzustand ein Hinweis, kein Angebot. */
+  if (!EDIT) {
+    box.appendChild(el("p",{style:"margin-top:14px;color:var(--ink-3);font-size:12.5px;",text:t("lock.readonly")}));
+    return box;
+  }
   const acts = [];
   if (onAdd) acts.push(el("button",{type:"button",class:"btn primary",text:t("addNow"),onclick:onAdd}));
   (extra || []).forEach(([label, fn]) => acts.push(el("button",{type:"button",class:"btn",text:label,onclick:fn})));
@@ -932,11 +977,11 @@ function rmView(m){
   body.appendChild(el("div",{class:"rm-legend",style:"padding:12px 0 0;border:0"}, rmLegendNodes(m.roadmap)));
   if (m.note) body.appendChild(el("p",{style:"color:var(--ink-2);margin-top:10px",text:m.note}));
   body.appendChild(el("div",{style:"display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--rule)"},[
-    el("button",{type:"button",class:"btn primary",text:t("rm.edit"),
-      onclick:()=>{ $("#ov").classList.remove("on"); rmOpen(idx); }}),
+    EDIT ? el("button",{type:"button",class:"btn primary",text:t("rm.edit"),
+      onclick:()=>{ $("#ov").classList.remove("on"); rmOpen(idx); }}) : null,
     el("button",{type:"button",class:"btn",text:t("rm.png"),onclick:()=>rmPNG(m.roadmap, m.title)}),
     el("button",{type:"button",class:"btn",text:t("rm.print"),onclick:()=>window.print()})
-  ]));
+  ].filter(Boolean)));
   $("#ov").classList.add("on");
 }
 function openViewer(m){
@@ -1703,6 +1748,78 @@ function rmPNG(rm, title){
   img.src = url;
 }
 
+
+/* ================================================================== Sperre
+   Anlegen und Ändern ist hinter einem Passwort. Das ist ein Schutz gegen
+   versehentliches Ändern, keine Zugriffskontrolle: Wer den Ordner öffnen
+   kann, kommt an der Sperre vorbei. Verbindlich sind die Freigaberechte des
+   OneDrive-Ordners - wer dort nur lesen darf, kann content/*.js nicht
+   ersetzen und damit nichts veröffentlichen.
+   Hinterlegt ist der SHA-256-Abdruck, nicht das Passwort.               */
+let EDIT = false;
+try { EDIT = sessionStorage.getItem(KEY("edit")) === "1"; } catch(e){}
+
+async function hashPw(pw){
+  if (!(window.crypto && window.crypto.subtle)) return null;
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
+  return "sha256:" + [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2,"0")).join("");
+}
+const lockActive = () => !!(SET.editorPasswordHash || "").trim();
+
+function setEdit(on){
+  EDIT = on;
+  try { on ? sessionStorage.setItem(KEY("edit"),"1") : sessionStorage.removeItem(KEY("edit")); } catch(e){}
+  $("#edBtn").classList.toggle("primary", on);
+  $("#lockBtn").style.display = on && lockActive() ? "" : "none";
+  renderAll();
+}
+/* Alles, was ändert, läuft durch diese Schleuse. */
+function requireEdit(fn){
+  if (EDIT || !lockActive()) { setEdit(true); fn(); return; }
+  openLock(fn);
+}
+let lockNext = null;
+function openLock(fn){
+  lockNext = fn || null;
+  $("#lockErr").textContent = "";
+  const inp = $("#lockPw"); inp.value = "";
+  $("#lock").classList.add("on");
+  setTimeout(() => inp.focus(), 30);
+}
+async function tryUnlock(){
+  const pw = $("#lockPw").value;
+  const h = await hashPw(pw);
+  if (h === null) { $("#lockErr").textContent = t("lock.nocrypto"); return; }
+  if (h !== (SET.editorPasswordHash || "").trim()) {
+    $("#lockErr").textContent = t("lock.wrong");
+    $("#lockPw").select();
+    return;
+  }
+  $("#lock").classList.remove("on");
+  setEdit(true);
+  const fn = lockNext; lockNext = null;
+  if (fn) fn();
+}
+/* Erzeugt die Zeile für content/settings.js zu einem neuen Passwort. */
+async function changePw(){
+  const pw = prompt(t("lock.newpw"));
+  if (!pw) return;
+  const h = await hashPw(pw);
+  if (h === null) { toast(t("lock.nocrypto")); return; }
+  const line = '  editorPasswordHash: "' + h + '"';
+  const box = $("#edForm");
+  box.replaceChildren(el("div",{class:"fld"},[
+    el("label",{text:t("lock.change")}),
+    el("textarea",{class:"codebox",readonly:true,style:"min-height:90px"},[document.createTextNode(line)]),
+    el("span",{class:"hint",text:t("lock.changeHint")})
+  ]), el("div",{},[
+    el("button",{type:"button",class:"btn sm",text:t("copy"),onclick:async e=>{
+      try { await navigator.clipboard.writeText(line); } catch(err){}
+      e.target.textContent = t("copied");
+    }})
+  ]));
+}
+
 /* ------------------------------------------------------------------ wiring */
 function renderAll(){
   renderNews(); renderMaps(); renderFiles();
@@ -1749,13 +1866,17 @@ function init(){
   $("#qFiles").addEventListener("input", e => { filesQ = e.target.value; renderFiles(); });
   $("#dashReload").addEventListener("click", () => mountDash(true));
 
-  $("#edBtn").addEventListener("click", () => openEditor("news"));
-  $("#edBtn2").addEventListener("click", () => openEditor("news"));
-  $("#edMaps").addEventListener("click", () => openEditor("maps"));
-  $("#edFiles").addEventListener("click", () => openEditor("files"));
+  $("#edBtn").addEventListener("click", () => requireEdit(() => openEditor("news")));
+  $("#lockBtn").addEventListener("click", () => { $("#ed").classList.remove("on");
+    $("#rm").classList.remove("on"); setEdit(false); });
+  $("#lockGo").addEventListener("click", tryUnlock);
+  $("#lockClose").addEventListener("click", () => { $("#lock").classList.remove("on"); lockNext = null; });
+  $("#lockPw").addEventListener("keydown", e => { if (e.key === "Enter") tryUnlock(); });
+  $("#lock").addEventListener("click", e => { if (e.target === $("#lock")) { $("#lock").classList.remove("on"); lockNext = null; } });
   $$("#edTabs button").forEach(b => b.addEventListener("click", () => openEditor(b.dataset.ed)));
-  $("#edNew").addEventListener("click", addEntry);
+  $("#edNew").addEventListener("click", () => { if (edType === "maps") rmNew(); else addEntry(); });
   $("#edShow").addEventListener("click", showCode);
+  $("#edPw").addEventListener("click", changePw);
   $("#edExport").addEventListener("click", () => exportFile(edType));
   if (window.showSaveFilePicker) {
     $("#edSave").style.display = "";
@@ -1775,7 +1896,6 @@ function init(){
     e.target.value = ""; edSel = 0; saveDraft(edType); paintEdList(); paintEdForm(); renderAll();
     toast(t("pickHint"));
   });
-  $("#rmNewBtn").addEventListener("click", rmNew);
   $("#rmCloseBtn").addEventListener("click", rmClose);
   $("#rmExport").addEventListener("click", () => exportFile("maps"));
   $("#rmPngBtn").addEventListener("click", () => { const m = DATA.maps[RM.idx];
@@ -1788,7 +1908,7 @@ function init(){
   [["#ed"],["#ov"]].forEach(([s]) => $(s).addEventListener("click", e => { if (e.target === $(s)) $(s).classList.remove("on"); }));
   $("#rm").addEventListener("click", e => { if (e.target === $("#rm")) rmClose(); });
   addEventListener("keydown", e => { if (e.key === "Escape") {
-    $("#ed").classList.remove("on"); $("#ov").classList.remove("on");
+    $("#ed").classList.remove("on"); $("#ov").classList.remove("on"); $("#lock").classList.remove("on");
     if ($("#rm").classList.contains("on")) rmClose(); } });
 
   $("#langDe").addEventListener("click", () => { LANG = "de"; applyLang(); });
@@ -1798,6 +1918,7 @@ function init(){
   addEventListener("hashchange", () => show((location.hash.slice(1) || "news")));
 
   applyLang();
+  setEdit(EDIT);
   paintDirty();
   show(["news","dashboard","maps","files"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "news");
 }

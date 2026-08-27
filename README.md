@@ -6,10 +6,15 @@ News, Anhänge und Maps steht in [`ANLEITUNG.md`](ANLEITUNG.md).
 
 | Reiter | Inhalt | Gepflegt über |
 |---|---|---|
-| News | Meldungen ans Management | `content/news.js` bzw. „Redaktion" im Board |
+| News | Meldungen ans Management | `content/news.js` bzw. „Redaktion" im Board (passwortgeschützt) |
 | Dashboard | das Portfolio-Cockpit (siehe unten) | `python3 build/build.py --extract` |
 | Rollout-Maps | **Roadmaps im Board selbst bauen** (Spuren, Balken, Meilensteine, PNG-Export) sowie Karten als Bild, PDF oder HTML-Seite | Roadmap-Editor im Board bzw. `content/maps.js` + Ordner `rollout-maps/` |
 | Anhänge | Dokumente aus dem Ordner | `content/attachments.js` + Ordner `anhaenge/` |
+
+Anlegen und Ändern läuft ausschließlich über den Knopf **Redaktion** und ist mit
+einem Passwort geschützt (voreingestellt `123456`, in `content/settings.js` als
+SHA-256-Abdruck hinterlegt). Das ist ein Schutz gegen versehentliches Ändern,
+keine Zugriffskontrolle – verbindlich sind die Freigaberechte des OneDrive-Ordners.
 
 Inhalte liegen als JavaScript-Dateien in `content/` und nicht als JSON, weil ein
 Browser aus einem lokalen Ordner (`file://`) keine JSON-Dateien nachladen darf –
