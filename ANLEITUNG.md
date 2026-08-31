@@ -222,6 +222,14 @@ laden.
 Dann liegt im Browser noch der alte Entwurf. In der Redaktion auf *Änderungen
 verwerfen* klicken – die Datei im Ordner ist maßgeblich.
 
+**„Diese Ansicht kann das Board nicht ausführen" oder „Some content didn't load".**
+Die Seite wurde aus der SharePoint- oder OneDrive-Vorschau im Browser geöffnet.
+Dort läuft sie in einem abgeschotteten Rahmen, in dem die Dateien aus dem Ordner
+nicht nachgeladen werden können – das lässt sich von hier aus nicht umgehen.
+Ordner synchronisieren, im Datei-Explorer öffnen, dort `index.html`
+doppelklicken. Das Dashboard allein (`dashboard/index.html`) ist eine einzelne
+Datei und läuft auch in der Vorschau.
+
 **Der Knopf zum Anlegen fehlt.**
 Dann ist die Redaktion gesperrt. Oben rechts auf *Redaktion* klicken und das
 Passwort eingeben.

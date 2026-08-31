@@ -1067,7 +1067,12 @@ function show(view){
   $$(".view").forEach(v => v.classList.toggle("on", v.id === "v-"+view));
   $$(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.view === view));
   if (view === "dashboard") mountDash(false);
-  if (location.hash.slice(1) !== view) history.replaceState(null,"","#"+view);
+  /* In einer Vorschau (SharePoint/OneDrive im Browser) läuft die Seite in einem
+     Sandkasten mit Herkunft "null"; history.replaceState wirft dort. Die
+     Adresszeile ist dann eben nicht merkfähig - die Reiter funktionieren weiter. */
+  try {
+    if (location.hash.slice(1) !== view) history.replaceState(null,"","#"+view);
+  } catch(e){}
   window.scrollTo({top:0, behavior:"instant"});
 }
 
@@ -1820,6 +1825,48 @@ async function changePw(){
   ]));
 }
 
+
+/* ================================================================ Fehlbedienung
+   Aus einer Browser-Vorschau heraus (SharePoint, OneDrive-Web, E-Mail-Anhang)
+   liegt die Seite in einem Sandkasten: relative Pfade lösen nicht auf, also
+   erreicht content/*.js die Seite nie. Statt einer leeren Oberfläche sagen wir,
+   was zu tun ist. Das greift ebenso, wenn index.html ohne den Ordner content/
+   irgendwohin kopiert wurde.                                                  */
+function contentReachable(){
+  return !!(window.BOARD_SETTINGS && Array.isArray(window.BOARD_NEWS));
+}
+function showSetupNotice(){
+  const sandboxed = (location.protocol === "about:" || location.protocol === "blob:"
+                     || (typeof origin !== "undefined" && origin === "null"));
+  document.body.replaceChildren(el("div",{style:
+    "max-width:760px;margin:0 auto;padding:64px 28px;font-family:Archivo,Helvetica,Arial,sans-serif;"},[
+    el("div",{style:"font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;"+
+      "background:#FFCC00;color:#16181A;padding:4px 8px;display:inline-block;",text:"IT"}),
+    el("h1",{style:"font-size:27px;font-weight:600;letter-spacing:-.03em;margin:22px 0 14px;",
+      text:sandboxed ? "Diese Ansicht kann das Board nicht ausführen"
+                     : "Die Inhaltsdateien fehlen"}),
+    el("p",{style:"font-size:15px;line-height:1.6;color:#5A5F63;margin:0 0 14px;",
+      text: sandboxed
+        ? "Die Seite wurde aus einer Vorschau heraus geöffnet – SharePoint und OneDrive zeigen HTML-Dateien in einem abgeschotteten Rahmen. Darin lassen sich die Dateien aus dem Ordner (Meldungen, Anhänge, Dashboard) nicht nachladen."
+        : "Die Datei index.html findet den Ordner content/ nicht. Vermutlich wurde sie ohne die übrigen Ordner an eine andere Stelle kopiert."}),
+    el("p",{style:"font-size:15px;line-height:1.6;color:#16181A;margin:0 0 10px;font-weight:600;",
+      text:"So läuft es:"}),
+    el("ol",{style:"font-size:15px;line-height:1.75;color:#5A5F63;margin:0 0 22px;padding-left:22px;"},
+      (sandboxed
+        ? ["In SharePoint oder OneDrive den Ordner auswählen und auf „Synchronisieren“ bzw. „Verknüpfung zu meinen Dateien hinzufügen“ klicken.",
+           "Den Ordner im Datei-Explorer öffnen.",
+           "Dort auf index.html doppelklicken."]
+        : ["Den vollständigen Ordner verwenden – index.html gehört neben die Ordner content/, dashboard/, anhaenge/ und rollout-maps/.",
+           "index.html im Datei-Explorer doppelklicken."]
+      ).map(x => el("li",{text:x}))),
+    el("p",{style:"font-size:13.5px;line-height:1.6;color:#8E9498;margin:0;padding-top:16px;border-top:1px solid #DEDCD4;",
+      text:"Das Dashboard allein ist eine einzelne Datei und läuft auch in der Vorschau: dashboard/index.html."}),
+    el("p",{style:"font-size:12.5px;line-height:1.6;color:#8E9498;margin:14px 0 0;",
+      text:"This page was opened from a browser preview. Sync the folder to your PC and open index.html from the file explorer."})
+  ]));
+  document.body.style.background = "#FAFAF8";
+}
+
 /* ------------------------------------------------------------------ wiring */
 function renderAll(){
   renderNews(); renderMaps(); renderFiles();
@@ -1845,6 +1892,7 @@ function applyTheme(){
   if (dashLoaded) mountDash(false);
 }
 function init(){
+  if (!contentReachable()) { showSetupNotice(); return; }
   loadDrafts();
   $("#bTitle").textContent = SET.title;
   $("#bSub").textContent = SET.subtitle;
@@ -1915,12 +1963,15 @@ function init(){
   $("#langEn").addEventListener("click", () => { LANG = "en"; applyLang(); });
   $("#themeBtn").addEventListener("click", () => {
     themeMode = themeMode === "system" ? "dark" : themeMode === "dark" ? "light" : "system"; applyTheme(); });
-  addEventListener("hashchange", () => show((location.hash.slice(1) || "news")));
+  try { addEventListener("hashchange", () => show((location.hash.slice(1) || "news"))); } catch(e){}
 
   applyLang();
   setEdit(EDIT);
   paintDirty();
-  show(["news","dashboard","maps","files"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "news");
+  let startView = "news";
+  try { const h = location.hash.slice(1);
+    if (["news","dashboard","maps","files"].includes(h)) startView = h; } catch(e){}
+  show(startView);
 }
 init();
 </script>
