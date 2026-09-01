@@ -61,6 +61,32 @@ Dieselbe Adresse lässt sich dauerhaft als `assetBaseUrl` in
 `content/settings.js` hinterlegen. Ohne Adresse erscheinen die Anhänge nur als
 Pfadangabe statt als toter Link.
 
+### Wenn auch die Leseausgabe nicht aufgeht
+
+Ob SharePoint und Teams eine HTML-Datei überhaupt **anzeigen** oder nur zum
+Herunterladen anbieten, entscheidet eine Einstellung eures Tenants
+(`BrowserFileHandling`). Steht sie auf *Strict* – in großen Unternehmen die
+Regel – schickt SharePoint jede HTML-Datei als Download, egal wie sie gebaut
+ist. Das lässt sich in der Datei nicht lösen.
+
+Zwei Wege, die dann funktionieren:
+
+**A – Der Bericht als PDF.** PDFs zeigen SharePoint und Teams zuverlässig direkt
+im Browser an. Dashboard öffnen, **Drucken / PDF** klicken, im Druckdialog als
+Ziel *Als PDF speichern* wählen, Format **A3 quer**, Hintergrundgrafiken
+einschalten. Ergebnis: ein zwölfseitiger Bericht mit Kennzahlen, allen
+Diagrammen, der Zeitachse und der vollständigen Tabelle – ohne Filter, dafür mit
+einem Link, der bei jedem aufgeht. Ein fertiges Beispiel liegt als
+`verteilfassung/IT_Process_Portfolio_Bericht.pdf` bei.
+
+**B – Ein Platz auf einem Webserver.** Die eigentliche Lösung. Der Ordner
+braucht nichts weiter als einen statischen Webspace: ein Intranet-Verzeichnis,
+einen IIS-Alias oder eine Azure Static Web App. Danach ist es eine normale
+Adresse, alles funktioniert, niemand synchronisiert etwas. Die Anfrage an die IT
+lautet: *„Wir brauchen einen statischen Webspace für einen Ordner mit HTML,
+JavaScript und einer Excel-Datei. Kein Backend, keine Datenbank, keine
+Anmeldung – nur ausliefern."*
+
 ---
 
 ## 3. Die Redaktion entsperren

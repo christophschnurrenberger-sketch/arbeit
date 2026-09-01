@@ -162,6 +162,6 @@ python3 build/build.py --extract
 | `build/model.json` | erzeugtes Datenmodell |
 | `dashboard/index.html` | fertiges Dashboard |
 | `index.html` | Management Board (Einstieg) |
-| `build/bundle.py`, `verteilfassung/` | Leseausgabe als Einzeldatei |
+| `build/bundle.py`, `verteilfassung/` | Leseausgabe als Einzeldatei und PDF-Bericht |
 | `content/*.js` | Inhalte des Boards |
 | `anhaenge/`, `rollout-maps/` | Dateien für Anhänge und Maps |

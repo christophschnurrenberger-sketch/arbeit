@@ -356,10 +356,19 @@ footer{
 }
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+/* Druck = Berichtsfassung. Was nur am Bildschirm Sinn ergibt, entfällt;
+   Zeitachse und Datenblatt beginnen je auf einer eigenen Seite.            */
 @media print{
-  .top{position:static;} .filters,.top-actions,.tbl-head .btn{display:none;}
-  .tbl-scroll{max-height:none;} body{background:#fff;} .shell{border:0;}
-  .card,.kpi,.gantt,.tbl-wrap{break-inside:avoid;}
+  .top{position:static;border-top-width:6px;}
+  .filters,.top-actions,.tbl-head .btn,.tbl-head .seg,.tbl-head .toggles,.card-h .hint{display:none;}
+  .tbl-scroll{max-height:none;overflow:visible;}
+  thead th{position:static;}
+  body{background:#fff;} .shell{border:0;padding:0 0 12px;max-width:none;}
+  .top-in{padding-left:0;padding-right:0;border:0;max-width:none;}
+  .kpi,.card,.g-row,.g-track,tbody tr{break-inside:avoid;}
+  .gantt-wrap,.tbl-wrap{break-before:page;}
+  .sec{break-after:avoid;}
+  footer{break-before:avoid;}
 }
 </style>
 <header class="top">
