@@ -61,6 +61,41 @@ Dieselbe Adresse lässt sich dauerhaft als `assetBaseUrl` in
 `content/settings.js` hinterlegen. Ohne Adresse erscheinen die Anhänge nur als
 Pfadangabe statt als toter Link.
 
+### Der Weg ohne Sync und ohne IT: die Excel-Mappe
+
+`verteilfassung/IT_Process_Portfolio_Cockpit.xlsx` bildet das Cockpit als
+Arbeitsmappe nach. **Excel-Dateien zeigen SharePoint und Teams direkt im
+Browser an** – interaktiv, mit euren bestehenden Berechtigungen, ohne
+Synchronisierung und ohne Download.
+
+Mappe in die Bibliothek legen, Link verschicken, fertig. Wer ihn anklickt,
+landet in Excel für das Web und kann sofort filtern.
+
+**Bedienung**: Im Blatt *Cockpit* die gelb hinterlegten Auswahlfelder ändern –
+Prozessgruppe, Initiative, L1-Prozess, Ebene, Status, Process Manager und den
+Stichtag. Die sieben Kennzahlen, alle fünf Diagramme und die Trefferliste
+rechnen sofort neu. Die Blätter *Prozesse* und *Phasen* sind echte
+Excel-Tabellen und lassen sich zusätzlich über die Spaltenköpfe filtern.
+
+**Berechtigungen**: Die Auswahlfelder sind Zellen, geändert werden können sie
+also nur mit Schreibrecht. Damit dabei nichts kaputtgeht, sind alle übrigen
+Zellen gesperrt – ein Kennwort braucht dafür niemand. Gib den Empfängern
+Schreibrecht auf diese eine Datei.
+
+**Eine Einschränkung, ehrlich gesagt**: Die Auswahl ist Teil der Datei. Ändert
+sie jemand, sehen alle anderen dieselbe Auswahl. Wer für sich allein filtern
+will, nutzt in Excel für das Web auf den Blättern *Prozesse* oder *Phasen* die
+**Blattansicht** (Ansicht → Blattansicht → Neu) – die wirkt nur für einen selbst.
+
+**Neu erzeugen** nach einer aktualisierten Planung:
+
+```bash
+python3 build/build.py --extract    # Modell aus der neuen Excel-Datei
+python3 build/excel.py              # Mappe neu aufbauen
+```
+
+---
+
 ### Wenn auch die Leseausgabe nicht aufgeht
 
 Ob SharePoint und Teams eine HTML-Datei überhaupt **anzeigen** oder nur zum

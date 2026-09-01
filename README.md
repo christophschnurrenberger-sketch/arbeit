@@ -41,6 +41,12 @@ einer Detailtabelle.
 | Vorschau im Browser (SharePoint) | nein | ja |
 | Erzeugen | – | `python3 build/bundle.py` |
 
+Und für den Fall, dass SharePoint HTML gar nicht ausliefert, gibt es
+`verteilfassung/IT_Process_Portfolio_Cockpit.xlsx`: dasselbe Cockpit als
+Arbeitsmappe mit Auswahlfeldern, Kennzahlen und Diagrammen. Excel-Dateien zeigt
+SharePoint direkt im Browser an – interaktiv, ohne Sync, ohne IT-Anfrage.
+Erzeugt mit `python3 build/excel.py`.
+
 Für Empfänger, die nur lesen, ist die Leseausgabe gedacht: eine Datei, per Link
 oder Anhang, ohne Sync. Gepflegt wird im Ordner.
 
@@ -162,6 +168,6 @@ python3 build/build.py --extract
 | `build/model.json` | erzeugtes Datenmodell |
 | `dashboard/index.html` | fertiges Dashboard |
 | `index.html` | Management Board (Einstieg) |
-| `build/bundle.py`, `verteilfassung/` | Leseausgabe als Einzeldatei und PDF-Bericht |
+| `build/bundle.py`, `build/excel.py`, `verteilfassung/` | Leseausgabe, PDF-Bericht und Excel-Cockpit |
 | `content/*.js` | Inhalte des Boards |
 | `anhaenge/`, `rollout-maps/` | Dateien für Anhänge und Maps |
