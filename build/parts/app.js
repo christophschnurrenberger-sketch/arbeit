@@ -861,10 +861,14 @@ function setPreset(p){
   render();
 }
 function init(){
-  /* Vom Management Board eingebettet: ?theme=dark&lang=en übernimmt dessen Ansicht. */
-  const qs = new URLSearchParams(location.search);
-  if (["dark","light","system"].includes(qs.get("theme"))) themeMode = qs.get("theme");
-  if (["de","en"].includes(qs.get("lang"))) LANG = qs.get("lang");
+  /* Vom Management Board eingebettet. Über die Adresszeile (?theme=dark&lang=en)
+     oder - wenn es keine gibt, etwa in einem srcdoc-Rahmen - über window.__EMBED. */
+  const emb = window.__EMBED || {};
+  let qs = new URLSearchParams("");
+  try { qs = new URLSearchParams(location.search); } catch(e){}
+  const th = emb.theme || qs.get("theme"), lg = emb.lang || qs.get("lang");
+  if (["dark","light","system"].includes(th)) themeMode = th;
+  if (["de","en"].includes(lg)) LANG = lg;
   $("#asOf").value = S.asOf;
   applyTheme();
   on("#q","input", e => { S.q = e.target.value; render(); });

@@ -596,6 +596,7 @@ const T = {
     "ed.reset":"Änderungen verwerfen",
     "ed.dirty":"Ungespeicherte Änderungen – erzeuge die Datei und lege sie in den Ordner content/.",
     "foot.local":"Läuft vollständig aus diesem Ordner – ohne Server, ohne Installation.",
+    "foot.bundle":"Einzeldatei – läuft ohne Ordner, ohne Server, ohne Installation.",
     "rm.title":"Roadmap bearbeiten", "rm.new":"Roadmap erstellen", "rm.newTitle":"Neue Roadmap",
     "rm.newItem":"Neuer Eintrag", "rm.lane":"Spur", "rm.addLane":"Spur hinzufügen", "rm.addItem":"Eintrag hinzufügen",
     "rm.from":"Von", "rm.to":"Bis", "rm.scale":"Raster", "rm.quarter":"Quartale", "rm.month":"Monate",
@@ -653,6 +654,7 @@ const T = {
     "ed.reset":"Discard changes",
     "ed.dirty":"Unsaved changes – generate the file and put it into the content/ folder.",
     "foot.local":"Runs entirely from this folder – no server, no installation.",
+    "foot.bundle":"Single file – runs without the folder, without a server, without installation.",
     "rm.title":"Edit roadmap", "rm.new":"Create roadmap", "rm.newTitle":"New roadmap",
     "rm.newItem":"New entry", "rm.lane":"Lane", "rm.addLane":"Add lane", "rm.addItem":"Add entry",
     "rm.from":"From", "rm.to":"To", "rm.scale":"Grid", "rm.quarter":"Quarters", "rm.month":"Months",
@@ -874,11 +876,9 @@ function postCard(n){
   box.appendChild(body);
   const links = (n.links || []).filter(l => l && safeHref(l.href));
   if (links.length){
-    box.appendChild(el("div",{class:"post-links"}, links.map(l => {
-      const isExt = /^https?:/i.test(l.href);
-      return el("a",{class:"flink",href:safeHref(l.href),target:isExt?"_blank":null,rel:isExt?"noopener":null},[
-        el("span",{class:"ic",text:fileIcon(l.href)}), el("span",{text:l.label || l.href})]);
-    })));
+    box.appendChild(el("div",{class:"post-links"}, links.map(l =>
+      assetLink(l.href, "flink", [el("span",{class:"ic",text:fileIcon(l.href)}),
+                                  el("span",{text:l.label || l.href})]))));
   }
   return box;
 }
@@ -946,7 +946,7 @@ function renderMaps(){
       const thumb = el("div",{class:"thumb"});
       if (type === "roadmap" && m.roadmap)
         thumb.appendChild(el("div",{class:"rmthumb"},[roadmapSVG(m.roadmap,{width:250,compact:true})]));
-      else if (type === "image" && safeHref(m.href)) thumb.appendChild(el("img",{src:safeHref(m.href),alt:m.title||"",loading:"lazy"}));
+      else if (type === "image" && assetHref(m.href)) thumb.appendChild(el("img",{src:assetHref(m.href),alt:m.title||"",loading:"lazy"}));
       else thumb.appendChild(el("span",{class:"ph",text:(ext(m.href)||type).toUpperCase()}));
       thumb.appendChild(el("span",{class:"badge",text:type}));
       return el("button",{type:"button",class:"tile",onclick:()=>openViewer(m)},[
@@ -987,9 +987,9 @@ function rmView(m){
 function openViewer(m){
   const type = m.type || guessType(m.href);
   if (type === "roadmap" && m.roadmap) { rmView(m); return; }
-  const href = safeHref(m.href);
-  $("#ovOpen").style.display = "";
-  $("#ovTitle").textContent = m.title || href;
+  const href = assetHref(m.href);
+  $("#ovOpen").style.display = href ? "" : "none";
+  $("#ovTitle").textContent = m.title || m.href;
   $("#ovOpen").href = href || "#";
   const body = $("#ovBody"); body.replaceChildren();
   if (!href) body.appendChild(el("p",{text:"–"}));
@@ -1028,9 +1028,7 @@ function renderFiles(){
       card.appendChild(el("div",{class:"grp-h",text:g}));
       card.appendChild(el("div",{class:"files"}, list
         .sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))
-        .map(f => {
-          const isExt = /^https?:/i.test(f.href||"");
-          return el("a",{class:"file",href:safeHref(f.href)||"#",target:isExt?"_blank":null,rel:isExt?"noopener":null},[
+        .map(f => assetLink(f.href, "file", [
             el("span",{class:"ft "+fileKind(f.href),text:(ext(f.href)||"?").toUpperCase().slice(0,4)}),
             el("span",{class:"fm"},[
               el("span",{class:"t",text:f.title || f.href}),
@@ -1038,14 +1036,37 @@ function renderFiles(){
               el("span",{class:"p",text:f.href})
             ]),
             el("span",{class:"fd",text:fmtDShort(f.date)})
-          ]);
-        })));
+          ]))));
     });
     box.appendChild(card);
   }
   $("#nFiles").textContent = DATA.files.length;
   $("#railFilesSub").textContent = DATA.files.length + " " + t("filesN");
 }
+
+
+/* ============================================================ Verteilfassung
+   build/bundle.py backt Inhalte und Dashboard in eine einzige Datei. Die läuft
+   dann ohne Ordner - per Link, als Mail-Anhang, in einer Vorschau. Sie ist eine
+   Leseausgabe: die Redaktion bleibt beim Ordner, weil eine einzelne Datei sich
+   nicht selbst zurückschreiben kann.
+   Dateien (Anhänge, Karten) liegen weiter im Ordner; über assetBaseUrl in
+   content/settings.js zeigen die Verweise auf die Bibliothek im Browser.      */
+const BUNDLE = window.BOARD_BUNDLE || null;
+const assetHref = h => {
+  const raw = safeHref(h);
+  if (!raw) return "";
+  if (!BUNDLE || /^(https?:|mailto:)/i.test(raw)) return raw;
+  const base = String(BUNDLE.assetBase || "").replace(/\/+$/, "");
+  return base ? base + "/" + raw.replace(/^\.?\//, "") : "";
+};
+/* Ohne erreichbares Ziel wird aus dem Verweis ein Pfad zum Nachschlagen. */
+const assetLink = (href, cls, kids, title) => {
+  const h = assetHref(href);
+  if (!h) return el("span",{class:cls,style:"opacity:.55;cursor:default",title:href}, kids);
+  const ext = /^https?:/i.test(h);
+  return el("a",{class:cls,href:h,target:ext?"_blank":null,rel:ext?"noopener":null,title:title||href}, kids);
+};
 
 /* ------------------------------------------------------------------ views */
 let dashLoaded = false, dashTheme = "";
@@ -1058,6 +1079,15 @@ function mountDash(force){
   const want = resolvedTheme() + "|" + LANG;
   if (dashLoaded && dashTheme === want && !force) return;
   dashTheme = want;
+  if (BUNDLE && BUNDLE.dashboard) {
+    const f = el("iframe",{title:t("dash.title")});
+    f.setAttribute("srcdoc", BUNDLE.dashboard.replace("<!--EMBED-->",
+      '<scr' + 'ipt>window.__EMBED={theme:"' + resolvedTheme() + '",lang:"' + LANG + '"}</scr' + 'ipt>'));
+    $("#frameWrap").replaceChildren(f);
+    $("#dashOpen").style.display = "none";
+    dashLoaded = true;
+    return;
+  }
   const src = SET.dashboardFile + "?theme=" + resolvedTheme() + "&lang=" + LANG;
   $("#frameWrap").replaceChildren(el("iframe",{src, title:t("dash.title"), loading:"lazy"}));
   $("#dashOpen").href = SET.dashboardFile;
@@ -1870,12 +1900,15 @@ function showSetupNotice(){
 /* ------------------------------------------------------------------ wiring */
 function renderAll(){
   renderNews(); renderMaps(); renderFiles();
+  if (BUNDLE) $("#fOwner").textContent =
+    (SET.owner ? (LANG === "de" ? "Pflege: " : "Maintained by: ") + SET.owner + "  ·  " : "") +
+    (LANG === "de" ? "Leseausgabe vom " : "Read-only copy of ") + fmtDShort(BUNDLE.built);
   $("#fCounts").textContent = DATA.news.length + " " + t("newsN") + " · " +
     DATA.maps.length + " " + t("mapsN") + " · " + DATA.files.length + " " + t("filesN");
 }
 function applyLang(){
   document.documentElement.lang = LANG;
-  $$("[data-i]").forEach(n => n.textContent = t(n.dataset.i));
+  $$("[data-i]").forEach(n => n.textContent = t(BUNDLE && n.dataset.i === "foot.local" ? "foot.bundle" : n.dataset.i));
   $$("[data-ph]").forEach(n => n.placeholder = t(n.dataset.ph));
   $("#langDe").setAttribute("aria-pressed", LANG === "de");
   $("#langEn").setAttribute("aria-pressed", LANG === "en");
@@ -1904,6 +1937,10 @@ function init(){
   $("#fOwner").textContent = SET.owner ? (LANG === "de" ? "Pflege: " : "Maintained by: ") + SET.owner : "";
   $("#dashOpen").href = SET.dashboardFile;
 
+  if (BUNDLE) {
+    $("#edBtn").style.display = "none";
+    $("#lockBtn").style.display = "none";
+  }
   try { const s = localStorage.getItem(KEY("theme")); if (s) themeMode = s; } catch(e){}
   applyTheme();
 

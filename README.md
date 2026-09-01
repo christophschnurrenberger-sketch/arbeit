@@ -31,6 +31,19 @@ Management-Dashboard für das Corporate-IT-Prozessportfolio aus
 HTML-File mit allen Filtern, KPIs, Diagrammen, einer Portfolio-Timeline und
 einer Detailtabelle.
 
+## Zwei Betriebsarten
+
+| | Ordner | Leseausgabe |
+|---|---|---|
+| Datei | `index.html` samt Ordnern | `verteilfassung/IT_Process_Board.html` |
+| Voraussetzung | OneDrive-Ordner synchronisiert | keine – eine Datei genügt |
+| Redaktion | ja, passwortgeschützt | nein, reine Leseansicht |
+| Vorschau im Browser (SharePoint) | nein | ja |
+| Erzeugen | – | `python3 build/bundle.py` |
+
+Für Empfänger, die nur lesen, ist die Leseausgabe gedacht: eine Datei, per Link
+oder Anhang, ohne Sync. Gepflegt wird im Ordner.
+
 ## Öffnen
 
 ```
@@ -149,5 +162,6 @@ python3 build/build.py --extract
 | `build/model.json` | erzeugtes Datenmodell |
 | `dashboard/index.html` | fertiges Dashboard |
 | `index.html` | Management Board (Einstieg) |
+| `build/bundle.py`, `verteilfassung/` | Leseausgabe als Einzeldatei |
 | `content/*.js` | Inhalte des Boards |
 | `anhaenge/`, `rollout-maps/` | Dateien für Anhänge und Maps |

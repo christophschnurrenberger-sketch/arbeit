@@ -11,8 +11,10 @@ Server, keine Installation, keine Rechte-Anfrage bei der IT. Wer den Ordner
 **Selbst öffnen** – im synchronisierten OneDrive-Ordner auf `index.html`
 doppelklicken. Der Browser zeigt das Board.
 
-**An andere weitergeben** – den ganzen Ordner in OneDrive freigeben. Wichtig:
-Die Empfänger müssen den Ordner **synchronisieren** (in OneDrive im Browser auf
+**An andere weitergeben** – für alle, die nur lesen, ist die **Leseausgabe aus
+Abschnitt 2** der richtige Weg: eine Datei, ein Link, kein Sync. Wer selbst
+pflegen soll, braucht den Ordner. Dafür den ganzen Ordner in OneDrive freigeben.
+Wichtig: Diese Empfänger müssen den Ordner **synchronisieren** (in OneDrive im Browser auf
 *Verknüpfung zu meinen Dateien hinzufügen* bzw. *Synchronisieren*) und dann dort
 `index.html` öffnen. Ein Klick auf die Datei direkt in der OneDrive-Weboberfläche
 funktioniert nicht – SharePoint und OneDrive zeigen HTML-Dateien nicht an,
@@ -24,7 +26,44 @@ an die Taskleiste heften, dann ist das Board ein Klick entfernt.
 
 ---
 
-## 2. Die Redaktion entsperren
+## 2. Verteilen ohne Sync – die Leseausgabe
+
+Der Ordnerbetrieb setzt voraus, dass jeder den OneDrive-Ordner synchronisiert.
+Für Empfänger, die das Board nur ansehen sollen, ist das zu viel verlangt.
+Dafür gibt es die **Verteilfassung**: das ganze Board – Meldungen, Roadmaps und
+das komplette Dashboard – in einer einzigen HTML-Datei.
+
+```bash
+python3 build/bundle.py
+```
+
+Ergebnis: `verteilfassung/IT_Process_Board.html`, rund 500 KB. Diese eine Datei
+
+- läuft per Doppelklick, ohne Ordner daneben,
+- läuft als E-Mail- oder Teams-Anhang,
+- läuft in der SharePoint- und OneDrive-Vorschau im Browser,
+- braucht keinen Server und keine Installation.
+
+Sie ist eine **Leseausgabe**: Der Knopf *Redaktion* fehlt, in der Fußzeile steht
+der Stand. Gepflegt wird weiter im Ordner; nach Änderungen die Datei einfach neu
+erzeugen und austauschen.
+
+**Anhänge und Karten** liegen weiter als echte Dateien im Ordner und stecken
+nicht mit in der Einzeldatei. Damit die Verweise trotzdem funktionieren, trage
+die Adresse des Ordners im Browser ein – SharePoint zeigt PDFs, Office-Dateien
+und Bilder ja anstandslos an, nur HTML nicht:
+
+```bash
+python3 build/bundle.py --base "https://….sharepoint.com/sites/…/Freigegebene%20Dokumente/Board"
+```
+
+Dieselbe Adresse lässt sich dauerhaft als `assetBaseUrl` in
+`content/settings.js` hinterlegen. Ohne Adresse erscheinen die Anhänge nur als
+Pfadangabe statt als toter Link.
+
+---
+
+## 3. Die Redaktion entsperren
 
 Alles, was etwas anlegt oder ändert – News, Anhänge, Rollout-Maps, Roadmaps –
 läuft ausschließlich über den Knopf **Redaktion** oben rechts. Er fragt nach
@@ -53,7 +92,7 @@ der Abdruck (SHA-256) des Passworts, nie das Passwort selbst.
 
 ---
 
-## 3. News veröffentlichen
+## 4. News veröffentlichen
 
 Der bequeme Weg, ganz ohne Dateien anzufassen:
 
@@ -96,7 +135,7 @@ Kategorien werden in `content/settings.js` gepflegt und bestimmen die Farbe.
 
 ---
 
-## 4. Anhänge ergänzen
+## 5. Anhänge ergänzen
 
 1. Die Datei in den Ordner **`anhaenge/`** legen.
 2. Im Board **Redaktion** entsperren, auf **Anhänge** wechseln, **Dateien wählen** drücken und die
@@ -111,7 +150,7 @@ Handarbeit. Verlinken lässt sich alles, was im Ordner liegt, auch Dateien aus
 
 ---
 
-## 5. Roadmaps direkt im Board bauen
+## 6. Roadmaps direkt im Board bauen
 
 **Redaktion** entsperren, auf **Rollout-Maps** wechseln und **Neu** drücken. Es
 öffnet sich ein Editor mit einer Vorschau, die sich sofort mitverändert. (Ist
@@ -157,7 +196,7 @@ zum Ändern dort auf *Roadmap bearbeiten*.
 
 ---
 
-## 6. Fertige Karten als Datei verknüpfen
+## 7. Fertige Karten als Datei verknüpfen
 
 Für Karten, die woanders entstanden sind: Datei in den Ordner
 **`rollout-maps/`** legen und über **Redaktion → Rollout-Maps** eintragen.
@@ -174,7 +213,7 @@ Das Feld **Typ** kann auf *auto* bleiben – es wird an der Dateiendung erkannt.
 
 ---
 
-## 7. Dashboard aktualisieren
+## 8. Dashboard aktualisieren
 
 Das Dashboard im gleichnamigen Reiter wird aus `dashboard/index.html` geladen.
 Kommt eine neue Excel-Version:
@@ -192,7 +231,7 @@ Details stehen in `README.md`.
 
 ---
 
-## 8. Was wo liegt
+## 9. Was wo liegt
 
 | Ordner / Datei | Inhalt |
 |---|---|
@@ -204,6 +243,8 @@ Details stehen in `README.md`.
 | `anhaenge/` | die Dokumente selbst |
 | `rollout-maps/` | die Karten selbst |
 | `dashboard/index.html` | das Portfolio-Dashboard |
+| `verteilfassung/` | die Leseausgabe als Einzeldatei |
+| `build/bundle.py` | erzeugt die Leseausgabe |
 | `data/`, `build/` | Quelldatei und Erzeugung des Dashboards |
 
 Die Ordner `data/` und `build/` werden nur zum Neubauen des Dashboards
@@ -212,7 +253,7 @@ gebraucht. Wer einen aufgeräumten Ordner verteilen möchte, kann sie weglassen 
 
 ---
 
-## 9. Wenn etwas nicht klappt
+## 10. Wenn etwas nicht klappt
 
 **Das Board zeigt keine News, obwohl die Datei ersetzt wurde.**
 Der Browser hält die alte Fassung im Zwischenspeicher. Mit `Strg` + `F5` neu
@@ -226,9 +267,9 @@ verwerfen* klicken – die Datei im Ordner ist maßgeblich.
 Die Seite wurde aus der SharePoint- oder OneDrive-Vorschau im Browser geöffnet.
 Dort läuft sie in einem abgeschotteten Rahmen, in dem die Dateien aus dem Ordner
 nicht nachgeladen werden können – das lässt sich von hier aus nicht umgehen.
-Ordner synchronisieren, im Datei-Explorer öffnen, dort `index.html`
-doppelklicken. Das Dashboard allein (`dashboard/index.html`) ist eine einzelne
-Datei und läuft auch in der Vorschau.
+Entweder den Ordner synchronisieren und `index.html` im Datei-Explorer öffnen –
+oder, besser für Empfänger, die **Leseausgabe** aus Abschnitt 2 verteilen, die
+genau für diesen Fall gebaut ist.
 
 **Der Knopf zum Anlegen fehlt.**
 Dann ist die Redaktion gesperrt. Oben rechts auf *Redaktion* klicken und das

@@ -16,6 +16,14 @@ window.BOARD_SETTINGS = {
   /* Startsprache der Oberfläche: "de" oder "en" */
   lang: "de",
 
+  /* Nur für die Verteilfassung (build/bundle.py): Adresse des Ordners im
+     Browser, z. B. die SharePoint-Bibliothek. Anhänge und Karten werden dann
+     von dort geöffnet, statt ins Leere zu zeigen. Beispiel:
+     "https://liebherr.sharepoint.com/sites/…/Freigegebene%20Dokumente/Board"
+     Leer lassen, wenn es keine solche Adresse gibt – die Pfade erscheinen dann
+     nur als Text. Für den normalen Ordnerbetrieb ist das Feld ohne Wirkung. */
+  assetBaseUrl: "",
+
   /* Kategorien für News – Reihenfolge bestimmt die Farbe (1–5) */
   newsCategories: ["Meilenstein", "Entscheidung", "Rollout", "Termin", "Achtung"],
 

@@ -29,7 +29,8 @@ def main() -> int:
 
     # </script> inside the JSON payload would close the tag early.
     data = data.replace("</", "<\\/")
-    script = f'<script>\nconst MODEL = {data};\n{app}\n</script>'
+    # <!--EMBED--> ist der Platz, an dem die Verteilfassung window.__EMBED einsetzt
+    script = f'<!--EMBED-->\n<script>\nconst MODEL = {data};\n{app}\n</script>'
 
     OUT_DIR.mkdir(exist_ok=True)
     standalone = (
