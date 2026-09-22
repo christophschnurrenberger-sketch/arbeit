@@ -1,0 +1,1923 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MSC IT Governance &amp; Process Cockpit</title>
+<style>
+/* ============================================================================
+   MSC IT Governance & Process Cockpit
+   Eine Datei, keine Installation, kein Server, keine externen Abhängigkeiten.
+   Alle Daten liegen im localStorage des Browsers.
+   ========================================================================== */
+:root{
+  --nav:#14171A; --nav-2:#1E2327; --nav-3:#2A3037; --nav-ink:#F2F4F5; --nav-ink-2:#9AA3AB;
+  --accent:#C8102E; --accent-dark:#A50D26; --accent-soft:#FBE9EC;
+  --paper:#FFFFFF; --ground:#F4F5F6; --panel:#FAFBFB;
+  --ink:#16181A; --ink-2:#545A60; --ink-3:#858C93;
+  --rule:#E2E5E7; --rule-2:#C9CED2;
+  --rag-g:#0C7D1F; --rag-a:#9A6400; --rag-r:#C02B2B; --rag-x:#7B848B;
+  --rag-g-bg:#E3F5E5; --rag-a-bg:#FBF0D8; --rag-r-bg:#FBE5E5; --rag-x-bg:#EDEFF0;
+  --ok:#0C7D1F; --warn:#9A6400; --bad:#C02B2B;
+  --c1:#2A6FB0; --c2:#C8102E; --c3:#1B8A6B; --c4:#7A5AA8; --c5:#B5761F; --c6:#4A5560;
+  --shadow:0 1px 2px rgba(20,23,26,.06),0 10px 26px -18px rgba(20,23,26,.35);
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","Segoe UI Mono",Consolas,"Liberation Mono",monospace;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{margin:0;font-weight:650;letter-spacing:-.01em;}
+button,input,select,textarea{font:inherit;color:inherit;}
+a{color:var(--accent-dark);}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px;}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+/* ============================================================ Navigation */
+.topbar{background:var(--nav);color:var(--nav-ink);position:sticky;top:0;z-index:60;border-bottom:3px solid var(--accent);}
+.topbar-in{max-width:1680px;margin:0 auto;padding:0 20px;}
+.brandrow{display:flex;align-items:center;gap:14px;padding:11px 0 9px;flex-wrap:wrap;}
+.logo{width:34px;height:34px;flex:0 0 auto;background:var(--accent);color:#fff;display:flex;align-items:center;
+  justify-content:center;font-weight:800;font-size:12px;letter-spacing:.04em;border-radius:3px;}
+.brandtxt h1{font-size:16.5px;color:#fff;line-height:1.25;}
+.brandtxt p{margin:1px 0 0;font-size:11.5px;color:var(--nav-ink-2);}
+.brandrow .spacer{flex:1;}
+.topacts{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.tb{background:transparent;border:1px solid var(--nav-3);color:var(--nav-ink);border-radius:3px;padding:5px 10px;
+  font-size:12px;cursor:pointer;white-space:nowrap;}
+.tb:hover{border-color:var(--nav-ink-2);background:var(--nav-2);}
+.tb.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+.savedot{font-size:11px;color:var(--nav-ink-2);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+.savedot i{width:7px;height:7px;border-radius:50%;background:var(--rag-g);display:inline-block;}
+.savedot.dirty i{background:var(--accent);}
+nav.mainnav{display:flex;gap:0;overflow-x:auto;scrollbar-width:thin;}
+nav.mainnav button{
+  background:none;border:0;border-bottom:3px solid transparent;color:var(--nav-ink-2);
+  padding:10px 14px 9px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;margin-bottom:-3px;
+}
+nav.mainnav button:hover{color:#fff;}
+nav.mainnav button[aria-current="true"]{color:#fff;font-weight:650;border-bottom-color:var(--accent);}
+
+/* ============================================================ Layout */
+.wrap{max-width:1680px;margin:0 auto;padding:20px 20px 70px;}
+.view{display:none;}
+.view.on{display:block;}
+.vhead{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+.vhead h2{font-size:21px;}
+.vhead p{margin:4px 0 0;color:var(--ink-2);font-size:13px;max-width:78ch;}
+.vhead .acts{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap;}
+.btn{background:var(--paper);border:1px solid var(--rule-2);border-radius:3px;padding:6px 11px;font-size:12.5px;
+  cursor:pointer;color:var(--ink-2);white-space:nowrap;}
+.btn:hover{border-color:var(--ink);color:var(--ink);}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+.btn.primary:hover{background:var(--accent-dark);border-color:var(--accent-dark);color:#fff;}
+.btn.danger{color:var(--bad);border-color:#E7B9B9;}
+.btn.danger:hover{background:var(--rag-r-bg);border-color:var(--bad);}
+.btn.sm{padding:3px 8px;font-size:11.5px;}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:4px;box-shadow:var(--shadow);}
+.card-h{padding:12px 16px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.card-h h3{font-size:14px;}
+.card-h .sub{font-size:12px;color:var(--ink-3);}
+.card-b{padding:16px;}
+.grid{display:grid;gap:14px;}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr));}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr));}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr));}
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr));}.g3{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:720px){.g2,.g3,.g4{grid-template-columns:1fr;}}
+
+/* ============================================================ Hinweis ADONIS */
+.notice{display:flex;gap:12px;align-items:flex-start;background:var(--accent-soft);border:1px solid #F0C8CF;
+  border-left:4px solid var(--accent);border-radius:3px;padding:12px 14px;margin-bottom:18px;}
+.notice .ic{font-weight:800;color:var(--accent);flex:0 0 auto;font-size:13px;}
+.notice p{margin:0;font-size:12.5px;color:var(--ink-2);max-width:105ch;}
+.notice b{color:var(--ink);}
+
+/* ============================================================ Kennzahlen */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:560px){.kpis{grid-template-columns:1fr;}}
+.kpi{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:13px 15px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;gap:3px;position:relative;overflow:hidden;}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--rule-2);}
+.kpi.g::before{background:var(--rag-g);} .kpi.a::before{background:var(--rag-a);}
+.kpi.r::before{background:var(--rag-r);} .kpi.n::before{background:var(--c1);}
+.kpi .lab{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);}
+.kpi .val{font-size:27px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums;}
+.kpi .sub{font-size:11.5px;color:var(--ink-2);}
+.meter{height:4px;background:var(--rule);border-radius:2px;overflow:hidden;margin-top:4px;}
+.meter i{display:block;height:100%;background:var(--c1);}
+
+/* ============================================================ Tabellen */
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:11px 14px;border-bottom:1px solid var(--rule);background:var(--panel);}
+.tools input[type=search],.tools select{border:1px solid var(--rule-2);border-radius:3px;padding:5px 9px;font-size:12.5px;background:var(--paper);}
+.tools input[type=search]{min-width:210px;}
+.tools .cnt{font-size:12px;color:var(--ink-3);margin-left:auto;font-variant-numeric:tabular-nums;}
+.tscroll{overflow:auto;max-height:min(66vh,760px);}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px;}
+thead th{position:sticky;top:0;z-index:2;background:var(--panel);text-align:left;font-size:10.5px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);padding:8px 10px;border-bottom:2px solid var(--rule-2);
+  white-space:nowrap;cursor:pointer;user-select:none;}
+thead th:hover{color:var(--ink);}
+thead th .ar{opacity:.35;margin-left:3px;}
+thead th[aria-sort] .ar{opacity:1;color:var(--accent);}
+thead th.act,tbody td.act{width:72px;cursor:default;text-align:right;white-space:nowrap;}
+tbody td{padding:0;border-bottom:1px solid var(--rule);vertical-align:middle;}
+tbody tr:hover{background:#FBFCFC;}
+tbody td .cell{padding:6px 10px;min-height:31px;display:block;cursor:text;min-width:90px;max-width:340px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+tbody td .cell:hover{background:#F1F4F6;box-shadow:inset 0 0 0 1px var(--rule-2);}
+tbody td.act .cell{cursor:default;}
+tbody td input.ed,tbody td select.ed,tbody td textarea.ed{width:100%;border:2px solid var(--accent);border-radius:2px;
+  padding:4px 8px;font-size:12.5px;background:var(--paper);}
+tbody td textarea.ed{min-height:66px;resize:vertical;}
+.empty{padding:40px 20px;text-align:center;color:var(--ink-3);font-size:13px;}
+.rowbtn{background:none;border:1px solid transparent;border-radius:3px;padding:2px 6px;cursor:pointer;color:var(--ink-3);font-size:12px;}
+.rowbtn:hover{border-color:var(--rule-2);color:var(--ink);}
+.rowbtn.del:hover{border-color:var(--bad);color:var(--bad);background:var(--rag-r-bg);}
+
+/* ============================================================ Marken */
+.rag{display:inline-flex;align-items:center;gap:5px;padding:1px 8px;border-radius:2px;font-size:11px;font-weight:700;white-space:nowrap;}
+.rag::before{font-size:10px;}
+.rag.G{background:var(--rag-g-bg);color:var(--rag-g);} .rag.G::before{content:"\25CF";}
+.rag.A{background:var(--rag-a-bg);color:var(--rag-a);} .rag.A::before{content:"\25B2";}
+.rag.R{background:var(--rag-r-bg);color:var(--rag-r);} .rag.R::before{content:"\25A0";}
+.rag.X{background:var(--rag-x-bg);color:var(--rag-x);} .rag.X::before{content:"\2014";}
+.tag{display:inline-block;padding:1px 7px;border-radius:2px;font-size:11px;font-weight:600;background:#EEF1F3;color:var(--ink-2);}
+.tag.demo{background:#F3E8FA;color:#6B3FA0;}
+.tag.tba{background:#EDEFF0;color:var(--ink-3);font-weight:500;font-style:italic;}
+.pill{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;font-weight:600;}
+
+/* ============================================================ Landkarte */
+.lgroup{margin-bottom:22px;}
+.lgroup > h3{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);
+  padding-bottom:7px;border-bottom:2px solid var(--nav);margin-bottom:12px;}
+.pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:12px;}
+.pcard{background:var(--paper);border:1px solid var(--rule);border-left:4px solid var(--rule-2);border-radius:4px;
+  padding:12px 14px;cursor:pointer;text-align:left;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;}
+.pcard:hover{border-color:var(--accent);border-left-color:var(--accent);}
+.pcard.G{border-left-color:var(--rag-g);} .pcard.A{border-left-color:var(--rag-a);}
+.pcard.R{border-left-color:var(--rag-r);} .pcard.X{border-left-color:var(--rag-x);}
+.pcard .id{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);}
+.pcard h4{font-size:14px;}
+.pcard .meta{font-size:11.5px;color:var(--ink-2);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.pcard .kids{font-size:11px;color:var(--ink-3);border-top:1px dashed var(--rule);padding-top:6px;margin-top:2px;}
+
+/* ============================================================ Matrix */
+.mwrap{overflow:auto;max-height:min(70vh,780px);border:1px solid var(--rule);border-radius:4px;background:var(--paper);}
+table.matrix{font-size:12px;}
+table.matrix th.rowh{position:sticky;left:0;z-index:3;background:var(--panel);text-align:left;min-width:240px;
+  border-right:2px solid var(--rule-2);text-transform:none;letter-spacing:0;font-size:12px;font-weight:600;color:var(--ink);
+  padding:7px 10px;cursor:default;}
+table.matrix thead th{text-align:center;min-width:104px;font-size:10.5px;cursor:default;}
+table.matrix thead th.corner{position:sticky;left:0;z-index:4;}
+table.matrix td{text-align:center;border-right:1px solid var(--rule);padding:0;}
+.mcell{width:100%;border:0;background:none;padding:7px 4px;cursor:pointer;font-size:10.5px;font-weight:600;line-height:1.25;}
+.mcell:hover{outline:2px solid var(--accent);outline-offset:-2px;}
+.mlegend{display:flex;gap:9px;flex-wrap:wrap;margin-top:11px;font-size:11.5px;color:var(--ink-2);}
+.mlegend span{display:inline-flex;align-items:center;gap:5px;}
+.mlegend i{width:11px;height:11px;border-radius:2px;display:inline-block;border:1px solid rgba(0,0,0,.08);}
+
+/* ============================================================ Dialoge */
+.ov{position:fixed;inset:0;z-index:100;background:rgba(16,18,20,.55);display:none;padding:26px 16px;overflow:auto;}
+.ov.on{display:block;}
+.dlg{max-width:860px;margin:0 auto;background:var(--paper);border-radius:5px;box-shadow:0 24px 60px -18px rgba(0,0,0,.5);overflow:hidden;}
+.dlg.wide{max-width:1120px;}
+.dlg.narrow{max-width:520px;}
+.dlg-h{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--nav);color:#fff;}
+.dlg-h h3{font-size:15px;flex:1;min-width:0;color:#fff;}
+.dlg-h .x{background:none;border:0;color:var(--nav-ink-2);font-size:20px;line-height:1;cursor:pointer;padding:2px 7px;border-radius:3px;}
+.dlg-h .x:hover{background:var(--nav-2);color:#fff;}
+.dlg-b{padding:18px;max-height:min(70vh,700px);overflow:auto;}
+.dlg-f{display:flex;gap:8px;padding:13px 18px;border-top:1px solid var(--rule);background:var(--panel);flex-wrap:wrap;align-items:center;}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;}
+@media(max-width:700px){.fgrid{grid-template-columns:1fr;}}
+.fld{display:flex;flex-direction:column;gap:4px;}
+.fld.full{grid-column:1/-1;}
+.fld label{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);}
+.fld input,.fld select,.fld textarea{border:1px solid var(--rule-2);border-radius:3px;padding:7px 9px;background:var(--paper);width:100%;}
+.fld textarea{min-height:82px;resize:vertical;}
+.fld .hint{font-size:11px;color:var(--ink-3);}
+
+/* ============================================================ Listen */
+.list{display:flex;flex-direction:column;}
+.litem{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--rule);}
+.litem:last-child{border-bottom:0;}
+.litem .m{flex:1;min-width:0;}
+.litem .t{font-size:13px;font-weight:600;}
+.litem .d{font-size:11.5px;color:var(--ink-2);margin-top:2px;}
+.litem .r{font-size:11px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums;}
+
+/* ============================================================ News */
+.news{display:flex;flex-direction:column;gap:0;}
+.post{padding:16px 0;border-bottom:1px solid var(--rule);}
+.post:first-child{padding-top:0;}
+.post .pm{display:flex;gap:9px;align-items:center;flex-wrap:wrap;font-size:11.5px;color:var(--ink-3);margin-bottom:6px;}
+.post h4{font-size:17px;margin-bottom:6px;}
+.post .body{color:var(--ink-2);font-size:13.5px;white-space:pre-wrap;max-width:80ch;}
+.post .pin{background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:2px;letter-spacing:.04em;}
+
+/* ============================================================ Diagramme */
+.bars{display:flex;flex-direction:column;gap:7px;}
+.bar{display:grid;grid-template-columns:150px 1fr 54px;gap:9px;align-items:center;font-size:12px;}
+.bar .n{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar .t{background:var(--rule);border-radius:2px;height:15px;overflow:hidden;}
+.bar .t i{display:block;height:100%;border-radius:2px;background:var(--c1);}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;}
+@media(max-width:620px){.bar{grid-template-columns:110px 1fr 44px;}}
+.stack{display:flex;height:17px;border-radius:2px;overflow:hidden;background:var(--rule);}
+.stack i{display:block;height:100%;}
+.flow{width:100%;height:auto;}
+footer{max-width:1680px;margin:0 auto;padding:16px 20px 30px;color:var(--ink-3);font-size:11.5px;
+  display:flex;gap:18px;flex-wrap:wrap;border-top:1px solid var(--rule);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+@media print{.topbar,.tools,.vhead .acts,.rowbtn{display:none;} .view{display:none;} .view.on{display:block;} body{background:#fff;}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brandrow">
+      <span class="logo">MSC</span>
+      <div class="brandtxt">
+        <h1>MSC IT Governance &amp; Process Cockpit</h1>
+        <p>Governance · Rollout · Risiken · Maßnahmen · KPIs</p>
+      </div>
+      <span class="spacer"></span>
+      <div class="topacts">
+        <span class="savedot" id="saveState"><i></i><span>Gespeichert</span></span>
+        <button type="button" class="tb" id="btnBackup">Backup</button>
+        <button type="button" class="tb" id="btnRestore">Restore</button>
+        <button type="button" class="tb" id="btnAdminJump">Administration</button>
+      </div>
+    </div>
+    <nav class="mainnav" id="nav" role="tablist" aria-label="Bereiche"></nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="notice" role="note">
+    <span class="ic">!</span>
+    <p><b>ADONIS bleibt die führende Quelle für veröffentlichte Prozessinhalte.</b>
+    Prozessmodelle, Beschreibungen, Rollen und freigegebene Dokumentation werden ausschließlich in ADONIS
+    gepflegt und dort veröffentlicht. Dieses Cockpit steuert ausschließlich <b>Governance, Rollout, Risiken,
+    Maßnahmen und KPIs</b> und hält dafür Verweise auf die ADONIS-Inhalte. Bei Abweichungen gilt ADONIS.</p>
+  </div>
+
+  <section class="view" id="v-overview" role="tabpanel">
+    <div class="vhead">
+      <div><h2>Executive Overview</h2>
+        <p>Steuerungssicht auf Prozessreife, Rollout und offene Entscheidungen. Alle Werte sind aus den
+           gepflegten Tabellen berechnet und leer, solange nichts bewertet wurde.</p></div>
+      <div class="acts"><button type="button" class="btn" id="ovRefresh">Neu berechnen</button></div>
+    </div>
+    <div class="kpis" id="ovKpis"></div>
+    <div class="grid g2" style="margin-top:14px;">
+      <div class="card"><div class="card-h"><h3>Lifecycle-Verteilung</h3><span class="sub" id="ovLcSub"></span></div>
+        <div class="card-b" id="ovLifecycle"></div></div>
+      <div class="card"><div class="card-h"><h3>Rollout-Fortschritt nach MSC</h3><span class="sub">Anteil operativer Prozesse je MSC</span></div>
+        <div class="card-b" id="ovRollout"></div></div>
+    </div>
+    <div class="grid g2" style="margin-top:14px;">
+      <div class="card"><div class="card-h"><h3>Wichtigste Governance-Lücken</h3><span class="sub">nach Gewicht sortiert</span></div>
+        <div class="card-b" id="ovGaps"></div></div>
+      <div class="card"><div class="card-h"><h3>Nächste Managemententscheidungen</h3><span class="sub">offene Entscheidungen nach Fälligkeit</span></div>
+        <div class="card-b" id="ovDecisions"></div></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-landscape" role="tabpanel">
+    <div class="vhead">
+      <div><h2>Process Landscape</h2>
+        <p>Prozesskarten nach Prozessgruppe. Eine Karte öffnet die Detailsicht mit Eltern-Kind-Beziehung,
+           Status, RAG und dem Verweis nach ADONIS.</p></div>
+      <div class="acts">
+        <select id="lsGroupFilter" class="btn"><option value="">Alle Prozessgruppen</option></select>
+        <select id="lsRagFilter" class="btn"><option value="">Alle RAG-Status</option></select>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-h"><h3>Prozessbeziehung: IT Demand Management</h3>
+        <span class="sub">Das Initial Assessment entscheidet über den Folgeprozess</span></div>
+      <div class="card-b" id="lsFlow"></div>
+    </div>
+    <div id="lsGroups"></div>
+  </section>
+
+  <section class="view" id="v-portfolio" role="tabpanel">
+    <div class="vhead">
+      <div><h2>Process Portfolio</h2>
+        <p>Vollständiger Prozessstammsatz (Process_Master). Zellen sind direkt bearbeitbar; jede Änderung
+           wird sofort lokal gespeichert.</p></div>
+    </div>
+    <div class="card" id="tbl-Process_Master"></div>
+  </section>
+
+  <section class="view" id="v-matrix" role="tabpanel">
+    <div class="vhead">
+      <div><h2>MSC Rollout Matrix</h2>
+        <p>Prozesse als Zeilen, MSCs als Spalten. Eine Zelle öffnet den Detaildialog für diese
+           Prozess-MSC-Kombination.</p></div>
+      <div class="acts">
+        <select id="mxGroup" class="btn"><option value="">Alle Prozessgruppen</option></select>
+        <button type="button" class="btn" id="mxFill">Fehlende Kombinationen anlegen</button>
+      </div>
+    </div>
+    <div class="mwrap" id="mxWrap"></div>
+    <div class="mlegend" id="mxLegend"></div>
+    <div class="card" style="margin-top:18px;">
+      <div class="card-h"><h3>Rollout-Datensätze (Process_Rollout)</h3>
+        <span class="sub">dieselben Daten als bearbeitbare Tabelle</span></div>
+      <div id="tbl-Process_Rollout"></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-governance" role="tabpanel">
+    <div class="vhead">
+      <div><h2>Governance &amp; Decisions</h2>
+        <p>Entscheidungen der Gremien mit Bedingungen, Fälligkeit und Nachweis.</p></div>
+    </div>
+    <div class="kpis" id="govKpis" style="margin-bottom:14px;"></div>
+    <div class="card" id="tbl-Governance_Decisions"></div>
+  </section>
+
+  <section class="view" id="v-kpi" role="tabpanel">
+    <div class="vhead">
+      <div><h2>KPI &amp; Adoption</h2>
+        <p>Kennzahlenkatalog für Governance-Reife und Nutzung. Abdeckungsgrade rechnet das Cockpit aus den
+           Stammdaten; inhaltliche Messwerte werden gepflegt.</p></div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-h"><h3>Berechnete Abdeckungsgrade</h3>
+        <span class="sub">aus Process_Master, Process_Rollout und Actions abgeleitet</span></div>
+      <div class="card-b" id="kpiDerived"></div>
+    </div>
+    <div class="card" id="tbl-Process_KPI"></div>
+  </section>
+
+  <section class="view" id="v-risks" role="tabpanel">
+    <div class="vhead">
+      <div><h2>Risks &amp; Actions</h2>
+        <p>Risiken mit RAG-Bewertung und die daraus abgeleiteten Maßnahmen.</p></div>
+    </div>
+    <div class="kpis" id="riskKpis" style="margin-bottom:14px;"></div>
+    <div class="card" style="margin-bottom:18px;" id="tbl-Risks"></div>
+    <div class="card" id="tbl-Actions"></div>
+  </section>
+
+  <section class="view" id="v-info" role="tabpanel">
+    <div class="vhead">
+      <div><h2>BPM Infopoint</h2>
+        <p>Meldungen, Zuständigkeiten und Verweise rund um das Prozessmanagement.</p></div>
+      <div class="acts"><button type="button" class="btn primary" id="newsNew">Meldung anlegen</button></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="card-h"><h3>Meldungen</h3><span class="sub" id="newsCount"></span></div>
+        <div class="card-b"><div class="news" id="newsList"></div></div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:14px;">
+          <div class="card-h"><h3>Führende Quellen</h3></div>
+          <div class="card-b">
+            <div class="list">
+              <div class="litem"><div class="m"><div class="t">ADONIS</div>
+                <div class="d">Prozessmodelle, Beschreibungen, Rollen und veröffentlichte Dokumentation.
+                Führend für alle veröffentlichten Prozessinhalte.</div></div></div>
+              <div class="litem"><div class="m"><div class="t">Dieses Cockpit</div>
+                <div class="d">Governance-Entscheidungen, Rollout-Status je MSC, Risiken, Maßnahmen und KPIs.
+                Keine Prozessinhalte.</div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Meldungen bearbeiten</h3><span class="sub">News-Tabelle</span></div>
+          <div id="tbl-News"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-admin" role="tabpanel">
+    <div class="vhead">
+      <div><h2>Administration</h2>
+        <p>Stammdaten, Sicherung und Wiederherstellung. Alle Daten liegen ausschließlich im lokalen Speicher
+           dieses Browsers.</p></div>
+    </div>
+    <div class="grid g2" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="card-h"><h3>Sicherung</h3><span class="sub">alle Tabellen in einer Datei</span></div>
+        <div class="card-b">
+          <p style="margin:0 0 12px;color:var(--ink-2);font-size:12.5px;">Das Backup enthält sämtliche Tabellen
+            einschließlich Meldungen als JSON. Beim Restore wird der gesamte Datenbestand ersetzt.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn primary" id="admBackup">Backup erzeugen</button>
+            <button type="button" class="btn" id="admRestore">Backup einspielen</button>
+            <button type="button" class="btn" id="admExportAllCsv">Alle Tabellen als CSV</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Datenbestand</h3><span class="sub" id="admStamp"></span></div>
+        <div class="card-b" id="admStats"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-h"><h3>Stammdaten MSC (MSC_Master)</h3>
+        <span class="sub">Spalten der Rollout-Matrix</span></div>
+      <div id="tbl-MSC_Master"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Zurücksetzen</h3></div>
+      <div class="card-b">
+        <p style="margin:0 0 12px;color:var(--ink-2);font-size:12.5px;">
+          <b>Demo-Daten entfernen</b> löscht ausschließlich Datensätze, die als Demo Data gekennzeichnet sind.
+          <b>Auslieferungszustand</b> verwirft den gesamten lokalen Bestand und stellt die Pilotprozesse wieder her.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn" id="admDropDemo">Demo-Daten entfernen</button>
+          <button type="button" class="btn danger" id="admReset">Auslieferungszustand herstellen</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>MSC IT Governance &amp; Process Cockpit</span>
+  <span id="ftStore"></span>
+  <span>Führende Quelle für veröffentlichte Prozessinhalte: ADONIS</span>
+</footer>
+
+<div class="ov" id="ovRecord" role="dialog" aria-modal="true" aria-labelledby="recTitle">
+  <div class="dlg"><div class="dlg-h"><h3 id="recTitle">Datensatz</h3>
+    <button type="button" class="x" data-close aria-label="Schließen">&times;</button></div>
+    <div class="dlg-b"><div class="fgrid" id="recForm"></div></div>
+    <div class="dlg-f">
+      <button type="button" class="btn primary" id="recSave">Übernehmen</button>
+      <button type="button" class="btn" data-close>Abbrechen</button>
+      <button type="button" class="btn danger" id="recDel" style="margin-left:auto;">Datensatz löschen</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ovCell" role="dialog" aria-modal="true" aria-labelledby="cellTitle">
+  <div class="dlg"><div class="dlg-h"><h3 id="cellTitle">Rollout-Detail</h3>
+    <button type="button" class="x" data-close aria-label="Schließen">&times;</button></div>
+    <div class="dlg-b"><div class="fgrid" id="cellForm"></div></div>
+    <div class="dlg-f">
+      <button type="button" class="btn primary" id="cellSave">Übernehmen</button>
+      <button type="button" class="btn" data-close>Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ovProc" role="dialog" aria-modal="true" aria-labelledby="procTitle">
+  <div class="dlg wide"><div class="dlg-h"><h3 id="procTitle">Prozess</h3>
+    <button type="button" class="x" data-close aria-label="Schließen">&times;</button></div>
+    <div class="dlg-b" id="procBody"></div>
+    <div class="dlg-f">
+      <button type="button" class="btn primary" id="procEdit">Bearbeiten</button>
+      <button type="button" class="btn" data-close>Schließen</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ovImport" role="dialog" aria-modal="true" aria-labelledby="impTitle">
+  <div class="dlg narrow"><div class="dlg-h"><h3 id="impTitle">Import</h3>
+    <button type="button" class="x" data-close aria-label="Schließen">&times;</button></div>
+    <div class="dlg-b">
+      <div class="fld" style="margin-bottom:14px;">
+        <label>Datei auswählen (JSON oder CSV)</label>
+        <input type="file" id="impFile" accept=".json,.csv,.txt" />
+        <span class="hint" id="impHint"></span>
+      </div>
+      <div class="fld">
+        <label>Vorgehen</label>
+        <select id="impMode">
+          <option value="merge">Zusammenführen – vorhandene Schlüssel aktualisieren, neue anhängen</option>
+          <option value="append">Anhängen – alles als neue Datensätze</option>
+          <option value="replace">Ersetzen – Tabelle vorher leeren</option>
+        </select>
+      </div>
+      <div id="impPreview" style="margin-top:14px;"></div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" class="btn primary" id="impGo" disabled>Import ausführen</button>
+      <button type="button" class="btn" data-close>Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ovConfirm" role="dialog" aria-modal="true" aria-labelledby="cfTitle">
+  <div class="dlg narrow"><div class="dlg-h"><h3 id="cfTitle">Bestätigen</h3>
+    <button type="button" class="x" data-close aria-label="Schließen">&times;</button></div>
+    <div class="dlg-b"><p id="cfText" style="margin:0;color:var(--ink-2);"></p></div>
+    <div class="dlg-f">
+      <button type="button" class="btn primary" id="cfOk">Ja, ausführen</button>
+      <button type="button" class="btn" data-close>Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="restoreFile" accept=".json" style="display:none" />
+
+<script>
+"use strict";
+/* ============================================================================
+   1 · Datenmodell
+   Jede Tabelle beschreibt ihre Felder einmal; Tabellenansicht, Formulardialog,
+   Import und Export lesen alle aus dieser einen Beschreibung.
+   ========================================================================== */
+const TBA = "To be assessed";
+const STORE_KEY = "mscCockpit.v1";
+const SCHEMA_VERSION = 1;
+
+const ROLLOUT_STATUS = ["N/A","Not Assessed","Planned","Access Ready","Training Planned",
+  "Training Completed","Roles Clarified","Rollout Started","Operational","Blocked","Local Exception"];
+/* Farbe und Fortschrittsgewicht je Rollout-Status. weight speist die Abdeckung. */
+const ROLLOUT_META = {
+  "N/A":              {bg:"#EDEFF0", fg:"#7B848B", weight:null},
+  "Not Assessed":     {bg:"#EDEFF0", fg:"#5A6169", weight:0},
+  "Planned":          {bg:"#E4ECF5", fg:"#245D91", weight:.15},
+  "Access Ready":     {bg:"#DCE8F4", fg:"#1F5488", weight:.3},
+  "Training Planned": {bg:"#E7EDF6", fg:"#3A5F92", weight:.4},
+  "Training Completed":{bg:"#DFEFE6", fg:"#1B6B42", weight:.55},
+  "Roles Clarified":  {bg:"#DBEFE2", fg:"#176437", weight:.7},
+  "Rollout Started":  {bg:"#FBF0D8", fg:"#8A5A00", weight:.8},
+  "Operational":      {bg:"#CFEBD6", fg:"#0C6B22", weight:1},
+  "Blocked":          {bg:"#FBE5E5", fg:"#B32626", weight:0},
+  "Local Exception":  {bg:"#F3E8FA", fg:"#6B3FA0", weight:null}
+};
+const RAG_VALUES = ["Grey","Green","Amber","Red"];
+const RAG_CODE = {Green:"G", Amber:"A", Red:"R", Grey:"X"};
+const RAG_LABEL = {Green:"Grün", Amber:"Gelb", Red:"Rot", Grey:"Grau"};
+
+const KPI_NAMES = ["Ownership Coverage","Publication Coverage","Review Compliance","KPI Coverage",
+  "MSC Rollout Coverage","Training Coverage","Access Readiness","Role Clarification Coverage",
+  "Workflow Usage Rate","Process Compliance Rate","Process Understanding Score","Local Deviation Rate",
+  "Cycle Time","Process-related Support Requests","Stakeholder Satisfaction","Action Closure Rate"];
+/* Diese Kennzahlen rechnet das Cockpit selbst aus; alle übrigen werden gemessen. */
+const KPI_DERIVED = ["Ownership Coverage","Publication Coverage","Review Compliance","KPI Coverage",
+  "MSC Rollout Coverage","Training Coverage","Access Readiness","Role Clarification Coverage","Action Closure Rate"];
+
+const f = (name, type, opts) => ({name, type, options: opts || null});
+const SCHEMA = {
+  Process_Master: {
+    label: "Process_Master", title: "Process Portfolio", key: "Process ID", nameField: "Process Name",
+    fields: [
+      f("Process ID","text"), f("Process Name","text"),
+      f("Process Group","select",["Management Processes","Core Processes","Support Processes",TBA]),
+      f("Parent Process","text"), f("Process Level","select",["L1","L2","L3","L4",TBA]),
+      f("Domain","text"), f("Description","longtext"),
+      f("MSC Relevance","select",[TBA,"Mandatory","Recommended","Optional","Not relevant"]),
+      f("Process Owner","text"), f("Process Manager","text"),
+      f("Lifecycle Status","select",[TBA,"Draft","In Review","Approved","Published","Under Revision","Retired"]),
+      f("Current Phase","select",[TBA,"Initiation","Design","Review","Approval","Rollout","Operation","Improvement"]),
+      f("Approval Body","select",[TBA,"IT Process Committee","IT Board","MSC Board","Process Owner Circle"]),
+      f("Approval Date","date"),
+      f("Repository","select",[TBA,"ADONIS","SharePoint","Other"]), f("Repository URL","url"),
+      f("Last Review Date","date"), f("Next Review Date","date"),
+      f("KPI Status","select",[TBA,"No KPI defined","KPI defined","KPI measured","KPI on target","KPI off target"]),
+      f("Overall RAG","select",RAG_VALUES),
+      f("Next Action","text"), f("Action Owner","text"), f("Due Date","date")
+    ]
+  },
+  MSC_Master: {
+    label: "MSC_Master", title: "MSC-Stammdaten", key: "MSC ID", nameField: "MSC Name",
+    fields: [
+      f("MSC ID","text"), f("MSC Name","text"), f("Entity","text"), f("Region","text"),
+      f("Local Contact","text"), f("Rollout Wave","select",[TBA,"Wave 1","Wave 2","Wave 3","Wave 4"]),
+      f("Status","select",[TBA,"Planned","Active","On Hold","Completed"]), f("Comment","longtext")
+    ]
+  },
+  Process_Rollout: {
+    label: "Process_Rollout", title: "MSC Rollout", key: "Rollout ID", nameField: "Rollout ID",
+    fields: [
+      f("Rollout ID","text"), f("Process ID","ref:Process_Master"), f("MSC ID","ref:MSC_Master"),
+      f("Rollout Status","select",ROLLOUT_STATUS),
+      f("Access Ready","select",[TBA,"No","In Progress","Yes"]),
+      f("Training Status","select",[TBA,"Not Planned","Planned","Completed"]),
+      f("Roles Clarified","select",[TBA,"No","In Progress","Yes"]),
+      f("Start Date","date"), f("Go-Live Date","date"),
+      f("Local Exception","select",["No","Yes"]), f("Evidence URL","url"), f("Comment","longtext")
+    ]
+  },
+  Governance_Decisions: {
+    label: "Governance_Decisions", title: "Governance & Decisions", key: "Decision ID", nameField: "Decision Title",
+    fields: [
+      f("Decision ID","text"), f("Process ID","ref:Process_Master"), f("Decision Title","text"),
+      f("Decision Type","select",[TBA,"Process Approval","Rollout Decision","Exception","Escalation","Funding","Role Assignment"]),
+      f("Decision Body","select",[TBA,"IT Process Committee","IT Board","MSC Board","Process Owner Circle"]),
+      f("Decision Owner","text"), f("Meeting Date","date"),
+      f("Decision Status","select",["Open","In Progress","Decided","Rejected","Deferred"]),
+      f("Decision Conditions","longtext"), f("Due Date","date"), f("Evidence URL","url")
+    ]
+  },
+  Process_KPI: {
+    label: "Process_KPI", title: "KPI & Adoption", key: "KPI ID", nameField: "KPI Name",
+    fields: [
+      f("KPI ID","text"), f("Process ID","ref:Process_Master"),
+      f("KPI Name","select",KPI_NAMES.concat([TBA])),
+      f("Category","select",[TBA,"Governance","Adoption","Performance"]),
+      f("Unit","select",[TBA,"%","Days","Count","Score"]),
+      f("Target Value","text"), f("Actual Value","text"), f("Period","text"),
+      f("KPI Status","select",[TBA,"Not measured","On target","Off target","Trend positive","Trend negative"]),
+      f("Comment","longtext")
+    ]
+  },
+  Risks: {
+    label: "Risks", title: "Risiken", key: "Risk ID", nameField: "Risk Title",
+    fields: [
+      f("Risk ID","text"), f("Process ID","ref:Process_Master"), f("MSC ID","ref:MSC_Master"),
+      f("Risk Title","text"), f("Description","longtext"),
+      f("Category","select",[TBA,"Governance","Adoption","Resource","Technical","Compliance","Organisational"]),
+      f("Probability","select",[TBA,"Low","Medium","High"]), f("Impact","select",[TBA,"Low","Medium","High"]),
+      f("RAG","select",RAG_VALUES), f("Mitigation","longtext"), f("Owner","text"), f("Due Date","date"),
+      f("Status","select",["Open","In Treatment","Monitored","Closed"]),
+      f("Escalation Required","select",["No","Yes"])
+    ]
+  },
+  Actions: {
+    label: "Actions", title: "Maßnahmen", key: "Action ID", nameField: "Action",
+    fields: [
+      f("Action ID","text"), f("Process ID","ref:Process_Master"), f("MSC ID","ref:MSC_Master"),
+      f("Source","select",[TBA,"Risk","Decision","Review","Audit","Rollout","KPI"]),
+      f("Action","text"), f("Owner","text"), f("Created Date","date"), f("Due Date","date"),
+      f("Priority","select",["Low","Medium","High","Critical"]),
+      f("Status","select",["Open","In Progress","Blocked","Done","Cancelled"]),
+      f("Evidence URL","url"), f("Closure Comment","longtext")
+    ]
+  },
+  News: {
+    label: "News", title: "Meldungen", key: "News ID", nameField: "Title",
+    fields: [
+      f("News ID","text"), f("Date","date"), f("Title","text"),
+      f("Category","select",["Information","Meilenstein","Entscheidung","Rollout","Achtung"]),
+      f("Pinned","select",["No","Yes"]), f("Author","text"), f("Body","longtext")
+    ]
+  }
+};
+const TABLES = Object.keys(SCHEMA);
+
+/* ============================================================================
+   2 · Auslieferungsbestand
+   Pilotprozesse mit echten Namen. Keine erfundenen Verantwortlichen, Freigabe-
+   oder Reviewdaten und keine erfundenen KPI-Werte - Unbekanntes bleibt auf
+   "To be assessed". Ergänzende Testdatensätze tragen _demo und werden in der
+   Oberfläche als "Demo Data" ausgewiesen.
+   ========================================================================== */
+const PILOTS = [
+  ["PRC-001","IT Demand Management","Management Processes","","L2"],
+  ["PRC-002","Change Request","Core Processes","PRC-001","L3"],
+  ["PRC-003","Manage IT Project","Core Processes","PRC-001","L3"],
+  ["PRC-004","Service Request","Core Processes","PRC-001","L3"],
+  ["PRC-005","Security Assessment","Support Processes","PRC-001","L3"],
+  ["PRC-006","Software Selection","Support Processes","PRC-001","L3"]
+];
+const DESCR = "Inhaltliche Prozessbeschreibung wird in ADONIS geführt und dort veröffentlicht.";
+
+function seed(){
+  const db = {_meta:{version:SCHEMA_VERSION, created:today(), saved:null}};
+  TABLES.forEach(t => db[t] = []);
+
+  db.Process_Master = PILOTS.map(([id,name,grp,parent,lvl]) => ({
+    "Process ID":id, "Process Name":name, "Process Group":grp,
+    "Parent Process":parent || "", "Process Level":lvl, "Domain":"IT", "Description":DESCR,
+    "MSC Relevance":TBA, "Process Owner":TBA, "Process Manager":TBA,
+    "Lifecycle Status":TBA, "Current Phase":TBA, "Approval Body":TBA, "Approval Date":"",
+    "Repository":"ADONIS", "Repository URL":TBA, "Last Review Date":"", "Next Review Date":"",
+    "KPI Status":TBA, "Overall RAG":"Grey", "Next Action":TBA, "Action Owner":TBA, "Due Date":""
+  }));
+
+  /* MSC-Stammdaten sind hier Platzhalter: die echten Einheiten trägt die
+     Administration nach. Deshalb durchgängig als Demo Data gekennzeichnet. */
+  db.MSC_Master = [1,2,3,4,5,6].map(i => ({
+    "MSC ID":"MSC-0"+i, "MSC Name":"Demo MSC "+i, "Entity":TBA, "Region":TBA,
+    "Local Contact":TBA, "Rollout Wave":TBA, "Status":TBA,
+    "Comment":"Platzhalter – echte MSC-Stammdaten in der Administration eintragen.", _demo:true
+  }));
+
+  db.Process_Rollout = [];
+  db.Process_Master.forEach(p => db.MSC_Master.forEach(msc => db.Process_Rollout.push({
+    "Rollout ID":"ROL-"+p["Process ID"].slice(4)+"-"+msc["MSC ID"].slice(4),
+    "Process ID":p["Process ID"], "MSC ID":msc["MSC ID"], "Rollout Status":"Not Assessed",
+    "Access Ready":TBA, "Training Status":TBA, "Roles Clarified":TBA,
+    "Start Date":"", "Go-Live Date":"", "Local Exception":"No", "Evidence URL":TBA, "Comment":"", _demo:true
+  })));
+
+  db.Governance_Decisions = [
+    {"Decision ID":"DEC-001","Process ID":"PRC-001","Decision Title":"Freigabe Zielbild IT Demand Management",
+     "Decision Type":"Process Approval","Decision Body":"IT Process Committee","Decision Owner":TBA,
+     "Meeting Date":"","Decision Status":"Open","Decision Conditions":TBA,"Due Date":"","Evidence URL":TBA,_demo:true},
+    {"Decision ID":"DEC-002","Process ID":"PRC-005","Decision Title":"Verbindlichkeit Security Assessment je MSC",
+     "Decision Type":"Rollout Decision","Decision Body":"MSC Board","Decision Owner":TBA,
+     "Meeting Date":"","Decision Status":"Open","Decision Conditions":TBA,"Due Date":"","Evidence URL":TBA,_demo:true}
+  ];
+
+  /* Kennzahlenkatalog: alle 16 Kennzahlen angelegt, ohne erfundene Messwerte. */
+  db.Process_KPI = KPI_NAMES.map((n,i) => ({
+    "KPI ID":"KPI-"+String(i+1).padStart(3,"0"), "Process ID":"", "KPI Name":n,
+    "Category": KPI_DERIVED.includes(n) ? "Governance" : "Adoption",
+    "Unit": n === "Cycle Time" ? "Days" : (n === "Process-related Support Requests" ? "Count"
+            : (n === "Process Understanding Score" || n === "Stakeholder Satisfaction" ? "Score" : "%")),
+    "Target Value":TBA, "Actual Value":TBA, "Period":TBA,
+    "KPI Status": KPI_DERIVED.includes(n) ? "Not measured" : TBA,
+    "Comment": KPI_DERIVED.includes(n)
+      ? "Wird im Cockpit aus den Stammdaten berechnet – siehe KPI & Adoption."
+      : "Messwert aus der Fachorganisation erforderlich."
+  }));
+
+  db.Risks = [
+    {"Risk ID":"RSK-001","Process ID":"PRC-001","MSC ID":"","Risk Title":"Process Owner nicht benannt",
+     "Description":"Ohne benannten Process Owner ist keine Freigabe und keine Reviewpflicht durchsetzbar.",
+     "Category":"Governance","Probability":"High","Impact":"High","RAG":"Red","Mitigation":TBA,
+     "Owner":TBA,"Due Date":"","Status":"Open","Escalation Required":"Yes",_demo:true},
+    {"Risk ID":"RSK-002","Process ID":"PRC-004","MSC ID":"","Risk Title":"Rollout-Status je MSC unbewertet",
+     "Description":"Ohne Bewertung je MSC lässt sich die Abdeckung nicht steuern.",
+     "Category":"Adoption","Probability":"Medium","Impact":"Medium","RAG":"Amber","Mitigation":TBA,
+     "Owner":TBA,"Due Date":"","Status":"Open","Escalation Required":"No",_demo:true}
+  ];
+
+  db.Actions = [
+    {"Action ID":"ACT-001","Process ID":"PRC-001","MSC ID":"","Source":"Risk",
+     "Action":"Process Owner je Pilotprozess benennen und in Process_Master eintragen",
+     "Owner":TBA,"Created Date":today(),"Due Date":"","Priority":"High","Status":"Open",
+     "Evidence URL":TBA,"Closure Comment":"",_demo:true},
+    {"Action ID":"ACT-002","Process ID":"","MSC ID":"","Source":"Rollout",
+     "Action":"Echte MSC-Stammdaten erfassen und Platzhalter ersetzen",
+     "Owner":TBA,"Created Date":today(),"Due Date":"","Priority":"High","Status":"Open",
+     "Evidence URL":TBA,"Closure Comment":"",_demo:true}
+  ];
+
+  db.News = [
+    {"News ID":"NEW-001","Date":today(),"Title":"Cockpit in Betrieb genommen","Category":"Information",
+     "Pinned":"Yes","Author":TBA,
+     "Body":"Das MSC IT Governance & Process Cockpit steht bereit. Es steuert Governance, Rollout, Risiken, "
+          +"Maßnahmen und KPIs.\n\nVeröffentlichte Prozessinhalte bleiben in ADONIS; das Cockpit verweist nur darauf.\n\n"
+          +"Nächste Schritte: Process Owner benennen, echte MSC-Stammdaten erfassen und die Rollout-Matrix bewerten."},
+    {"News ID":"NEW-002","Date":today(),"Title":"Pilotprozesse angelegt","Category":"Meilenstein","Pinned":"No",
+     "Author":TBA,
+     "Body":"Sechs Pilotprozesse sind im Portfolio angelegt: IT Demand Management, Change Request, "
+          +"Manage IT Project, Service Request, Security Assessment und Software Selection.\n\n"
+          +"Alle Verantwortlichen, Freigabe- und Reviewdaten stehen auf \"To be assessed\" und sind zu erheben."}
+  ];
+  return db;
+}
+
+/* ============================================================================
+   3 · Werkzeug und Speicher
+   ========================================================================== */
+function today(){ const d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+function el(tag, attrs, kids){
+  const n = document.createElement(tag);
+  if (attrs) for (const k in attrs){
+    const v = attrs[k];
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;
+    else if (k === "html") n.innerHTML = v;
+    else if (k.slice(0,2) === "on") n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v === true ? "" : v);
+  }
+  if (kids) [].concat(kids).forEach(c => { if (c) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+  return n;
+}
+const isTBA = v => !v || String(v).trim() === "" || String(v).trim() === TBA;
+const has = v => !isTBA(v);
+function fmtDate(v){ if (!v) return ""; const d = new Date(String(v)+"T00:00:00");
+  return isNaN(d) ? String(v) : d.toLocaleDateString("de-DE"); }
+function daysUntil(v){ if (!v) return null; const d = new Date(String(v)+"T00:00:00");
+  if (isNaN(d)) return null; const t = new Date(today()+"T00:00:00");
+  return Math.round((d - t) / 86400000); }
+function uid(table){
+  const pre = {Process_Master:"PRC", MSC_Master:"MSC", Process_Rollout:"ROL", Governance_Decisions:"DEC",
+               Process_KPI:"KPI", Risks:"RSK", Actions:"ACT", News:"NEW"}[table] || "REC";
+  const keyF = SCHEMA[table].key;
+  let max = 0;
+  (DB[table]||[]).forEach(r => { const m = String(r[keyF]||"").match(/(\d+)\s*$/); if (m) max = Math.max(max, +m[1]); });
+  return pre + "-" + String(max + 1).padStart(3,"0");
+}
+function download(name, text, mime){
+  const blob = new Blob([text], {type:(mime||"text/plain")+";charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = el("a",{href:url, download:name});
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+}
+
+/* --- CSV. Trennzeichen wird erkannt, Anführungszeichen nach RFC 4180. ----- */
+function csvSplit(text){
+  const t = text.replace(/^﻿/, "");
+  const head = t.split(/\r?\n/)[0] || "";
+  const sep = (head.split(";").length > head.split(",").length) ? ";" : ",";
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < t.length; i++){
+    const c = t[i];
+    if (q){
+      if (c === '"'){ if (t[i+1] === '"'){ cell += '"'; i++; } else q = false; }
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === sep){ row.push(cell); cell = ""; }
+    else if (c === "\n"){ row.push(cell); rows.push(row); row = []; cell = ""; }
+    else if (c === "\r"){ /* ignorieren */ }
+    else cell += c;
+  }
+  if (cell !== "" || row.length){ row.push(cell); rows.push(row); }
+  return rows.filter(r => r.length && !(r.length === 1 && r[0].trim() === ""));
+}
+function csvToRecords(text, table){
+  const rows = csvSplit(text);
+  if (!rows.length) return [];
+  const headers = rows[0].map(h => h.trim());
+  const known = SCHEMA[table].fields.map(x => x.name);
+  return rows.slice(1).map(r => {
+    const rec = {};
+    headers.forEach((h,i) => { if (known.indexOf(h) >= 0) rec[h] = (r[i] === undefined ? "" : r[i].trim()); });
+    return rec;
+  }).filter(r => Object.keys(r).length);
+}
+function recordsToCsv(table, rows){
+  const cols = SCHEMA[table].fields.map(x => x.name);
+  const esc = v => { const s = String(v === undefined || v === null ? "" : v);
+    return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
+  const out = [cols.map(esc).join(";")];
+  rows.forEach(r => out.push(cols.map(c => esc(r[c])).join(";")));
+  return "﻿" + out.join("\r\n");
+}
+
+/* --- Speicher ------------------------------------------------------------ */
+let DB = null, saveTimer = 0;
+function loadDB(){
+  let raw = null;
+  try { raw = localStorage.getItem(STORE_KEY); } catch(e){ raw = null; }
+  if (!raw) return seed();
+  try {
+    const d = JSON.parse(raw);
+    if (!d || typeof d !== "object") return seed();
+    if (!d._meta) d._meta = {version:SCHEMA_VERSION, created:today(), saved:null};
+    TABLES.forEach(t => { if (!Array.isArray(d[t])) d[t] = []; });
+    return d;
+  } catch(e){ return seed(); }
+}
+function setSaveState(state){
+  const n = $("#saveState");
+  n.classList.toggle("dirty", state === "dirty");
+  n.querySelector("span:last-child").textContent =
+    state === "dirty" ? "Speichere …" : (state === "error" ? "Nicht gespeichert" : "Gespeichert");
+}
+function save(){
+  setSaveState("dirty");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    DB._meta.saved = new Date().toISOString();
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); setSaveState("ok"); }
+    catch(e){ setSaveState("error");
+      alert("Die Daten konnten nicht lokal gespeichert werden: " + e.message +
+            "\n\nBitte über Administration ein Backup erzeugen."); }
+    updateFooter();
+  }, 220);
+}
+function updateFooter(){
+  let size = 0;
+  try { size = (localStorage.getItem(STORE_KEY) || "").length; } catch(e){}
+  const saved = DB._meta.saved ? new Date(DB._meta.saved).toLocaleString("de-DE") : "noch nicht";
+  $("#ftStore").textContent = "Lokal gespeichert: " + saved + " · " + (size/1024).toFixed(0) + " KB";
+}
+
+/* ============================================================================
+   4 · Tabellenkomponente
+   Suchen, je Spalte filtern, sortieren, direkt bearbeiten, anlegen, löschen,
+   als JSON und CSV aus- und einlesen. Jede Änderung speichert sofort.
+   ========================================================================== */
+const TSTATE = {};
+function tstate(t){ return TSTATE[t] || (TSTATE[t] = {q:"", filters:{}, sort:{col:null, dir:1}}); }
+
+function optionsFor(table, field){
+  if (field.type.slice(0,4) === "ref:"){
+    const ref = field.type.slice(4), s = SCHEMA[ref];
+    return (DB[ref]||[]).map(r => r[s.key]).filter(Boolean);
+  }
+  return field.options || null;
+}
+function displayValue(table, field, rec){
+  const v = rec[field.name];
+  if (field.name === "Overall RAG" || field.name === "RAG") return null;
+  if (field.type.slice(0,4) === "ref:" && v){
+    const ref = field.type.slice(4), s = SCHEMA[ref];
+    const hit = (DB[ref]||[]).find(r => r[s.key] === v);
+    return hit ? v + " · " + (hit[s.nameField] || "") : v;
+  }
+  if (field.type === "date") return fmtDate(v);
+  return v === undefined || v === null ? "" : String(v);
+}
+function filteredRows(table){
+  const st = tstate(table), sc = SCHEMA[table];
+  const q = st.q.trim().toLowerCase();
+  let rows = (DB[table]||[]).filter(r => {
+    if (q){
+      const blob = sc.fields.map(f => String(r[f.name] === undefined ? "" : r[f.name])).join(" ").toLowerCase();
+      if (blob.indexOf(q) < 0) return false;
+    }
+    for (const col in st.filters){
+      const want = st.filters[col];
+      if (!want) continue;
+      const got = String(r[col] === undefined ? "" : r[col]);
+      const fld = sc.fields.find(x => x.name === col);
+      const isList = fld && (fld.options || fld.type.slice(0,4) === "ref:");
+      if (isList ? got !== want : got.toLowerCase().indexOf(String(want).toLowerCase()) < 0) return false;
+    }
+    return true;
+  });
+  if (st.sort.col){
+    const col = st.sort.col, dir = st.sort.dir;
+    rows = rows.slice().sort((a,b) => {
+      const x = String(a[col] === undefined ? "" : a[col]), y = String(b[col] === undefined ? "" : b[col]);
+      const nx = parseFloat(x), ny = parseFloat(y);
+      if (!isNaN(nx) && !isNaN(ny) && /^[\d.,\s-]+$/.test(x) && /^[\d.,\s-]+$/.test(y)) return (nx-ny)*dir;
+      return x.localeCompare(y, "de", {numeric:true}) * dir;
+    });
+  }
+  return rows;
+}
+
+function renderTable(table){
+  const host = document.getElementById("tbl-" + table);
+  if (!host) return;
+  const sc = SCHEMA[table], st = tstate(table);
+  const rows = filteredRows(table);
+  const total = (DB[table]||[]).length;
+  host.replaceChildren();
+
+  /* --- Werkzeugleiste --- */
+  const tools = el("div",{class:"tools"});
+  const search = el("input",{type:"search", placeholder:"Suchen in " + sc.label + " …", value:st.q,
+    "aria-label":"Suchen", oninput:e => { st.q = e.target.value; renderTable(table); }});
+  tools.appendChild(search);
+  tools.appendChild(el("button",{class:"btn primary", type:"button", text:"Neu",
+    onclick:() => addRecord(table)}));
+  tools.appendChild(el("button",{class:"btn", type:"button", text:"Import",
+    onclick:() => openImport(table)}));
+  tools.appendChild(el("button",{class:"btn", type:"button", text:"Export JSON",
+    onclick:() => download(table + ".json", JSON.stringify(filteredRows(table), null, 2), "application/json")}));
+  tools.appendChild(el("button",{class:"btn", type:"button", text:"Export CSV",
+    onclick:() => download(table + ".csv", recordsToCsv(table, filteredRows(table)), "text/csv")}));
+  const anyFilter = st.q || Object.keys(st.filters).some(k => st.filters[k]) || st.sort.col;
+  if (anyFilter) tools.appendChild(el("button",{class:"btn", type:"button", text:"Zurücksetzen",
+    onclick:() => { TSTATE[table] = {q:"", filters:{}, sort:{col:null, dir:1}}; renderTable(table); }}));
+  tools.appendChild(el("span",{class:"cnt",
+    text: rows.length === total ? total + " Datensätze" : rows.length + " von " + total + " Datensätzen"}));
+  host.appendChild(tools);
+
+  /* --- Tabelle --- */
+  const wrap = el("div",{class:"tscroll"});
+  const tb = el("table");
+  const thead = el("thead");
+  const hr = el("tr");
+  sc.fields.forEach(fld => {
+    const sorted = st.sort.col === fld.name;
+    const th = el("th",{title:"Sortieren nach " + fld.name,
+      onclick:() => { if (st.sort.col === fld.name) st.sort.dir *= -1;
+                      else { st.sort.col = fld.name; st.sort.dir = 1; } renderTable(table); }},
+      [el("span",{text:fld.name}), el("span",{class:"ar", text: sorted ? (st.sort.dir > 0 ? "▲" : "▼") : "⇅"})]);
+    if (sorted) th.setAttribute("aria-sort", st.sort.dir > 0 ? "ascending" : "descending");
+    hr.appendChild(th);
+  });
+  hr.appendChild(el("th",{class:"act", text:"Aktion"}));
+  thead.appendChild(hr);
+
+  /* Filterzeile: Auswahlfelder für Listen, Textfeld für alles andere */
+  const fr = el("tr");
+  sc.fields.forEach(fld => {
+    const cell = el("th",{style:"padding:5px 6px;border-bottom:1px solid var(--rule);cursor:default;background:var(--paper);"});
+    const opts = optionsFor(table, fld);
+    if (opts){
+      const sel = el("select",{style:"width:100%;font-size:11px;padding:2px 4px;border:1px solid var(--rule-2);border-radius:2px;background:var(--paper);",
+        onchange:e => { st.filters[fld.name] = e.target.value; renderTable(table); }});
+      sel.appendChild(el("option",{value:"", text:"alle"}));
+      const seen = {};
+      (DB[table]||[]).forEach(r => { const v = r[fld.name]; if (v && !seen[v]){ seen[v] = 1; } });
+      opts.concat(Object.keys(seen)).filter((v,i,a) => a.indexOf(v) === i).forEach(o =>
+        sel.appendChild(el("option",{value:o, text:o, selected: st.filters[fld.name] === o})));
+      cell.appendChild(sel);
+    } else {
+      cell.appendChild(el("input",{type:"text", placeholder:"enthält …", value: st.filters[fld.name] || "",
+        style:"width:100%;font-size:11px;padding:2px 5px;border:1px solid var(--rule-2);border-radius:2px;",
+        oninput:e => { st.filters[fld.name] = e.target.value; clearTimeout(cell._t);
+                       cell._t = setTimeout(() => renderTable(table), 260); }}));
+    }
+    fr.appendChild(cell);
+  });
+  fr.appendChild(el("th",{class:"act", style:"background:var(--paper);border-bottom:1px solid var(--rule);"}));
+  thead.appendChild(fr);
+  tb.appendChild(thead);
+
+  const tbody = el("tbody");
+  const shown = rows.slice(0, 600);
+  shown.forEach(rec => {
+    const tr = el("tr");
+    sc.fields.forEach((fld, ci) => {
+      const td = el("td");
+      const cell = el("span",{class:"cell"});
+      paintCell(cell, table, fld, rec);
+      if (ci === 0 && rec._demo) cell.appendChild(el("span",{class:"tag demo", text:"Demo Data",
+        style:"margin-left:6px;"}));
+      cell.addEventListener("click", () => editCell(td, cell, table, fld, rec));
+      td.appendChild(cell);
+      tr.appendChild(td);
+    });
+    const act = el("td",{class:"act"});
+    act.appendChild(el("span",{class:"cell"},[
+      el("button",{class:"rowbtn", type:"button", title:"Datensatz öffnen", text:"✎",
+        onclick:() => openRecord(table, rec)}),
+      el("button",{class:"rowbtn del", type:"button", title:"Datensatz löschen", text:"✕",
+        onclick:() => confirmDlg("Diesen Datensatz aus " + sc.label + " löschen?", () => {
+          const i = DB[table].indexOf(rec); if (i >= 0) DB[table].splice(i,1); save(); refreshAll(); })})
+    ]));
+    tr.appendChild(act);
+    tbody.appendChild(tr);
+  });
+  tb.appendChild(tbody);
+  wrap.appendChild(tb);
+  if (!rows.length) wrap.appendChild(el("div",{class:"empty",
+    text: total ? "Kein Datensatz passt zu Suche und Filter." : "Noch keine Datensätze. Über „Neu“ anlegen oder importieren."}));
+  else if (rows.length > shown.length) wrap.appendChild(el("div",{class:"empty",
+    text:"Es werden die ersten " + shown.length + " von " + rows.length + " Treffern angezeigt. Filter verwenden, um einzugrenzen."}));
+  host.appendChild(wrap);
+}
+
+function paintCell(cell, table, fld, rec){
+  cell.replaceChildren();
+  const v = rec[fld.name];
+  if (fld.name === "Overall RAG" || fld.name === "RAG"){
+    const code = RAG_CODE[v] || "X";
+    cell.appendChild(el("span",{class:"rag " + code, text: RAG_LABEL[v] || "Grau"}));
+    return;
+  }
+  if (table === "Process_Rollout" && fld.name === "Rollout Status"){
+    const meta = ROLLOUT_META[v] || ROLLOUT_META["Not Assessed"];
+    cell.appendChild(el("span",{class:"pill", text: v || "Not Assessed",
+      style:"background:" + meta.bg + ";color:" + meta.fg}));
+    return;
+  }
+  if (isTBA(v) && fld.type !== "date"){
+    cell.appendChild(el("span",{class:"tag tba", text: v ? String(v) : "–"}));
+    return;
+  }
+  if (fld.type === "url" && has(v)){
+    cell.appendChild(el("a",{href:String(v), target:"_blank", rel:"noopener", text:String(v)}));
+    return;
+  }
+  cell.textContent = displayValue(table, fld, rec);
+  cell.title = String(v === undefined ? "" : v);
+}
+
+function editCell(td, cell, table, fld, rec){
+  if (td.querySelector(".ed")) return;
+  const opts = optionsFor(table, fld);
+  let input;
+  if (opts){
+    input = el("select",{class:"ed"});
+    if (fld.type.slice(0,4) === "ref:") input.appendChild(el("option",{value:"", text:"–"}));
+    const cur = rec[fld.name];
+    opts.concat(cur && opts.indexOf(cur) < 0 ? [cur] : []).forEach(o =>
+      input.appendChild(el("option",{value:o, text:o, selected:o === cur})));
+  } else if (fld.type === "longtext"){
+    input = el("textarea",{class:"ed"});
+    input.value = rec[fld.name] === undefined ? "" : rec[fld.name];
+  } else {
+    input = el("input",{class:"ed", type: fld.type === "date" ? "date" : "text"});
+    input.value = rec[fld.name] === undefined ? "" : rec[fld.name];
+  }
+  const commit = ok => {
+    if (ok){
+      const before = rec[fld.name];
+      rec[fld.name] = input.value;
+      if (before !== input.value){ save(); onDataChanged(table); }
+    }
+    td.replaceChildren(cell);
+    paintCell(cell, table, fld, rec);
+    if (rec._demo && SCHEMA[table].fields[0].name === fld.name)
+      cell.appendChild(el("span",{class:"tag demo", text:"Demo Data", style:"margin-left:6px;"}));
+  };
+  input.addEventListener("keydown", e => {
+    if (e.key === "Escape"){ e.preventDefault(); commit(false); }
+    if (e.key === "Enter" && fld.type !== "longtext"){ e.preventDefault(); commit(true); }
+  });
+  input.addEventListener("blur", () => commit(true));
+  td.replaceChildren(input);
+  input.focus();
+  if (input.select) try { input.select(); } catch(e){}
+}
+
+/* ============================================================================
+   5 · Datensätze anlegen, öffnen, löschen
+   ========================================================================== */
+let recCtx = null;
+function blankRecord(table){
+  const sc = SCHEMA[table], r = {};
+  sc.fields.forEach(f => {
+    if (f.name === sc.key) r[f.name] = uid(table);
+    else if (f.type === "date") r[f.name] = "";
+    else if (f.name === "Overall RAG" || f.name === "RAG") r[f.name] = "Grey";
+    else if (f.options) r[f.name] = f.options.indexOf(TBA) >= 0 ? TBA : f.options[0];
+    else r[f.name] = TBA;
+  });
+  if (table === "News"){ r["Date"] = today(); r["Pinned"] = "No"; r["Body"] = ""; r["Title"] = ""; }
+  if (table === "Actions") r["Created Date"] = today();
+  return r;
+}
+function addRecord(table){
+  const rec = blankRecord(table);
+  DB[table].push(rec);
+  save(); refreshAll();
+  openRecord(table, rec, true);
+}
+function openRecord(table, rec, isNew){
+  recCtx = {table, rec, isNew};
+  const sc = SCHEMA[table];
+  $("#recTitle").textContent = sc.label + " · " + (rec[sc.key] || "neuer Datensatz");
+  const form = $("#recForm"); form.replaceChildren();
+  sc.fields.forEach(fld => {
+    const id = "rf_" + fld.name.replace(/\W+/g,"_");
+    const wrap = el("div",{class:"fld" + (fld.type === "longtext" ? " full" : "")});
+    wrap.appendChild(el("label",{for:id, text:fld.name}));
+    const opts = optionsFor(table, fld);
+    let inp;
+    if (opts){
+      inp = el("select",{id});
+      if (fld.type.slice(0,4) === "ref:") inp.appendChild(el("option",{value:"", text:"– kein Bezug –"}));
+      const cur = rec[fld.name];
+      opts.concat(cur && opts.indexOf(cur) < 0 ? [cur] : []).forEach(o =>
+        inp.appendChild(el("option",{value:o, text:o, selected:o === cur})));
+    } else if (fld.type === "longtext"){
+      inp = el("textarea",{id}); inp.value = rec[fld.name] || "";
+    } else {
+      inp = el("input",{id, type: fld.type === "date" ? "date" : (fld.type === "url" ? "text" : "text")});
+      inp.value = rec[fld.name] === undefined ? "" : rec[fld.name];
+    }
+    inp.dataset.field = fld.name;
+    wrap.appendChild(inp);
+    if (fld.name === sc.key) wrap.appendChild(el("span",{class:"hint", text:"Schlüssel – muss eindeutig sein"}));
+    form.appendChild(wrap);
+  });
+  if (table === "Process_Master"){
+    const s = suggestRAG(rec);
+    const box = el("div",{class:"fld full", style:"background:var(--panel);border:1px solid var(--rule);border-radius:3px;padding:11px 13px;"});
+    box.appendChild(el("label",{text:"RAG-Vorschlag des Cockpits"}));
+    box.appendChild(el("div",{style:"display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:2px;"},[
+      el("span",{class:"rag " + RAG_CODE[s.rag], text:RAG_LABEL[s.rag]}),
+      el("span",{style:"font-size:12px;color:var(--ink-2);flex:1;min-width:200px;",
+        text: s.reasons.length ? s.reasons.join(" · ") : "Keine Auffälligkeiten."}),
+      el("button",{class:"btn sm", type:"button", text:"Vorschlag übernehmen", onclick:() => {
+        const sel = form.querySelector('[data-field="Overall RAG"]'); if (sel) sel.value = s.rag; }})
+    ]));
+    form.appendChild(box);
+  }
+  $("#recDel").style.display = "";
+  openOv("#ovRecord");
+}
+$("#recSave").addEventListener("click", () => {
+  if (!recCtx) return;
+  const {table, rec} = recCtx, sc = SCHEMA[table];
+  const form = $("#recForm");
+  const newKey = form.querySelector('[data-field="' + sc.key + '"]').value.trim();
+  if (!newKey){ alert("Der Schlüssel " + sc.key + " darf nicht leer sein."); return; }
+  const clash = (DB[table]||[]).some(r => r !== rec && String(r[sc.key]) === newKey);
+  if (clash){ alert("Der Schlüssel „" + newKey + "“ ist in " + sc.label + " bereits vergeben."); return; }
+  Array.from(form.querySelectorAll("[data-field]")).forEach(inp => { rec[inp.dataset.field] = inp.value; });
+  save(); closeOv("#ovRecord"); refreshAll();
+});
+$("#recDel").addEventListener("click", () => {
+  if (!recCtx) return;
+  const {table, rec} = recCtx;
+  confirmDlg("Diesen Datensatz aus " + SCHEMA[table].label + " löschen?", () => {
+    const i = DB[table].indexOf(rec); if (i >= 0) DB[table].splice(i,1);
+    save(); closeOv("#ovRecord"); refreshAll();
+  });
+});
+
+/* --- Dialoghilfen -------------------------------------------------------- */
+function openOv(sel){ $(sel).classList.add("on"); }
+function closeOv(sel){ $(sel).classList.remove("on"); }
+$$(".ov").forEach(ov => {
+  ov.addEventListener("click", e => { if (e.target === ov) ov.classList.remove("on"); });
+  ov.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => ov.classList.remove("on")));
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") $$(".ov.on").forEach(o => o.classList.remove("on"));
+});
+let cfAction = null;
+function confirmDlg(text, fn){ $("#cfText").textContent = text; cfAction = fn; openOv("#ovConfirm"); }
+$("#cfOk").addEventListener("click", () => { const fn = cfAction; cfAction = null; closeOv("#ovConfirm"); if (fn) fn(); });
+
+/* ============================================================================
+   6 · Berechnungen
+   RAG-Vorschlag nach der vereinbarten Regel; Abdeckungsgrade aus den Stammdaten.
+   ========================================================================== */
+const ACTIVE_ROLLOUT = ["Planned","Access Ready","Training Planned","Training Completed",
+                        "Roles Clarified","Rollout Started","Operational"];
+function rolloutsOf(pid){ return (DB.Process_Rollout||[]).filter(r => r["Process ID"] === pid); }
+
+function suggestRAG(p){
+  const pid = p["Process ID"], reasons = [];
+  const rl = rolloutsOf(pid);
+  const owner = has(p["Process Owner"]);
+  const repo = has(p["Repository"]);
+  const nrd = daysUntil(p["Next Review Date"]);
+  const reviewOverdue = nrd !== null && nrd < 0;
+  const reviewSoon = nrd !== null && nrd >= 0 && nrd <= 30;
+  const reviewValid = nrd !== null && nrd > 30;
+  const blocked = rl.some(r => r["Rollout Status"] === "Blocked");
+  const running = rl.some(r => ACTIVE_ROLLOUT.indexOf(r["Rollout Status"]) >= 0 && r["Rollout Status"] !== "Operational");
+  const redRisk = (DB.Risks||[]).some(r => r["Process ID"] === pid && r["RAG"] === "Red" && r["Status"] !== "Closed");
+  const critDec = (DB.Governance_Decisions||[]).some(d => d["Process ID"] === pid
+    && (d["Decision Status"] === "Open" || d["Decision Status"] === "In Progress")
+    && (d["Decision Type"] === "Escalation" || (daysUntil(d["Due Date"]) !== null && daysUntil(d["Due Date"]) < 0)));
+  const kpiSet = ["KPI defined","KPI measured","KPI on target","KPI off target"].indexOf(p["KPI Status"]) >= 0;
+  const assessed = owner || repo || nrd !== null || has(p["Lifecycle Status"])
+    || rl.some(r => r["Rollout Status"] !== "Not Assessed");
+
+  if (!assessed) return {rag:"Grey", reasons:["Noch nicht bewertet"]};
+  if (!owner) reasons.push("Process Owner fehlt");
+  if (reviewOverdue) reasons.push("Review überfällig seit " + Math.abs(nrd) + " Tagen");
+  if (blocked) reasons.push("Rollout in mindestens einem MSC blockiert");
+  if (critDec) reasons.push("Kritische Entscheidung offen");
+  if (redRisk) reasons.push("Rotes Risiko offen");
+  if (reasons.length) return {rag:"Red", reasons};
+  if (running) reasons.push("Rollout läuft");
+  if (reviewSoon) reasons.push("Review in " + nrd + " Tagen fällig");
+  if (!kpiSet) reasons.push("Kein KPI hinterlegt");
+  if (reasons.length) return {rag:"Amber", reasons};
+  if (owner && repo && reviewValid) return {rag:"Green", reasons:["Owner und Repository vorhanden, Review gültig"]};
+  return {rag:"Amber", reasons:["Bewertung unvollständig"]};
+}
+
+function pct(a, b){ return b ? Math.round(a / b * 100) : null; }
+function metrics(){
+  const P = DB.Process_Master || [], R = DB.Process_Rollout || [], A = DB.Actions || [];
+  const scored = R.filter(r => ROLLOUT_META[r["Rollout Status"]] && ROLLOUT_META[r["Rollout Status"]].weight !== null);
+  const wsum = scored.reduce((s,r) => s + ROLLOUT_META[r["Rollout Status"]].weight, 0);
+  const withReview = P.filter(p => p["Next Review Date"]);
+  const closable = A.filter(a => a["Status"] !== "Cancelled");
+  return {
+    processes: P.length,
+    relevant: P.filter(p => ["Mandatory","Recommended","Optional"].indexOf(p["MSC Relevance"]) >= 0).length,
+    relevantTBA: P.filter(p => isTBA(p["MSC Relevance"])).length,
+    published: P.filter(p => p["Lifecycle Status"] === "Published").length,
+    withOwner: P.filter(p => has(p["Process Owner"])).length,
+    inRollout: P.filter(p => rolloutsOf(p["Process ID"]).some(r => ACTIVE_ROLLOUT.indexOf(r["Rollout Status"]) >= 0)).length,
+    rolloutCoverage: scored.length ? Math.round(wsum / scored.length * 100) : null,
+    overdueReviews: P.filter(p => { const d = daysUntil(p["Next Review Date"]); return d !== null && d < 0; }).length,
+    openDecisions: (DB.Governance_Decisions||[]).filter(d => d["Decision Status"] === "Open" || d["Decision Status"] === "In Progress").length,
+    redRisks: (DB.Risks||[]).filter(r => r["RAG"] === "Red" && r["Status"] !== "Closed").length,
+    ownershipCoverage: pct(P.filter(p => has(p["Process Owner"])).length, P.length),
+    publicationCoverage: pct(P.filter(p => p["Lifecycle Status"] === "Published").length, P.length),
+    reviewCompliance: withReview.length ? pct(withReview.filter(p => daysUntil(p["Next Review Date"]) >= 0).length, withReview.length) : null,
+    kpiCoverage: pct(P.filter(p => ["KPI defined","KPI measured","KPI on target","KPI off target"].indexOf(p["KPI Status"]) >= 0).length, P.length),
+    trainingCoverage: scored.length ? pct(scored.filter(r => r["Training Status"] === "Completed").length, scored.length) : null,
+    accessReadiness: scored.length ? pct(scored.filter(r => r["Access Ready"] === "Yes").length, scored.length) : null,
+    roleClarification: scored.length ? pct(scored.filter(r => r["Roles Clarified"] === "Yes").length, scored.length) : null,
+    actionClosure: closable.length ? pct(closable.filter(a => a["Status"] === "Done").length, closable.length) : null,
+    scoredCombos: scored.length, totalCombos: R.length
+  };
+}
+function governanceGaps(){
+  const P = DB.Process_Master || [], R = DB.Process_Rollout || [];
+  const g = [
+    {t:"Process Owner nicht benannt", n:P.filter(p => !has(p["Process Owner"])).length, w:"Freigabe und Reviewpflicht nicht durchsetzbar", go:"portfolio"},
+    {t:"Kein Reviewtermin hinterlegt", n:P.filter(p => !p["Next Review Date"]).length, w:"Aktualität der Inhalte ungesteuert", go:"portfolio"},
+    {t:"Review überfällig", n:P.filter(p => { const d = daysUntil(p["Next Review Date"]); return d !== null && d < 0; }).length, w:"Veröffentlichte Inhalte gelten als überholt", go:"portfolio"},
+    {t:"Kein KPI hinterlegt", n:P.filter(p => !(["KPI defined","KPI measured","KPI on target","KPI off target"].indexOf(p["KPI Status"]) >= 0)).length, w:"Wirksamkeit nicht messbar", go:"kpi"},
+    {t:"Prozess nicht veröffentlicht", n:P.filter(p => p["Lifecycle Status"] !== "Published").length, w:"Verbindlichkeit für die MSCs fehlt", go:"portfolio"},
+    {t:"MSC-Relevanz unbewertet", n:P.filter(p => isTBA(p["MSC Relevance"])).length, w:"Rollout-Umfang unklar", go:"portfolio"},
+    {t:"Rollout-Kombination unbewertet", n:R.filter(r => r["Rollout Status"] === "Not Assessed").length, w:"Abdeckung je MSC nicht steuerbar", go:"matrix"},
+    {t:"Rollout blockiert", n:R.filter(r => r["Rollout Status"] === "Blocked").length, w:"Einführung steht still", go:"matrix"},
+    {t:"Kein Repository-Verweis", n:P.filter(p => !has(p["Repository URL"])).length, w:"Kein direkter Weg zum ADONIS-Inhalt", go:"portfolio"}
+  ];
+  return g.filter(x => x.n > 0).sort((a,b) => b.n - a.n);
+}
+
+/* ============================================================================
+   7 · Ansichten
+   ========================================================================== */
+function kpiTile(lab, val, sub, tone, meter){
+  const n = el("div",{class:"kpi" + (tone ? " " + tone : "")});
+  n.appendChild(el("span",{class:"lab", text:lab}));
+  n.appendChild(el("span",{class:"val", text: val === null || val === undefined ? "–" : String(val)}));
+  if (meter !== null && meter !== undefined)
+    n.appendChild(el("span",{class:"meter"},[el("i",{style:"width:" + Math.max(0,Math.min(100,meter)) + "%"})]));
+  if (sub) n.appendChild(el("span",{class:"sub", text:sub}));
+  return n;
+}
+function barRow(name, value, max, label, colour){
+  return el("div",{class:"bar"},[
+    el("span",{class:"n", text:name, title:name}),
+    el("span",{class:"t"},[el("i",{style:"width:" + (max ? Math.round(value/max*100) : 0) + "%" + (colour ? ";background:" + colour : "")})]),
+    el("span",{class:"v", text: label === undefined ? String(value) : label})
+  ]);
+}
+
+function renderOverview(){
+  const m = metrics();
+  $("#ovKpis").replaceChildren(
+    kpiTile("Relevant Processes", m.relevant, m.relevantTBA ? m.relevantTBA + " noch unbewertet" : "MSC-Relevanz bewertet", "n"),
+    kpiTile("Published Processes", m.published, "von " + m.processes + " Prozessen", m.published ? "g" : "a",
+            pct(m.published, m.processes)),
+    kpiTile("Processes with Owner", m.withOwner, "von " + m.processes + " Prozessen", m.withOwner === m.processes ? "g" : "r",
+            pct(m.withOwner, m.processes)),
+    kpiTile("Processes in Rollout", m.inRollout, "mindestens ein MSC aktiv", m.inRollout ? "n" : "a"),
+    kpiTile("Rollout Coverage", m.rolloutCoverage === null ? "–" : m.rolloutCoverage + " %",
+            m.scoredCombos + " von " + m.totalCombos + " Kombinationen gewertet",
+            m.rolloutCoverage === null ? "" : (m.rolloutCoverage >= 80 ? "g" : m.rolloutCoverage >= 30 ? "a" : "r"),
+            m.rolloutCoverage),
+    kpiTile("Overdue Reviews", m.overdueReviews, "Reviewtermin überschritten", m.overdueReviews ? "r" : "g"),
+    kpiTile("Open Decisions", m.openDecisions, "offen oder in Arbeit", m.openDecisions ? "a" : "g"),
+    kpiTile("Red Risks", m.redRisks, "offene Risiken mit RAG Rot", m.redRisks ? "r" : "g")
+  );
+
+  const lc = {};
+  (DB.Process_Master||[]).forEach(p => { const k = p["Lifecycle Status"] || TBA; lc[k] = (lc[k]||0) + 1; });
+  const lcKeys = Object.keys(lc).sort((a,b) => lc[b] - lc[a]);
+  const lcMax = Math.max.apply(null, [1].concat(lcKeys.map(k => lc[k])));
+  const lcBox = $("#ovLifecycle"); lcBox.replaceChildren();
+  $("#ovLcSub").textContent = (DB.Process_Master||[]).length + " Prozesse";
+  if (!lcKeys.length) lcBox.appendChild(el("div",{class:"empty", text:"Keine Prozesse erfasst."}));
+  else lcBox.appendChild(el("div",{class:"bars"}, lcKeys.map(k =>
+    barRow(k, lc[k], lcMax, lc[k] + " (" + pct(lc[k], (DB.Process_Master||[]).length) + " %)",
+           k === "Published" ? "var(--rag-g)" : (k === TBA ? "var(--rag-x)" : "var(--c1)")))));
+
+  const roBox = $("#ovRollout"); roBox.replaceChildren();
+  const mscs = DB.MSC_Master || [];
+  if (!mscs.length) roBox.appendChild(el("div",{class:"empty", text:"Keine MSC-Stammdaten erfasst."}));
+  else roBox.appendChild(el("div",{class:"bars"}, mscs.map(msc => {
+    const rows = (DB.Process_Rollout||[]).filter(r => r["MSC ID"] === msc["MSC ID"]
+      && ROLLOUT_META[r["Rollout Status"]] && ROLLOUT_META[r["Rollout Status"]].weight !== null);
+    const w = rows.length ? Math.round(rows.reduce((s,r) => s + ROLLOUT_META[r["Rollout Status"]].weight, 0) / rows.length * 100) : 0;
+    return barRow(msc["MSC ID"] + " · " + (msc["MSC Name"]||""), w, 100, rows.length ? w + " %" : "–",
+                  w >= 80 ? "var(--rag-g)" : w >= 30 ? "var(--rag-a)" : "var(--c1)");
+  })));
+
+  const gaps = governanceGaps();
+  const gapBox = $("#ovGaps"); gapBox.replaceChildren();
+  if (!gaps.length) gapBox.appendChild(el("div",{class:"empty", text:"Keine offenen Governance-Lücken."}));
+  else gapBox.appendChild(el("div",{class:"list"}, gaps.slice(0,7).map(g =>
+    el("div",{class:"litem"},[
+      el("span",{class:"rag " + (g.n > 5 ? "R" : "A"), text:String(g.n)}),
+      el("div",{class:"m"},[el("div",{class:"t", text:g.t}), el("div",{class:"d", text:g.w})]),
+      el("button",{class:"btn sm", type:"button", text:"Ansehen", onclick:() => show(g.go)})
+    ]))));
+
+  const dec = (DB.Governance_Decisions||[])
+    .filter(d => d["Decision Status"] === "Open" || d["Decision Status"] === "In Progress")
+    .sort((a,b) => String(a["Due Date"]||"9999").localeCompare(String(b["Due Date"]||"9999")));
+  const decBox = $("#ovDecisions"); decBox.replaceChildren();
+  if (!dec.length) decBox.appendChild(el("div",{class:"empty", text:"Keine offenen Entscheidungen."}));
+  else decBox.appendChild(el("div",{class:"list"}, dec.slice(0,7).map(d => {
+    const du = daysUntil(d["Due Date"]);
+    return el("div",{class:"litem"},[
+      el("div",{class:"m"},[
+        el("div",{class:"t", text:d["Decision Title"] || d["Decision ID"]}),
+        el("div",{class:"d", text:[d["Decision Body"], d["Decision Type"], d["Process ID"]].filter(has).join(" · ") || "–"})
+      ]),
+      el("span",{class:"r", text: d["Due Date"] ? fmtDate(d["Due Date"]) + (du < 0 ? " (überfällig)" : "") : "ohne Termin"}),
+      el("button",{class:"btn sm", type:"button", text:"Öffnen", onclick:() => { show("governance"); openRecord("Governance_Decisions", d); }})
+    ]);
+  })));
+}
+
+/* --- Process Landscape --------------------------------------------------- */
+const FOLLOW_UPS = ["Change Request","Manage IT Project","Service Request","Security Assessment","Software Selection"];
+function renderFlow(){
+  const box = $("#lsFlow"); box.replaceChildren();
+  const P = DB.Process_Master || [];
+  const src = P.find(p => p["Process Name"] === "IT Demand Management");
+  const outs = FOLLOW_UPS.map(n => P.find(p => p["Process Name"] === n)).filter(Boolean);
+  if (!src || !outs.length){
+    box.appendChild(el("div",{class:"empty", text:"Die Pilotprozesse sind nicht vollständig vorhanden; der Ablauf kann nicht dargestellt werden."}));
+    return;
+  }
+  const NS = "http://www.w3.org/2000/svg";
+  const sv = (t,a,k) => { const n = document.createElementNS(NS,t);
+    if (a) for (const x in a){ if (a[x] !== null && a[x] !== undefined) n.setAttribute(x, a[x]); }
+    if (k) [].concat(k).forEach(c => n.appendChild(c)); return n; };
+  const H = 30 + outs.length * 48, W = 860;
+  const svg = sv("svg",{class:"flow", viewBox:"0 0 " + W + " " + H, role:"img",
+    "aria-label":"IT Demand Management führt abhängig vom Initial Assessment zu fünf Folgeprozessen"});
+  const midY = H/2;
+  const box1 = (x,y,w,h,label,sub,rag,onclick) => {
+    const g = sv("g",{style:"cursor:pointer"});
+    g.appendChild(sv("rect",{x, y, width:w, height:h, rx:3, fill:"#fff", stroke:"#C9CED2", "stroke-width":1}));
+    g.appendChild(sv("rect",{x, y, width:4, height:h, fill:
+      rag === "Green" ? "#0C7D1F" : rag === "Amber" ? "#9A6400" : rag === "Red" ? "#C02B2B" : "#C9CED2"}));
+    const t = sv("text",{x:x+14, y:y+(sub?20:h/2+4), "font-size":12.5, "font-weight":600, fill:"#16181A"});
+    t.textContent = label; g.appendChild(t);
+    if (sub){ const s = sv("text",{x:x+14, y:y+34, "font-size":10.5, fill:"#858C93"}); s.textContent = sub; g.appendChild(s); }
+    if (onclick) g.addEventListener("click", onclick);
+    return g;
+  };
+  svg.appendChild(box1(4, midY-26, 196, 52, "IT Demand Management", src["Process ID"], src["Overall RAG"],
+    () => openProcess(src)));
+  const dx = 236, dw = 146;
+  svg.appendChild(sv("rect",{x:dx, y:midY-26, width:dw, height:52, rx:3, fill:"#14171A"}));
+  const dt = sv("text",{x:dx+dw/2, y:midY-2, "font-size":12, "font-weight":700, fill:"#fff", "text-anchor":"middle"});
+  dt.textContent = "Initial Assessment"; svg.appendChild(dt);
+  const dt2 = sv("text",{x:dx+dw/2, y:midY+14, "font-size":10, fill:"#9AA3AB", "text-anchor":"middle"});
+  dt2.textContent = "entscheidet über den Weg"; svg.appendChild(dt2);
+  svg.appendChild(sv("line",{x1:200, y1:midY, x2:dx, y2:midY, stroke:"#C9CED2", "stroke-width":1.5}));
+  const bx = 470, bw = 386;
+  outs.forEach((p,i) => {
+    const y = 14 + i*48;
+    svg.appendChild(sv("path",{d:"M" + (dx+dw) + " " + midY + " C " + (dx+dw+38) + " " + midY + ", " +
+      (bx-38) + " " + (y+20) + ", " + bx + " " + (y+20), fill:"none", stroke:"#C9CED2", "stroke-width":1.5}));
+    svg.appendChild(box1(bx, y, bw, 40, p["Process Name"], p["Process ID"] + " · " + (p["Process Group"]||""),
+      p["Overall RAG"], () => openProcess(p)));
+  });
+  box.appendChild(svg);
+  box.appendChild(el("p",{style:"margin:10px 0 0;font-size:12px;color:var(--ink-3);",
+    text:"Die fünf Folgeprozesse sind in Process_Master über das Feld Parent Process mit IT Demand Management verknüpft. "
+       + "Welcher Weg eingeschlagen wird, entscheidet das Initial Assessment im Demand Management."}));
+}
+function renderLandscape(){
+  renderFlow();
+  const P = DB.Process_Master || [];
+  const gSel = $("#lsGroupFilter"), rSel = $("#lsRagFilter");
+  if (gSel.options.length <= 1)
+    ["Management Processes","Core Processes","Support Processes",TBA].forEach(g =>
+      gSel.appendChild(el("option",{value:g, text:g})));
+  if (rSel.options.length <= 1)
+    RAG_VALUES.forEach(r => rSel.appendChild(el("option",{value:r, text:RAG_LABEL[r]})));
+  const gf = gSel.value, rf = rSel.value;
+  const host = $("#lsGroups"); host.replaceChildren();
+  const groups = ["Management Processes","Core Processes","Support Processes"];
+  const others = P.map(p => p["Process Group"]).filter(g => groups.indexOf(g) < 0);
+  groups.concat(others.filter((v,i,a) => a.indexOf(v) === i)).forEach(grp => {
+    if (gf && gf !== grp) return;
+    const list = P.filter(p => (p["Process Group"] || TBA) === grp && (!rf || p["Overall RAG"] === rf));
+    const sec = el("div",{class:"lgroup"});
+    sec.appendChild(el("h3",{text:grp + " · " + list.length}));
+    if (!list.length) sec.appendChild(el("div",{class:"empty", text:"Kein Prozess in dieser Gruppe."}));
+    else sec.appendChild(el("div",{class:"pcards"}, list.map(p => {
+      const kids = P.filter(c => c["Parent Process"] === p["Process ID"]);
+      const parent = P.find(c => c["Process ID"] === p["Parent Process"]);
+      const card = el("button",{class:"pcard " + (RAG_CODE[p["Overall RAG"]] || "X"), type:"button",
+        onclick:() => openProcess(p)});
+      card.appendChild(el("span",{class:"id", text:p["Process ID"] + " · " + (p["Process Level"]||"")}));
+      card.appendChild(el("h4",{text:p["Process Name"] || "(ohne Name)"}));
+      card.appendChild(el("div",{class:"meta"},[
+        el("span",{class:"rag " + (RAG_CODE[p["Overall RAG"]]||"X"), text:RAG_LABEL[p["Overall RAG"]]||"Grau"}),
+        el("span",{class:"tag", text:p["Lifecycle Status"] || TBA})
+      ]));
+      const rel = [];
+      if (parent) rel.push("Folgeprozess von " + parent["Process Name"]);
+      if (kids.length) rel.push(kids.length + " abhängige Prozesse: " + kids.map(k => k["Process Name"]).join(", "));
+      if (rel.length) card.appendChild(el("div",{class:"kids", text:rel.join(" · ")}));
+      return card;
+    })));
+    host.appendChild(sec);
+  });
+}
+let procCtx = null;
+function openProcess(p){
+  procCtx = p;
+  $("#procTitle").textContent = p["Process ID"] + " · " + (p["Process Name"] || "");
+  const b = $("#procBody"); b.replaceChildren();
+  const s = suggestRAG(p);
+  const P = DB.Process_Master || [];
+  const parent = P.find(c => c["Process ID"] === p["Parent Process"]);
+  const kids = P.filter(c => c["Parent Process"] === p["Process ID"]);
+  const head = el("div",{style:"display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;"},[
+    el("span",{class:"rag " + (RAG_CODE[p["Overall RAG"]]||"X"), text:"RAG " + (RAG_LABEL[p["Overall RAG"]]||"Grau")}),
+    el("span",{class:"tag", text:p["Process Group"] || TBA}),
+    el("span",{class:"tag", text:p["Process Level"] || TBA}),
+    el("span",{class:"tag", text:"Lifecycle: " + (p["Lifecycle Status"] || TBA)})
+  ]);
+  b.appendChild(head);
+  b.appendChild(el("div",{style:"background:var(--panel);border:1px solid var(--rule);border-radius:3px;padding:11px 13px;margin-bottom:14px;"},[
+    el("div",{style:"font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px;",
+      text:"RAG-Vorschlag: " + RAG_LABEL[s.rag]}),
+    el("div",{style:"font-size:12.5px;color:var(--ink-2);", text:s.reasons.join(" · ")})
+  ]));
+  const rows = [
+    ["Domain", p["Domain"]], ["Beschreibung", p["Description"]],
+    ["MSC Relevance", p["MSC Relevance"]], ["Process Owner", p["Process Owner"]],
+    ["Process Manager", p["Process Manager"]], ["Current Phase", p["Current Phase"]],
+    ["Approval Body", p["Approval Body"]], ["Approval Date", p["Approval Date"] ? fmtDate(p["Approval Date"]) : TBA],
+    ["Last Review Date", p["Last Review Date"] ? fmtDate(p["Last Review Date"]) : TBA],
+    ["Next Review Date", p["Next Review Date"] ? fmtDate(p["Next Review Date"]) : TBA],
+    ["KPI Status", p["KPI Status"]], ["Next Action", p["Next Action"]],
+    ["Action Owner", p["Action Owner"]], ["Due Date", p["Due Date"] ? fmtDate(p["Due Date"]) : TBA],
+    ["Eltern-Beziehung", parent ? parent["Process ID"] + " · " + parent["Process Name"] : "kein Elternprozess"],
+    ["Abhängige Prozesse", kids.length ? kids.map(k => k["Process Name"]).join(", ") : "keine"]
+  ];
+  const grid = el("div",{class:"fgrid"});
+  rows.forEach(([k,v]) => grid.appendChild(el("div",{class:"fld" + (k === "Beschreibung" ? " full" : "")},[
+    el("label",{text:k}),
+    el("div",{style:"font-size:13px;color:" + (isTBA(v) ? "var(--ink-3)" : "var(--ink)") + ";" + (isTBA(v) ? "font-style:italic;" : ""),
+      text: isTBA(v) ? (v || TBA) : String(v)})
+  ])));
+  b.appendChild(grid);
+
+  const adonis = el("div",{style:"margin-top:16px;padding-top:14px;border-top:1px solid var(--rule);"});
+  adonis.appendChild(el("div",{style:"font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;",
+    text:"Repository · führende Quelle"}));
+  if (has(p["Repository URL"]))
+    adonis.appendChild(el("a",{class:"btn primary", href:String(p["Repository URL"]), target:"_blank", rel:"noopener",
+      text:(p["Repository"] || "ADONIS") + " öffnen", style:"display:inline-block;text-decoration:none;"}));
+  else
+    adonis.appendChild(el("div",{style:"font-size:12.5px;color:var(--ink-2);",
+      text:"Für " + (p["Repository"] || "ADONIS") + " ist noch keine Adresse hinterlegt. Feld „Repository URL“ im Portfolio pflegen, dann erscheint hier der direkte Link."}));
+  b.appendChild(adonis);
+
+  const rl = rolloutsOf(p["Process ID"]);
+  if (rl.length){
+    const rbox = el("div",{style:"margin-top:16px;padding-top:14px;border-top:1px solid var(--rule);"});
+    rbox.appendChild(el("div",{style:"font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;",
+      text:"Rollout je MSC"}));
+    rbox.appendChild(el("div",{style:"display:flex;gap:6px;flex-wrap:wrap;"}, rl.map(r => {
+      const meta = ROLLOUT_META[r["Rollout Status"]] || ROLLOUT_META["Not Assessed"];
+      return el("button",{class:"pill", type:"button", style:"background:" + meta.bg + ";color:" + meta.fg + ";border:0;cursor:pointer;padding:3px 9px;",
+        text:r["MSC ID"] + ": " + r["Rollout Status"], onclick:() => { closeOv("#ovProc"); openCell(r["Process ID"], r["MSC ID"]); }});
+    })));
+    b.appendChild(rbox);
+  }
+  openOv("#ovProc");
+}
+$("#procEdit").addEventListener("click", () => { if (procCtx){ closeOv("#ovProc"); openRecord("Process_Master", procCtx); } });
+
+/* --- MSC Rollout Matrix -------------------------------------------------- */
+function renderMatrix(){
+  const sel = $("#mxGroup");
+  if (sel.options.length <= 1)
+    ["Management Processes","Core Processes","Support Processes"].forEach(g => sel.appendChild(el("option",{value:g, text:g})));
+  const grp = sel.value;
+  const P = (DB.Process_Master||[]).filter(p => !grp || p["Process Group"] === grp);
+  const M = DB.MSC_Master || [];
+  const wrap = $("#mxWrap"); wrap.replaceChildren();
+  if (!P.length || !M.length){
+    wrap.appendChild(el("div",{class:"empty",
+      text: !M.length ? "Keine MSC-Stammdaten erfasst. In der Administration anlegen."
+                      : "Kein Prozess in dieser Auswahl."}));
+  } else {
+    const tb = el("table",{class:"matrix"});
+    const hr = el("tr");
+    hr.appendChild(el("th",{class:"rowh corner", text:"Prozess"}));
+    M.forEach(m => hr.appendChild(el("th",{title:(m["MSC Name"]||"") + " · " + (m["Region"]||"")},
+      [el("div",{text:m["MSC ID"]}), el("div",{style:"font-weight:400;color:var(--ink-3);text-transform:none;letter-spacing:0;", text:m["MSC Name"]||""})])));
+    tb.appendChild(el("thead",{},[hr]));
+    const body = el("tbody");
+    P.forEach(p => {
+      const tr = el("tr");
+      tr.appendChild(el("th",{class:"rowh"},[
+        el("div",{text:p["Process Name"] || p["Process ID"]}),
+        el("div",{style:"font-weight:400;color:var(--ink-3);font-size:10.5px;", text:p["Process ID"] + " · " + (p["Process Group"]||"")})
+      ]));
+      M.forEach(m => {
+        const rec = (DB.Process_Rollout||[]).find(r => r["Process ID"] === p["Process ID"] && r["MSC ID"] === m["MSC ID"]);
+        const st = rec ? rec["Rollout Status"] : null;
+        const meta = ROLLOUT_META[st] || {bg:"#FFFFFF", fg:"#C9CED2"};
+        const td = el("td");
+        td.appendChild(el("button",{class:"mcell", type:"button",
+          style:"background:" + meta.bg + ";color:" + meta.fg,
+          title:p["Process Name"] + " · " + m["MSC ID"] + ": " + (st || "kein Datensatz"),
+          text: st || "anlegen", onclick:() => openCell(p["Process ID"], m["MSC ID"])}));
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+    tb.appendChild(body);
+    wrap.appendChild(tb);
+  }
+  $("#mxLegend").replaceChildren.apply($("#mxLegend"), ROLLOUT_STATUS.map(s =>
+    el("span",{},[el("i",{style:"background:" + ROLLOUT_META[s].bg}), el("span",{text:s})])));
+}
+let cellCtx = null;
+function openCell(pid, mid){
+  let rec = (DB.Process_Rollout||[]).find(r => r["Process ID"] === pid && r["MSC ID"] === mid);
+  if (!rec){
+    rec = blankRecord("Process_Rollout");
+    rec["Process ID"] = pid; rec["MSC ID"] = mid; rec["Rollout Status"] = "Not Assessed";
+    rec["Local Exception"] = "No";
+    DB.Process_Rollout.push(rec); save();
+  }
+  cellCtx = rec;
+  const p = (DB.Process_Master||[]).find(x => x["Process ID"] === pid);
+  const m = (DB.MSC_Master||[]).find(x => x["MSC ID"] === mid);
+  $("#cellTitle").textContent = (p ? p["Process Name"] : pid) + "  ·  " + (m ? m["MSC ID"] + " " + (m["MSC Name"]||"") : mid);
+  const form = $("#cellForm"); form.replaceChildren();
+  SCHEMA.Process_Rollout.fields.forEach(fld => {
+    const wrap = el("div",{class:"fld" + (fld.type === "longtext" ? " full" : "")});
+    wrap.appendChild(el("label",{text:fld.name}));
+    const opts = optionsFor("Process_Rollout", fld);
+    let inp;
+    if (opts){
+      inp = el("select");
+      if (fld.type.slice(0,4) === "ref:") inp.appendChild(el("option",{value:"", text:"–"}));
+      opts.forEach(o => inp.appendChild(el("option",{value:o, text:o, selected:o === rec[fld.name]})));
+    } else if (fld.type === "longtext"){ inp = el("textarea"); inp.value = rec[fld.name] || ""; }
+    else { inp = el("input",{type: fld.type === "date" ? "date" : "text"}); inp.value = rec[fld.name] || ""; }
+    const ro = (fld.name === "Rollout ID" || fld.name === "Process ID" || fld.name === "MSC ID");
+    if (ro){ inp.setAttribute("disabled",""); inp.style.background = "var(--panel)"; }
+    inp.dataset.field = fld.name;
+    wrap.appendChild(inp);
+    form.appendChild(wrap);
+  });
+  openOv("#ovCell");
+}
+$("#cellSave").addEventListener("click", () => {
+  if (!cellCtx) return;
+  Array.from($("#cellForm").querySelectorAll("[data-field]")).forEach(inp => {
+    if (!inp.hasAttribute("disabled")) cellCtx[inp.dataset.field] = inp.value;
+  });
+  save(); closeOv("#ovCell"); refreshAll();
+});
+$("#mxFill").addEventListener("click", () => {
+  const P = DB.Process_Master||[], M = DB.MSC_Master||[];
+  let added = 0;
+  P.forEach(p => M.forEach(m => {
+    const hit = (DB.Process_Rollout||[]).some(r => r["Process ID"] === p["Process ID"] && r["MSC ID"] === m["MSC ID"]);
+    if (!hit){
+      const rec = blankRecord("Process_Rollout");
+      rec["Process ID"] = p["Process ID"]; rec["MSC ID"] = m["MSC ID"];
+      rec["Rollout Status"] = "Not Assessed"; rec["Local Exception"] = "No";
+      DB.Process_Rollout.push(rec); added++;
+    }
+  }));
+  save(); refreshAll();
+  alert(added ? added + " fehlende Kombinationen angelegt." : "Es fehlten keine Kombinationen.");
+});
+
+/* --- Governance, KPI, Risiken -------------------------------------------- */
+function renderGovernance(){
+  const D = DB.Governance_Decisions || [];
+  const open = D.filter(d => d["Decision Status"] === "Open" || d["Decision Status"] === "In Progress");
+  const overdue = open.filter(d => { const x = daysUntil(d["Due Date"]); return x !== null && x < 0; });
+  $("#govKpis").replaceChildren(
+    kpiTile("Entscheidungen gesamt", D.length, "in Governance_Decisions", "n"),
+    kpiTile("Offen", open.length, "offen oder in Arbeit", open.length ? "a" : "g"),
+    kpiTile("Überfällig", overdue.length, "Fälligkeit überschritten", overdue.length ? "r" : "g"),
+    kpiTile("Entschieden", D.filter(d => d["Decision Status"] === "Decided").length, "abgeschlossen", "g")
+  );
+}
+function renderKpiView(){
+  const m = metrics();
+  const rows = [
+    ["Ownership Coverage", m.ownershipCoverage, "Prozesse mit benanntem Owner"],
+    ["Publication Coverage", m.publicationCoverage, "Lifecycle Status = Published"],
+    ["Review Compliance", m.reviewCompliance, "Reviewtermin nicht überschritten"],
+    ["KPI Coverage", m.kpiCoverage, "Prozesse mit hinterlegtem KPI"],
+    ["MSC Rollout Coverage", m.rolloutCoverage, "gewichteter Rollout-Fortschritt"],
+    ["Training Coverage", m.trainingCoverage, "Schulung abgeschlossen"],
+    ["Access Readiness", m.accessReadiness, "Zugriff eingerichtet"],
+    ["Role Clarification Coverage", m.roleClarification, "Rollen geklärt"],
+    ["Action Closure Rate", m.actionClosure, "Maßnahmen erledigt"]
+  ];
+  const box = $("#kpiDerived"); box.replaceChildren();
+  box.appendChild(el("div",{class:"bars"}, rows.map(([n,v,d]) =>
+    barRow(n, v === null ? 0 : v, 100, v === null ? "–" : v + " %",
+           v === null ? "var(--rag-x)" : v >= 80 ? "var(--rag-g)" : v >= 40 ? "var(--rag-a)" : "var(--rag-r)"))));
+  box.appendChild(el("p",{style:"margin:12px 0 0;font-size:12px;color:var(--ink-3);",
+    text:"Ein Strich bedeutet: noch keine Datenbasis vorhanden. Die übrigen Kennzahlen aus dem Katalog "
+       + "(Workflow Usage Rate, Process Compliance Rate, Process Understanding Score, Local Deviation Rate, "
+       + "Cycle Time, Process-related Support Requests, Stakeholder Satisfaction) werden gemessen und in der "
+       + "Tabelle unten gepflegt – sie stehen bewusst auf „To be assessed“ statt auf erfundenen Werten."}));
+}
+function renderRisks(){
+  const R = DB.Risks || [], A = DB.Actions || [];
+  const open = R.filter(r => r["Status"] !== "Closed");
+  $("#riskKpis").replaceChildren(
+    kpiTile("Risiken offen", open.length, "nicht geschlossen", open.length ? "a" : "g"),
+    kpiTile("Davon Rot", open.filter(r => r["RAG"] === "Red").length, "RAG Rot", open.filter(r => r["RAG"] === "Red").length ? "r" : "g"),
+    kpiTile("Eskalation nötig", open.filter(r => r["Escalation Required"] === "Yes").length, "Escalation Required = Yes", "a"),
+    kpiTile("Maßnahmen offen", A.filter(a => a["Status"] === "Open" || a["Status"] === "In Progress").length,
+            "von " + A.length + " Maßnahmen", "n")
+  );
+}
+/* --- News ---------------------------------------------------------------- */
+function renderNews(){
+  const N = (DB.News||[]).slice().sort((a,b) => {
+    const pa = a["Pinned"] === "Yes" ? 0 : 1, pb = b["Pinned"] === "Yes" ? 0 : 1;
+    if (pa !== pb) return pa - pb;
+    return String(b["Date"]||"").localeCompare(String(a["Date"]||""));
+  });
+  $("#newsCount").textContent = N.length + (N.length === 1 ? " Meldung" : " Meldungen");
+  const box = $("#newsList"); box.replaceChildren();
+  if (!N.length){ box.appendChild(el("div",{class:"empty", text:"Noch keine Meldungen."})); return; }
+  N.forEach(n => {
+    const post = el("article",{class:"post"});
+    const meta = el("div",{class:"pm"});
+    if (n["Pinned"] === "Yes") meta.appendChild(el("span",{class:"pin", text:"ANGEHEFTET"}));
+    if (n["Category"]) meta.appendChild(el("span",{class:"tag", text:n["Category"]}));
+    meta.appendChild(el("span",{text:fmtDate(n["Date"])}));
+    if (has(n["Author"])) meta.appendChild(el("span",{text:"· " + n["Author"]}));
+    meta.appendChild(el("button",{class:"rowbtn", type:"button", text:"✎", title:"Meldung bearbeiten",
+      style:"margin-left:auto;", onclick:() => openRecord("News", n)}));
+    post.appendChild(meta);
+    post.appendChild(el("h4",{text:n["Title"] || "(ohne Titel)"}));
+    post.appendChild(el("div",{class:"body", text:n["Body"] || ""}));
+    box.appendChild(post);
+  });
+}
+$("#newsNew").addEventListener("click", () => addRecord("News"));
+
+/* --- Administration ------------------------------------------------------ */
+function renderAdmin(){
+  const box = $("#admStats"); box.replaceChildren();
+  const rows = TABLES.map(t => ({t, n:(DB[t]||[]).length, d:(DB[t]||[]).filter(r => r._demo).length}));
+  const max = Math.max.apply(null, [1].concat(rows.map(r => r.n)));
+  box.appendChild(el("div",{class:"bars"}, rows.map(r =>
+    barRow(SCHEMA[r.t].label, r.n, max, r.n + (r.d ? " (" + r.d + " Demo)" : "")))));
+  let size = 0; try { size = (localStorage.getItem(STORE_KEY)||"").length; } catch(e){}
+  $("#admStamp").textContent = (size/1024).toFixed(1) + " KB im lokalen Speicher";
+}
+function backupObject(){
+  return {format:"MSCITGovernanceProcessCockpit", version:SCHEMA_VERSION,
+          exported:new Date().toISOString(), data:DB};
+}
+function doBackup(){
+  download("MSC_Cockpit_Backup_" + today() + ".json", JSON.stringify(backupObject(), null, 2), "application/json");
+}
+function doRestore(){ $("#restoreFile").value = ""; $("#restoreFile").click(); }
+$("#restoreFile").addEventListener("change", e => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    let obj;
+    try { obj = JSON.parse(String(fr.result)); }
+    catch(err){ alert("Die Datei ist kein gültiges JSON: " + err.message); return; }
+    const data = obj && obj.data ? obj.data : obj;
+    if (!data || typeof data !== "object" || !TABLES.some(t => Array.isArray(data[t]))){
+      alert("Die Datei enthält keinen erkennbaren Cockpit-Datenbestand."); return;
+    }
+    const counts = TABLES.map(t => SCHEMA[t].label + ": " + (Array.isArray(data[t]) ? data[t].length : 0)).join("\n");
+    confirmDlg("Der gesamte lokale Datenbestand wird durch das Backup ersetzt.\n\n" + counts, () => {
+      const fresh = {_meta:{version:SCHEMA_VERSION, created:today(), saved:null}};
+      TABLES.forEach(t => fresh[t] = Array.isArray(data[t]) ? data[t] : []);
+      if (data._meta && data._meta.created) fresh._meta.created = data._meta.created;
+      DB = fresh; save(); refreshAll();
+      alert("Backup eingespielt.");
+    });
+  };
+  fr.readAsText(file);
+});
+$("#btnBackup").addEventListener("click", doBackup);
+$("#btnRestore").addEventListener("click", doRestore);
+$("#admBackup").addEventListener("click", doBackup);
+$("#admRestore").addEventListener("click", doRestore);
+$("#btnAdminJump").addEventListener("click", () => show("admin"));
+$("#admExportAllCsv").addEventListener("click", () => {
+  TABLES.forEach((t,i) => setTimeout(() =>
+    download(t + ".csv", recordsToCsv(t, DB[t]||[]), "text/csv"), i * 320));
+});
+$("#admDropDemo").addEventListener("click", () => {
+  const n = TABLES.reduce((s,t) => s + (DB[t]||[]).filter(r => r._demo).length, 0);
+  if (!n){ alert("Es sind keine als Demo Data gekennzeichneten Datensätze vorhanden."); return; }
+  confirmDlg(n + " als Demo Data gekennzeichnete Datensätze werden gelöscht. "
+    + "Rollout-Datensätze ohne gültiges MSC werden dabei ebenfalls entfernt.", () => {
+    TABLES.forEach(t => DB[t] = (DB[t]||[]).filter(r => !r._demo));
+    const ids = (DB.MSC_Master||[]).map(m => m["MSC ID"]);
+    DB.Process_Rollout = (DB.Process_Rollout||[]).filter(r => ids.indexOf(r["MSC ID"]) >= 0);
+    save(); refreshAll(); alert("Demo-Daten entfernt.");
+  });
+});
+$("#admReset").addEventListener("click", () => {
+  confirmDlg("Der gesamte lokale Datenbestand wird verworfen und der Auslieferungszustand mit den "
+    + "sechs Pilotprozessen wiederhergestellt. Vorher ein Backup erzeugen?", () => {
+    DB = seed(); save(); refreshAll(); show("overview"); alert("Auslieferungszustand hergestellt.");
+  });
+});
+
+/* --- Import -------------------------------------------------------------- */
+let impCtx = null, impRows = null;
+function openImport(table){
+  impCtx = table; impRows = null;
+  $("#impTitle").textContent = "Import nach " + SCHEMA[table].label;
+  $("#impFile").value = "";
+  $("#impGo").setAttribute("disabled","");
+  $("#impHint").textContent = "Erwartet werden die Spalten aus " + SCHEMA[table].label
+    + ". Schlüsselfeld: " + SCHEMA[table].key + ".";
+  $("#impPreview").replaceChildren();
+  openOv("#ovImport");
+}
+$("#impFile").addEventListener("change", e => {
+  const file = e.target.files && e.target.files[0];
+  const prev = $("#impPreview"); prev.replaceChildren();
+  impRows = null; $("#impGo").setAttribute("disabled","");
+  if (!file) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    const text = String(fr.result);
+    let rows = null, err = null;
+    try {
+      if (/\.json$/i.test(file.name) || text.trim().charAt(0) === "[" || text.trim().charAt(0) === "{"){
+        const o = JSON.parse(text);
+        rows = Array.isArray(o) ? o : (Array.isArray(o.data && o.data[impCtx]) ? o.data[impCtx]
+             : (Array.isArray(o[impCtx]) ? o[impCtx] : null));
+        if (!rows) err = "Im JSON wurde keine Liste von Datensätzen für " + SCHEMA[impCtx].label + " gefunden.";
+      } else rows = csvToRecords(text, impCtx);
+    } catch(ex){ err = "Datei konnte nicht gelesen werden: " + ex.message; }
+    if (err || !rows || !rows.length){
+      prev.appendChild(el("div",{style:"color:var(--bad);font-size:12.5px;", text: err || "Keine Datensätze gefunden."}));
+      return;
+    }
+    const known = SCHEMA[impCtx].fields.map(x => x.name);
+    const cols = Object.keys(rows[0]).filter(c => known.indexOf(c) >= 0);
+    const unknown = Object.keys(rows[0]).filter(c => known.indexOf(c) < 0);
+    impRows = rows;
+    prev.appendChild(el("div",{style:"font-size:12.5px;color:var(--ink-2);"},[
+      el("div",{text: rows.length + " Datensätze erkannt."}),
+      el("div",{text: "Übernommene Spalten: " + (cols.join(", ") || "keine")}),
+      unknown.length ? el("div",{style:"color:var(--warn);", text:"Ignoriert: " + unknown.join(", ")}) : null,
+      cols.indexOf(SCHEMA[impCtx].key) < 0
+        ? el("div",{style:"color:var(--warn);", text:"Ohne Spalte " + SCHEMA[impCtx].key + " werden neue Schlüssel vergeben."})
+        : null
+    ]));
+    $("#impGo").removeAttribute("disabled");
+  };
+  fr.readAsText(file);
+});
+$("#impGo").addEventListener("click", () => {
+  if (!impRows || !impCtx) return;
+  const table = impCtx, sc = SCHEMA[table], mode = $("#impMode").value;
+  const known = sc.fields.map(x => x.name);
+  if (mode === "replace") DB[table] = [];
+  let added = 0, updated = 0;
+  impRows.forEach(src => {
+    const rec = {};
+    known.forEach(k => { if (src[k] !== undefined) rec[k] = String(src[k]); });
+    if (!Object.keys(rec).length) return;
+    const key = rec[sc.key];
+    const hit = (mode === "merge" && key) ? (DB[table]||[]).find(r => String(r[sc.key]) === String(key)) : null;
+    if (hit){ known.forEach(k => { if (rec[k] !== undefined) hit[k] = rec[k]; }); updated++; }
+    else {
+      const full = blankRecord(table);
+      known.forEach(k => { if (rec[k] !== undefined) full[k] = rec[k]; });
+      if (!rec[sc.key] || (DB[table]||[]).some(r => String(r[sc.key]) === String(rec[sc.key]))) full[sc.key] = uid(table);
+      DB[table].push(full); added++;
+    }
+  });
+  save(); closeOv("#ovImport"); refreshAll();
+  alert("Import abgeschlossen: " + added + " neu, " + updated + " aktualisiert.");
+});
+
+/* ============================================================================
+   8 · Navigation und Start
+   ========================================================================== */
+const NAV = [
+  ["overview","Executive Overview"], ["landscape","Process Landscape"], ["portfolio","Process Portfolio"],
+  ["matrix","MSC Rollout Matrix"], ["governance","Governance & Decisions"], ["kpi","KPI & Adoption"],
+  ["risks","Risks & Actions"], ["info","BPM Infopoint"], ["admin","Administration"]
+];
+let CURRENT = "overview";
+function show(view){
+  if (!NAV.some(n => n[0] === view)) view = "overview";
+  CURRENT = view;
+  $$(".view").forEach(v => v.classList.toggle("on", v.id === "v-" + view));
+  $$("#nav button").forEach(b => b.setAttribute("aria-current", String(b.dataset.view === view)));
+  try { if (location.hash.slice(1) !== view) history.replaceState(null, "", "#" + view); } catch(e){}
+  renderView(view);
+  window.scrollTo(0,0);
+}
+function renderView(view){
+  if (view === "overview") renderOverview();
+  else if (view === "landscape") renderLandscape();
+  else if (view === "portfolio") renderTable("Process_Master");
+  else if (view === "matrix"){ renderMatrix(); renderTable("Process_Rollout"); }
+  else if (view === "governance"){ renderGovernance(); renderTable("Governance_Decisions"); }
+  else if (view === "kpi"){ renderKpiView(); renderTable("Process_KPI"); }
+  else if (view === "risks"){ renderRisks(); renderTable("Risks"); renderTable("Actions"); }
+  else if (view === "info"){ renderNews(); renderTable("News"); }
+  else if (view === "admin"){ renderAdmin(); renderTable("MSC_Master"); }
+}
+function refreshAll(){ renderView(CURRENT); updateFooter(); }
+function onDataChanged(){ /* Kennzahlen hängen an mehreren Tabellen */ refreshAll(); }
+
+function init(){
+  DB = loadDB();
+  const nav = $("#nav");
+  NAV.forEach(([id,label]) => nav.appendChild(el("button",{type:"button", role:"tab",
+    "data-view":id, text:label, "aria-current":String(id === "overview"),
+    onclick:() => show(id)})));
+  $("#ovRefresh").addEventListener("click", () => renderOverview());
+  $("#lsGroupFilter").addEventListener("change", renderLandscape);
+  $("#lsRagFilter").addEventListener("change", renderLandscape);
+  $("#mxGroup").addEventListener("change", renderMatrix);
+  try { addEventListener("hashchange", () => show(location.hash.slice(1) || "overview")); } catch(e){}
+  setSaveState("ok");
+  updateFooter();
+  let start = "overview";
+  try { const h = location.hash.slice(1); if (NAV.some(n => n[0] === h)) start = h; } catch(e){}
+  show(start);
+  if (!localStorage.getItem(STORE_KEY)) save();
+}
+init();
+</script>
+</body>
+</html>
