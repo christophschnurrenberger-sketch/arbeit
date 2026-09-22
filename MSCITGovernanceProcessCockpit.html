@@ -229,6 +229,55 @@ table.matrix td{text-align:center;border-right:1px solid var(--rule);padding:0;}
 .stack{display:flex;height:17px;border-radius:2px;overflow:hidden;background:var(--rule);}
 .stack i{display:block;height:100%;}
 .flow{width:100%;height:auto;}
+
+/* ====================================================== Portfolio-Dashboard */
+.filterbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--paper);
+  border:1px solid var(--rule);border-radius:4px;padding:10px 12px;box-shadow:var(--shadow);margin-bottom:14px;}
+.filterbar input[type=search],.filterbar select{border:1px solid var(--rule-2);border-radius:3px;
+  padding:5px 9px;font-size:12.5px;background:var(--paper);max-width:100%;}
+.filterbar input[type=search]{min-width:190px;flex:1 1 190px;}
+.filterbar select{flex:0 1 auto;}
+.filterbar .cnt{margin-left:auto;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-2);margin-top:9px;}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:11px;height:11px;border-radius:2px;display:inline-block;}
+.sbar{display:grid;grid-template-columns:132px 1fr 84px;gap:9px;align-items:center;font-size:12px;
+  padding:3px 0;border:0;background:none;width:100%;text-align:left;cursor:pointer;color:inherit;}
+.sbar:hover .n{color:var(--ink);} .sbar:hover .t i{filter:brightness(.92);}
+.sbar .n{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sbar .t{background:var(--rule);border-radius:2px;height:15px;overflow:hidden;}
+.sbar .t i{display:block;height:100%;border-radius:2px;}
+.sbar .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;font-size:11.5px;}
+.sbar.on .n{color:var(--ink);font-weight:650;}
+@media(max-width:620px){.sbar{grid-template-columns:96px 1fr 70px;}}
+
+/* Zeitstrahl. --glab ist die Breite der Namensspalte und zugleich der linke
+   Rand der Gitterebene, damit Monatslinien und Balken deckungsgleich sind. */
+.gantt{--glab:232px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);overflow:hidden;}
+.ghead{display:flex;align-items:stretch;border-bottom:1px solid var(--rule);background:var(--panel);}
+.ghead .gl{width:var(--glab);flex:0 0 auto;padding:6px 10px;font-size:10.5px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);border-right:1px solid var(--rule);}
+.ghead .gt{flex:1;position:relative;height:26px;}
+.ghead .gm{position:absolute;top:6px;font-size:10.5px;color:var(--ink-3);white-space:nowrap;
+  border-left:1px solid var(--rule);padding-left:4px;height:20px;}
+.gbody{position:relative;overflow:auto;max-height:min(56vh,470px);}
+.grow{display:flex;align-items:stretch;height:22px;}
+.grow:hover{background:var(--panel);}
+.grow .gl{width:var(--glab);flex:0 0 auto;padding:0 10px;font-size:11.5px;line-height:22px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid var(--rule);color:var(--ink-2);}
+.grow .gt{flex:1;position:relative;}
+.gbar{position:absolute;top:5px;height:12px;border-radius:2px;border:0;padding:0;cursor:pointer;min-width:3px;
+  overflow:hidden;}
+.gbar:hover{outline:2px solid var(--accent);outline-offset:1px;}
+.gbar i{display:block;height:100%;}
+.gpoint{position:absolute;top:7px;width:8px;height:8px;transform:rotate(45deg);border:0;padding:0;cursor:pointer;}
+.gover{position:absolute;left:var(--glab);right:0;top:0;pointer-events:none;}
+.gline{position:absolute;top:0;bottom:0;width:1px;background:var(--rule);}
+.gnow{position:absolute;top:0;bottom:0;width:1px;background:var(--accent);}
+/* Die Linie laeuft durch Kopf und Koerper; beschriftet ist sie in der Legende,
+   sonst ueberdeckt sie die Monatsangabe daneben. */
+.ghead .gnow{top:3px;bottom:3px;}
+@media(max-width:760px){.gantt{--glab:118px;}}
 footer{max-width:1680px;margin:0 auto;padding:16px 20px 30px;color:var(--ink-3);font-size:11.5px;
   display:flex;gap:18px;flex-wrap:wrap;border-top:1px solid var(--rule);}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
@@ -286,6 +335,55 @@ footer{max-width:1680px;margin:0 auto;padding:16px 20px 30px;color:var(--ink-3);
         <div class="card-b" id="ovGaps"></div></div>
       <div class="card"><div class="card-h"><h3>Nächste Managemententscheidungen</h3><span class="sub">offene Entscheidungen nach Fälligkeit</span></div>
         <div class="card-b" id="ovDecisions"></div></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-dash" role="tabpanel">
+    <div class="vhead">
+      <div><h2>Portfolio-Dashboard</h2>
+        <p>Termine, Fortschritt und Verantwortung für alle Prozesse im Bestand. Jeder Filter wirkt auf
+           sämtliche Kacheln, Diagramme und Listen; ein Klick auf einen Balken filtert weiter.</p></div>
+      <div class="acts">
+        <button type="button" class="btn" id="dbCsv">Auswahl als CSV</button>
+        <button type="button" class="btn" id="dbReset">Filter zurücksetzen</button>
+      </div>
+    </div>
+    <div class="filterbar">
+      <input type="search" id="dbSearch" placeholder="Prozess, ID oder Verantwortliche suchen" />
+      <select id="dbGroup"><option value="">Alle Prozessgruppen</option></select>
+      <select id="dbLevel"><option value="">Alle Ebenen</option></select>
+      <select id="dbInit"><option value="">Alle Initiativen</option></select>
+      <select id="dbStatus"><option value="">Alle Terminstatus</option></select>
+      <select id="dbLead"><option value="">Alle Verantwortlichen</option></select>
+      <span class="cnt" id="dbCount"></span>
+    </div>
+    <div class="kpis" id="dbKpis"></div>
+    <div class="grid g2" style="margin-top:14px;">
+      <div class="card"><div class="card-h"><h3>Terminstatus</h3><span class="sub">Klick filtert</span></div>
+        <div class="card-b" id="dbStatusChart"></div></div>
+      <div class="card"><div class="card-h"><h3>Fortschritt nach Prozessgruppe</h3><span class="sub">Ø Fertigstellung</span></div>
+        <div class="card-b" id="dbGroupChart"></div></div>
+    </div>
+    <div class="grid g2" style="margin-top:14px;">
+      <div class="card"><div class="card-h"><h3>Prozesse je Initiative</h3><span class="sub">roter Anteil = verzögert</span></div>
+        <div class="card-b" id="dbInitChart"></div></div>
+      <div class="card"><div class="card-h"><h3>Verantwortliche</h3><span class="sub">Initiative Lead, roter Anteil = verzögert</span></div>
+        <div class="card-b" id="dbLeadChart"></div></div>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <div class="card-h"><h3>Zeitstrahl</h3><span class="sub" id="dbGanttSub"></span></div>
+      <div class="card-b">
+        <div class="gantt" id="dbGantt"></div>
+        <div class="legend" id="dbGanttLegend"></div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:14px;">
+      <div class="card"><div class="card-h"><h3>Termin überschritten</h3>
+          <span class="sub">Endtermin vorbei, Fortschritt unter 100 %</span></div>
+        <div class="card-b" id="dbLate"></div></div>
+      <div class="card"><div class="card-h"><h3>Als Nächstes fällig</h3>
+          <span class="sub">offene Prozesse nach Endtermin</span></div>
+        <div class="card-b" id="dbNext"></div></div>
     </div>
   </section>
 
@@ -1695,6 +1793,361 @@ function renderFlow(){
     text:"Die fünf Folgeprozesse sind in Process_Master über das Feld Parent Process mit IT Demand Management verknüpft. "
        + "Welcher Weg eingeschlagen wird, entscheidet das Initial Assessment im Demand Management."}));
 }
+/* ============================================================================
+   Portfolio-Dashboard
+   Wertet die Termin- und Fortschrittsfelder aus dem Excel-Export aus. Kacheln,
+   Diagramme, Zeitstrahl und Listen lesen dieselbe gefilterte Menge, damit kein
+   Wert gegen einen anderen steht.
+   ========================================================================== */
+const SCHED_ORDER = ["Terminiert","In Arbeit","Verzögert","Abgeschlossen","Nicht geplant",TBA];
+const SCHED_COLOR = {"Terminiert":"#2A6FB0", "In Arbeit":"#B5761F", "Verzögert":"#C02B2B",
+  "Abgeschlossen":"#0C7D1F", "Nicht geplant":"#7B848B"};
+SCHED_COLOR[TBA] = "#C9CED2";
+const SCHED_BG = {"Terminiert":"#DCE8F4", "In Arbeit":"#F7EBD8", "Verzögert":"#F8DFDF",
+  "Abgeschlossen":"#DCEFE0", "Nicht geplant":"#E9ECEE"};
+SCHED_BG[TBA] = "#EFF1F2";
+const GROUP_SHORT = {"Management Processes":"Management", "Core Processes":"Core", "Support Processes":"Support"};
+
+/* "100%" oder "41%" aus dem Export; alles andere gilt als nicht gemessen. */
+function pctOf(v){
+  const m = String(v === undefined || v === null ? "" : v).match(/(\d+(?:[.,]\d+)?)/);
+  if (!m) return null;
+  return Math.max(0, Math.min(100, parseFloat(m[1].replace(",", "."))));
+}
+function dateOf(v){
+  if (!v) return null;
+  const d = new Date(String(v) + "T00:00:00");
+  return isNaN(d) ? null : d;
+}
+const DAY = 86400000;
+/* Mehrfachnennungen stehen im Export durch Komma getrennt in einem Feld. */
+function peopleOf(v){
+  if (isTBA(v)) return [];
+  return String(v).split(",").map(x => x.trim()).filter(Boolean);
+}
+function schedOf(p){ return has(p["Schedule Status"]) ? p["Schedule Status"] : TBA; }
+function isLate(p){
+  const e = dateOf(p["Planned End"]), pc = pctOf(p["Completion %"]);
+  if (!e || pc === 100) return false;
+  return e.getTime() < new Date(today() + "T00:00:00").getTime();
+}
+
+/* --- Filter. Der Zustand steht in den Bedienelementen, nicht daneben. ----- */
+function dashState(){
+  return {q:($("#dbSearch").value || "").trim().toLowerCase(), grp:$("#dbGroup").value,
+          lvl:$("#dbLevel").value, ini:$("#dbInit").value, st:$("#dbStatus").value, lead:$("#dbLead").value};
+}
+function dashRows(){
+  const f = dashState();
+  return (DB.Process_Master || []).filter(p =>
+       (!f.grp  || (p["Process Group"] || TBA) === f.grp)
+    && (!f.lvl  || (p["Process Level"] || TBA) === f.lvl)
+    && (!f.ini  || (p["Domain"] || TBA) === f.ini)
+    && (!f.st   || schedOf(p) === f.st)
+    && (!f.lead || peopleOf(p["Process Owner"]).indexOf(f.lead) >= 0)
+    && (!f.q    || [p["Process Name"], p["Process ID"], p["Process Owner"], p["Process Manager"], p["Consultant"]]
+                     .some(v => String(v || "").toLowerCase().indexOf(f.q) >= 0)));
+}
+/* Auswahllisten folgen dem Bestand, nicht einer festen Aufzählung. */
+function fillSelect(sel, values, labels){
+  const now = [].slice.call(sel.options, 1).map(o => o.value).join("\u0001");
+  if (now === values.join("\u0001")) return;
+  const keep = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  values.forEach(v => sel.appendChild(el("option",{value:v, text:(labels && labels[v]) || v})));
+  sel.value = values.indexOf(keep) >= 0 ? keep : "";
+}
+function toggleFilter(sel, value){
+  sel.value = sel.value === value ? "" : value;
+  renderDash();
+}
+
+function renderDash(){
+  const P = DB.Process_Master || [];
+  const uniq = (arr) => arr.filter((v,i,a) => v && a.indexOf(v) === i).sort((a,b) => String(a).localeCompare(String(b),"de"));
+  fillSelect($("#dbGroup"), uniq(P.map(p => p["Process Group"] || TBA)));
+  fillSelect($("#dbLevel"), uniq(P.map(p => p["Process Level"] || TBA)));
+  fillSelect($("#dbInit"),  uniq(P.map(p => p["Domain"] || TBA)));
+  fillSelect($("#dbStatus"), SCHED_ORDER.filter(s => P.some(p => schedOf(p) === s)));
+  const leadNames = [];
+  P.forEach(p => peopleOf(p["Process Owner"]).forEach(n => { if (leadNames.indexOf(n) < 0) leadNames.push(n); }));
+  fillSelect($("#dbLead"), leadNames.sort((a,b) => a.localeCompare(b,"de")));
+
+  const rows = dashRows();
+  $("#dbCount").textContent = rows.length === P.length
+    ? P.length + " Prozesse" : rows.length + " von " + P.length + " Prozessen";
+
+  dashKpis(rows, P);
+  dashStatusChart(rows);
+  dashGroupChart(rows);
+  dashInitChart(rows);
+  dashLeadChart(rows);
+  dashGantt(rows);
+  dashLists(rows);
+}
+
+/* --- Kacheln ------------------------------------------------------------- */
+function dashKpis(rows, all){
+  const n = rows.length;
+  const byStatus = s => rows.filter(p => schedOf(p) === s).length;
+  const measured = rows.map(p => pctOf(p["Completion %"])).filter(v => v !== null);
+  const avg = measured.length ? Math.round(measured.reduce((a,b) => a+b, 0) / measured.length) : null;
+  const late = rows.filter(isLate).length;
+  const approved = rows.filter(p => p["Approval Date"]).length;
+  const noDate = rows.filter(p => !p["Planned Start"] && !p["Planned End"]).length;
+  const share = v => n ? Math.round(v / n * 100) + " % der Auswahl" : "keine Auswahl";
+
+  const tile = (cls, lab, val, sub, meter) => {
+    const k = el("div",{class:"kpi " + cls},[
+      el("div",{class:"lab", text:lab}), el("div",{class:"val", text:val})]);
+    if (meter !== undefined && meter !== null)
+      k.appendChild(el("div",{class:"meter"},[el("i",{style:"width:" + meter + "%"})]));
+    k.appendChild(el("div",{class:"sub", text:sub}));
+    return k;
+  };
+  const host = $("#dbKpis"); host.replaceChildren();
+  [
+    tile("n", "Prozesse", String(n), n === all.length ? "gesamter Bestand" : "von " + all.length + " im Bestand"),
+    tile("n", "Ø Fortschritt", avg === null ? "–" : avg + " %",
+      measured.length + " von " + n + " mit Angabe", avg === null ? null : avg),
+    tile("a", "In Arbeit", String(byStatus("In Arbeit")), share(byStatus("In Arbeit"))),
+    tile("r", "Verzögert", String(byStatus("Verzögert")), share(byStatus("Verzögert"))),
+    tile("g", "Abgeschlossen", String(byStatus("Abgeschlossen")), share(byStatus("Abgeschlossen"))),
+    tile("r", "Termin überschritten", String(late), "Endtermin vorbei, unter 100 %"),
+    tile("g", "Freigegeben", String(approved), "Freigabedatum in der Quelle"),
+    tile("", "Ohne Termin", String(noDate), "weder Start noch Ende gesetzt")
+  ].forEach(t => host.appendChild(t));
+}
+
+/* --- Balken -------------------------------------------------------------- */
+function barRow(label, title, valueText, width, color, active, onclick){
+  return el("button",{class:"sbar" + (active ? " on" : ""), type:"button", title:title, onclick:onclick},[
+    el("span",{class:"n", text:label}),
+    el("span",{class:"t"},[el("i",{style:"width:" + Math.max(width, width > 0 ? 1 : 0) + "%;background:" + color})]),
+    el("span",{class:"v", text:valueText})
+  ]);
+}
+function emptyBox(text){ return el("div",{class:"empty", text:text}); }
+
+function dashStatusChart(rows){
+  const host = $("#dbStatusChart"); host.replaceChildren();
+  if (!rows.length){ host.appendChild(emptyBox("Kein Prozess in dieser Auswahl.")); return; }
+  const counts = SCHED_ORDER.map(s => [s, rows.filter(p => schedOf(p) === s).length]).filter(x => x[1]);
+  const stack = el("div",{class:"stack"});
+  counts.forEach(([s,c]) => stack.appendChild(el("i",{
+    style:"width:" + (c / rows.length * 100) + "%;background:" + SCHED_COLOR[s],
+    title:s + ": " + c})));
+  host.appendChild(stack);
+  const box = el("div",{style:"margin-top:11px;"});
+  const max = Math.max.apply(null, counts.map(x => x[1]));
+  counts.forEach(([s,c]) => box.appendChild(barRow(s, s + ": " + c + " Prozesse",
+    c + " · " + Math.round(c / rows.length * 100) + " %", c / max * 100, SCHED_COLOR[s],
+    $("#dbStatus").value === s, () => toggleFilter($("#dbStatus"), s))));
+  host.appendChild(box);
+}
+
+function dashGroupChart(rows){
+  const host = $("#dbGroupChart"); host.replaceChildren();
+  const groups = ["Management Processes","Core Processes","Support Processes"]
+    .concat((DB.Process_Master||[]).map(p => p["Process Group"] || TBA))
+    .filter((v,i,a) => a.indexOf(v) === i);
+  const data = groups.map(g => {
+    const list = rows.filter(p => (p["Process Group"] || TBA) === g);
+    const m = list.map(p => pctOf(p["Completion %"])).filter(v => v !== null);
+    return {g, n:list.length, avg: m.length ? Math.round(m.reduce((a,b) => a+b, 0) / m.length) : null};
+  }).filter(d => d.n);
+  if (!data.length){ host.appendChild(emptyBox("Kein Prozess in dieser Auswahl.")); return; }
+  data.forEach(d => host.appendChild(barRow(
+    (GROUP_SHORT[d.g] || d.g) + " (" + d.n + ")",
+    d.g + ": " + d.n + " Prozesse" + (d.avg === null ? ", ohne Fortschrittsangabe" : ", Ø " + d.avg + " %"),
+    d.avg === null ? "–" : d.avg + " %", d.avg === null ? 0 : d.avg, "var(--c1)",
+    $("#dbGroup").value === d.g, () => toggleFilter($("#dbGroup"), d.g))));
+  const lv = ["L1","L2","L3","L4",TBA].map(l => [l, rows.filter(p => (p["Process Level"] || TBA) === l).length])
+    .filter(x => x[1]);
+  if (lv.length){
+    host.appendChild(el("div",{style:"margin:13px 0 7px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);",
+      text:"Ebenen"}));
+    const max = Math.max.apply(null, lv.map(x => x[1]));
+    lv.forEach(([l,c]) => host.appendChild(barRow(l, l + ": " + c + " Prozesse", String(c),
+      c / max * 100, "var(--c6)", $("#dbLevel").value === l, () => toggleFilter($("#dbLevel"), l))));
+  }
+}
+
+/* Zwei Werte je Balken: Gesamtzahl als Breite, verzögerter Anteil in Rot. */
+function splitBarChart(host, data, activeValue, onPick, emptyText, limit){
+  host.replaceChildren();
+  if (!data.length){ host.appendChild(emptyBox(emptyText)); return; }
+  const max = Math.max.apply(null, data.map(d => d.n));
+  const shown = limit ? data.slice(0, limit) : data;
+  shown.forEach(d => {
+    const bar = el("span",{class:"t"});
+    const track = el("i",{style:"width:" + (d.n / max * 100) + "%;background:var(--c1);position:relative;"});
+    if (d.late) track.appendChild(el("span",{
+      style:"position:absolute;right:0;top:0;bottom:0;width:" + (d.late / d.n * 100) + "%;background:var(--rag-r);"}));
+    bar.appendChild(track);
+    host.appendChild(el("button",{class:"sbar" + (activeValue === d.key ? " on" : ""), type:"button",
+      title:d.key + ": " + d.n + " Prozesse" + (d.late ? ", davon " + d.late + " verzögert" : ""),
+      onclick:() => onPick(d.key)},[
+      el("span",{class:"n", text:d.label || d.key}), bar,
+      el("span",{class:"v", text:d.late ? d.n + " · " + d.late + "↓" : String(d.n)})]));
+  });
+  if (limit && data.length > limit)
+    host.appendChild(el("div",{style:"margin-top:8px;font-size:11.5px;color:var(--ink-3);",
+      text:"weitere " + (data.length - limit) + " mit weniger Prozessen"}));
+}
+function dashInitChart(rows){
+  const keys = rows.map(p => p["Domain"] || TBA).filter((v,i,a) => a.indexOf(v) === i);
+  const data = keys.map(k => ({key:k,
+    n: rows.filter(p => (p["Domain"] || TBA) === k).length,
+    late: rows.filter(p => (p["Domain"] || TBA) === k && schedOf(p) === "Verzögert").length}))
+    .sort((a,b) => b.n - a.n);
+  splitBarChart($("#dbInitChart"), data, $("#dbInit").value,
+    k => toggleFilter($("#dbInit"), k), "Kein Prozess in dieser Auswahl.");
+}
+function dashLeadChart(rows){
+  const tally = {};
+  rows.forEach(p => peopleOf(p["Process Owner"]).forEach(n => {
+    const t = tally[n] || (tally[n] = {key:n, n:0, late:0});
+    t.n++; if (schedOf(p) === "Verzögert") t.late++;
+  }));
+  const data = Object.keys(tally).map(k => tally[k]).sort((a,b) => b.n - a.n || a.key.localeCompare(b.key,"de"));
+  splitBarChart($("#dbLeadChart"), data, $("#dbLead").value,
+    k => toggleFilter($("#dbLead"), k),
+    "Für diese Auswahl ist kein Initiative Lead hinterlegt.", 10);
+}
+
+/* --- Zeitstrahl ---------------------------------------------------------- */
+const G_ROW = 22;   /* muss zur Höhe von .grow im Stylesheet passen */
+function dashGantt(rows){
+  const host = $("#dbGantt"); host.replaceChildren();
+  const leg = $("#dbGanttLegend"); leg.replaceChildren();
+  const dated = rows.map(p => ({p, s:dateOf(p["Planned Start"]), e:dateOf(p["Planned End"])}))
+    .filter(x => x.s || x.e)
+    .sort((a,b) => (a.s || a.e) - (b.s || b.e));
+  $("#dbGanttSub").textContent = dated.length
+    ? dated.length + " von " + rows.length + " Prozessen mit Terminen"
+    : "keine Termine in dieser Auswahl";
+  if (!dated.length){ host.appendChild(emptyBox("Für diese Auswahl sind keine Termine hinterlegt.")); return; }
+
+  const now = new Date(today() + "T00:00:00");
+  let min = Infinity, max = -Infinity;
+  dated.forEach(x => { [x.s, x.e].forEach(d => { if (!d) return;
+    min = Math.min(min, d.getTime()); max = Math.max(max, d.getTime()); }); });
+  min = Math.min(min, now.getTime()); max = Math.max(max, now.getTime());
+  const from = new Date(new Date(min).getFullYear(), new Date(min).getMonth(), 1);
+  const lastD = new Date(max);
+  const to = new Date(lastD.getFullYear(), lastD.getMonth() + 1, 1);
+  const span = to - from;
+  const at = d => (d - from) / span * 100;
+
+  const head = el("div",{class:"ghead"},[el("div",{class:"gl", text:"Prozess"})]);
+  const headTrack = el("div",{class:"gt"});
+  const months = [];
+  for (let d = new Date(from); d < to; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) months.push(new Date(d));
+  /* Wie dicht die Monate beschriftet werden, haengt an der wirklich
+     verfuegbaren Breite - auf dem Telefon sonst uebereinander. */
+  const labW = parseInt(getComputedStyle(host).getPropertyValue("--glab")) || 232;
+  const trackW = Math.max((host.clientWidth || 900) - labW, 120);
+  const every = Math.max(1, Math.ceil(months.length / Math.max(1, Math.floor(trackW / 58))));
+  months.forEach((d,i) => { if (i % every) return;
+    headTrack.appendChild(el("div",{class:"gm", style:"left:" + at(d) + "%",
+      text:d.toLocaleDateString("de-DE",{month:"short", year:"2-digit"})})); });
+  head.appendChild(headTrack);
+  host.appendChild(head);
+
+  const body = el("div",{class:"gbody"});
+  const over = el("div",{class:"gover", style:"height:" + (dated.length * G_ROW) + "px"});
+  months.forEach((d,i) => { if (i % every) return;
+    over.appendChild(el("div",{class:"gline", style:"left:" + at(d) + "%"})); });
+  over.appendChild(el("div",{class:"gnow", style:"left:" + at(now) + "%"}));
+  headTrack.appendChild(el("div",{class:"gnow", style:"left:" + at(now) + "%"}));
+  body.appendChild(over);
+
+  dated.forEach(x => {
+    const row = el("div",{class:"grow"},[
+      el("div",{class:"gl", text:x.p["Process Name"] || x.p["Process ID"], title:x.p["Process Name"]})]);
+    const track = el("div",{class:"gt"});
+    const st = schedOf(x.p), col = SCHED_COLOR[st] || SCHED_COLOR[TBA];
+    const pc = pctOf(x.p["Completion %"]);
+    const tip = (x.p["Process Name"] || "") + " · " + st
+      + (x.s ? " · Start " + fmtDate(x.p["Planned Start"]) : "")
+      + (x.e ? " · Ende " + fmtDate(x.p["Planned End"]) : "")
+      + (pc === null ? "" : " · " + pc + " %");
+    if (x.s && x.e && x.e >= x.s){
+      const left = at(x.s), width = Math.max(at(x.e) - left, .35);
+      /* Heller Grund = geplante Dauer, satter Teil = erledigter Anteil. Ohne
+         Fortschrittsangabe bleibt der Balken hell und zeigt nur den Status. */
+      const bar = el("button",{class:"gbar", type:"button", title:tip,
+        style:"left:" + left + "%;width:" + width + "%;background:" + (SCHED_BG[st] || SCHED_BG[TBA])
+            + ";box-shadow:inset 0 0 0 1px " + col,
+        onclick:() => openProcess(x.p)});
+      if (pc) bar.appendChild(el("i",{style:"width:" + pc + "%;background:" + col}));
+      track.appendChild(bar);
+    } else {
+      const d = x.s || x.e;
+      track.appendChild(el("button",{class:"gpoint", type:"button",
+        title:tip + (x.s ? " · kein Endtermin" : " · kein Starttermin"),
+        style:"left:calc(" + at(d) + "% - 4px);background:" + col, onclick:() => openProcess(x.p)}));
+    }
+    row.appendChild(track);
+    body.appendChild(row);
+  });
+  host.appendChild(body);
+
+  SCHED_ORDER.filter(s => dated.some(x => schedOf(x.p) === s)).forEach(s =>
+    leg.appendChild(el("span",{},[el("i",{style:"background:" + SCHED_COLOR[s]}), el("span",{text:s})])));
+  leg.appendChild(el("span",{},[
+    el("i",{style:"background:" + SCHED_BG["In Arbeit"] + ";box-shadow:inset 0 0 0 1px " + SCHED_COLOR["In Arbeit"]}),
+    el("span",{text:"heller Grund = geplante Dauer, satt = erledigter Anteil"})]));
+  leg.appendChild(el("span",{},[el("i",{style:"background:var(--accent)"}),
+    el("span",{text:"Linie = heute (" + fmtDate(today()) + ")"})]));
+}
+
+/* --- Listen -------------------------------------------------------------- */
+function dashListItem(p, rightText, rightClass){
+  return el("button",{class:"litem", type:"button", style:"width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--rule);cursor:pointer;",
+    onclick:() => openProcess(p)},[
+    el("div",{class:"m"},[
+      el("div",{class:"t", text:p["Process Name"] || p["Process ID"]}),
+      el("div",{class:"d", text:[p["Process ID"], p["Domain"], has(p["Process Owner"]) ? p["Process Owner"] : null]
+        .filter(v => v && v !== TBA).join(" · ")})]),
+    el("div",{class:"r", style:rightClass ? "color:" + rightClass + ";font-weight:700;" : null, text:rightText})
+  ]);
+}
+function dashLists(rows){
+  const now = new Date(today() + "T00:00:00").getTime();
+  const late = rows.filter(isLate)
+    .sort((a,b) => dateOf(a["Planned End"]) - dateOf(b["Planned End"]));
+  const lateHost = $("#dbLate"); lateHost.replaceChildren();
+  if (!late.length) lateHost.appendChild(emptyBox("Kein Prozess in dieser Auswahl hat seinen Endtermin überschritten."));
+  else {
+    const list = el("div",{class:"list"});
+    late.slice(0, 12).forEach(p => {
+      const d = Math.round((now - dateOf(p["Planned End"]).getTime()) / DAY);
+      const pc = pctOf(p["Completion %"]);
+      list.appendChild(dashListItem(p, d + " Tage" + (pc === null ? "" : " · " + pc + " %"), "var(--bad)"));
+    });
+    lateHost.appendChild(list);
+    if (late.length > 12) lateHost.appendChild(el("div",{style:"margin-top:9px;font-size:11.5px;color:var(--ink-3);",
+      text:"und " + (late.length - 12) + " weitere – Filter „Verzögert" + "“ oder Zeitstrahl nutzen."}));
+  }
+
+  const open = rows.filter(p => dateOf(p["Planned End"]) && pctOf(p["Completion %"]) !== 100
+      && dateOf(p["Planned End"]).getTime() >= now)
+    .sort((a,b) => dateOf(a["Planned End"]) - dateOf(b["Planned End"]));
+  const nextHost = $("#dbNext"); nextHost.replaceChildren();
+  if (!open.length) nextHost.appendChild(emptyBox("Für diese Auswahl steht kein Endtermin mehr aus."));
+  else {
+    const list = el("div",{class:"list"});
+    open.slice(0, 12).forEach(p => {
+      const d = Math.round((dateOf(p["Planned End"]).getTime() - now) / DAY);
+      list.appendChild(dashListItem(p, fmtDate(p["Planned End"]) + " · in " + d + " Tagen",
+        d <= 30 ? "var(--warn)" : null));
+    });
+    nextHost.appendChild(list);
+  }
+}
+
 function renderLandscape(){
   renderFlow();
   const P = DB.Process_Master || [];
@@ -2166,7 +2619,8 @@ $("#impGo").addEventListener("click", () => {
    8 · Navigation und Start
    ========================================================================== */
 const NAV = [
-  ["overview","Executive Overview"], ["landscape","Process Landscape"], ["portfolio","Process Portfolio"],
+  ["overview","Executive Overview"], ["dash","Portfolio-Dashboard"],
+  ["landscape","Process Landscape"], ["portfolio","Process Portfolio"],
   ["matrix","MSC Rollout Matrix"], ["governance","Governance & Decisions"], ["kpi","KPI & Adoption"],
   ["risks","Risks & Actions"], ["info","BPM Infopoint"], ["admin","Administration"]
 ];
@@ -2182,6 +2636,7 @@ function show(view){
 }
 function renderView(view){
   if (view === "overview") renderOverview();
+  else if (view === "dash") renderDash();
   else if (view === "landscape") renderLandscape();
   else if (view === "portfolio") renderTable("Process_Master");
   else if (view === "matrix"){ renderMatrix(); renderTable("Process_Rollout"); }
@@ -2201,6 +2656,19 @@ function init(){
     "data-view":id, text:label, "aria-current":String(id === "overview"),
     onclick:() => show(id)})));
   $("#ovRefresh").addEventListener("click", () => renderOverview());
+  ["#dbGroup","#dbLevel","#dbInit","#dbStatus","#dbLead"].forEach(id =>
+    $(id).addEventListener("change", renderDash));
+  $("#dbSearch").addEventListener("input", renderDash);
+  $("#dbReset").addEventListener("click", () => {
+    ["#dbGroup","#dbLevel","#dbInit","#dbStatus","#dbLead"].forEach(id => { $(id).value = ""; });
+    $("#dbSearch").value = "";
+    renderDash();
+  });
+  $("#dbCsv").addEventListener("click", () => {
+    const rows = dashRows();
+    if (!rows.length){ alert("Die aktuelle Auswahl ist leer."); return; }
+    download("Prozessauswahl_" + today() + ".csv", recordsToCsv("Process_Master", rows), "text/csv");
+  });
   $("#lsGroupFilter").addEventListener("change", renderLandscape);
   $("#lsRagFilter").addEventListener("change", renderLandscape);
   $("#lsLevelFilter").addEventListener("change", renderLandscape);
@@ -2210,6 +2678,12 @@ function init(){
   $("#mxLevel").addEventListener("change", renderMatrix);
   $("#mxSearch").addEventListener("input", renderMatrix);
   try { addEventListener("hashchange", () => show(location.hash.slice(1) || "overview")); } catch(e){}
+  let resizeTimer = null;
+  addEventListener("resize", () => {
+    if (CURRENT !== "dash") return;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => dashGantt(dashRows()), 180);
+  });
   setSaveState("ok");
   updateFooter();
   let start = "overview";

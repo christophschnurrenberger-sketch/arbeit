@@ -64,6 +64,24 @@ Rollout-Kombinationen, je zwei Entscheidungen, Risiken und Maßnahmen) sind in d
 Oberfläche als **Demo Data** gekennzeichnet und über *Administration → Demo-Daten
 entfernen* in einem Schritt löschbar.
 
+## Portfolio-Dashboard
+
+Der zweite Navigationspunkt wertet die Termin- und Fortschrittsfelder aus dem
+Export aus: acht Kacheln (Anzahl, Ø Fortschritt, in Arbeit, verzögert,
+abgeschlossen, Termin überschritten, freigegeben, ohne Termin), Verteilungen
+nach Terminstatus, Prozessgruppe, Ebene, Initiative und Verantwortlichen, ein
+Zeitstrahl über alle Prozesse mit Terminen sowie die Listen „Termin
+überschritten" und „Als Nächstes fällig".
+
+Sechs Filter (Suche, Prozessgruppe, Ebene, Initiative, Terminstatus,
+Verantwortliche) wirken auf jede Kachel, jedes Diagramm und jede Liste
+gleichzeitig; ein Klick auf einen Balken setzt denselben Filter, ein zweiter
+hebt ihn auf. *Auswahl als CSV* gibt genau die gefilterten Prozesse aus.
+
+Im Zeitstrahl ist der helle Grund die geplante Dauer und der satte Teil der
+erledigte Anteil; Prozesse mit nur einem Datum stehen als Raute. Die rote Linie
+ist der heutige Tag, ein Klick öffnet die Detailsicht des Prozesses.
+
 ## Umstieg von einer älteren Fassung
 
 Wer das Cockpit vorher geöffnet hat, hat einen Bestand im Browser. Der wird beim
