@@ -295,7 +295,10 @@ footer{max-width:1680px;margin:0 auto;padding:16px 20px 30px;color:var(--ink-3);
         <p>Prozesskarten nach Prozessgruppe. Eine Karte öffnet die Detailsicht mit Eltern-Kind-Beziehung,
            Status, RAG und dem Verweis nach ADONIS.</p></div>
       <div class="acts">
+        <input type="search" id="lsSearch" class="btn" placeholder="Prozess suchen" style="min-width:190px;" />
         <select id="lsGroupFilter" class="btn"><option value="">Alle Prozessgruppen</option></select>
+        <select id="lsLevelFilter" class="btn"><option value="">Alle Ebenen</option></select>
+        <select id="lsDomainFilter" class="btn"><option value="">Alle Initiativen</option></select>
         <select id="lsRagFilter" class="btn"><option value="">Alle RAG-Status</option></select>
       </div>
     </div>
@@ -322,7 +325,9 @@ footer{max-width:1680px;margin:0 auto;padding:16px 20px 30px;color:var(--ink-3);
         <p>Prozesse als Zeilen, MSCs als Spalten. Eine Zelle öffnet den Detaildialog für diese
            Prozess-MSC-Kombination.</p></div>
       <div class="acts">
+        <input type="search" id="mxSearch" class="btn" placeholder="Prozess suchen" style="min-width:180px;" />
         <select id="mxGroup" class="btn"><option value="">Alle Prozessgruppen</option></select>
+        <select id="mxLevel" class="btn"><option value="">Alle Ebenen</option></select>
         <button type="button" class="btn" id="mxFill">Fehlende Kombinationen anlegen</button>
       </div>
     </div>
@@ -435,7 +440,8 @@ footer{max-width:1680px;margin:0 auto;padding:16px 20px 30px;color:var(--ink-3);
       <div class="card-b">
         <p style="margin:0 0 12px;color:var(--ink-2);font-size:12.5px;">
           <b>Demo-Daten entfernen</b> löscht ausschließlich Datensätze, die als Demo Data gekennzeichnet sind.
-          <b>Auslieferungszustand</b> verwirft den gesamten lokalen Bestand und stellt die Pilotprozesse wieder her.</p>
+          <b>Auslieferungszustand</b> verwirft den gesamten lokalen Bestand und stellt das
+          ausgelieferte Portfolio (Pilotprozesse und Excel-Import) wieder her.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button type="button" class="btn" id="admDropDemo">Demo-Daten entfernen</button>
           <button type="button" class="btn danger" id="admReset">Auslieferungszustand herstellen</button>
@@ -534,7 +540,7 @@ footer{max-width:1680px;margin:0 auto;padding:16px 20px 30px;color:var(--ink-3);
    ========================================================================== */
 const TBA = "To be assessed";
 const STORE_KEY = "mscCockpit.v1";
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;   /* 2 = Prozessportfolio aus dem Excel-Export enthalten */
 
 const ROLLOUT_STATUS = ["N/A","Not Assessed","Planned","Access Ready","Training Planned",
   "Training Completed","Roles Clarified","Rollout Started","Operational","Blocked","Local Exception"];
@@ -583,7 +589,14 @@ const SCHEMA = {
       f("Last Review Date","date"), f("Next Review Date","date"),
       f("KPI Status","select",[TBA,"No KPI defined","KPI defined","KPI measured","KPI on target","KPI off target"]),
       f("Overall RAG","select",RAG_VALUES),
-      f("Next Action","text"), f("Action Owner","text"), f("Due Date","date")
+      f("Next Action","text"), f("Action Owner","text"), f("Due Date","date"),
+      /* Ab hier die Felder aus dem Excel-Export. Sie tragen Werte, die es im
+         Cockpit vorher nicht gab, und bleiben leer, wo die Quelle leer ist. */
+      f("Consultant","text"),
+      f("Schedule Status","select",[TBA,"Terminiert","In Arbeit","Verzögert","Abgeschlossen","Nicht geplant"]),
+      f("Elaboration Status","select",[TBA,"Terminiert","In Arbeit","Verzögert","Abgeschlossen"]),
+      f("Planned Start","date"), f("Planned End","date"),
+      f("Duration (d)","text"), f("Completion %","text"), f("Source Comment","longtext")
     ]
   },
   MSC_Master: {
@@ -665,7 +678,8 @@ const TABLES = Object.keys(SCHEMA);
 
 /* ============================================================================
    2 · Auslieferungsbestand
-   Pilotprozesse mit echten Namen. Keine erfundenen Verantwortlichen, Freigabe-
+   Pilotprozesse der Spezifikation und das vollständige Prozessportfolio aus dem
+   Excel-Export. Keine erfundenen Verantwortlichen, Freigabe-
    oder Reviewdaten und keine erfundenen KPI-Werte - Unbekanntes bleibt auf
    "To be assessed". Ergänzende Testdatensätze tragen _demo und werden in der
    Oberfläche als "Demo Data" ausgewiesen.
@@ -680,18 +694,247 @@ const PILOTS = [
 ];
 const DESCR = "Inhaltliche Prozessbeschreibung wird in ADONIS geführt und dort veröffentlicht.";
 
+/* Prozessportfolio aus dem Excel-Export "Process Portfolio", Stand 2026-09-22.
+   124 Zeilen, unveraendert uebernommen. Reihenfolge ist Baumreihenfolge, daher
+   steht jeder Elternprozess vor seinen Kindern.
+   Spalten je Zeile:
+   0 Name  1 Gruppe (MP/CP/SP)  2 Ebene  3 Elternindex (-1 = Wurzel)
+   4 Initiative  5 Terminstatus  6 Fortschritt  7 Start  8 Ende  9 Dauer (T)
+   10 Elaboration  11 Initiative Lead  12 Process Manager  13 Consultant
+   14 Freigabedatum  15 Kommentar
+   Leere Quellfelder bleiben leer und werden in der Oberflaeche zu
+   "To be assessed"; es wird nichts ergaenzt. */
+const PORTFOLIO = [
+ ["Build IT Service","CP",1,-1,"ITSM","In Arbeit","41%","","","0","Ohne Angabe","Dalek Martin (LIS)","Wiehe Alexander (COB)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","",""],
+ ["Deploy IT service","CP",2,0,"ITSM","In Arbeit","0%","2026-05-04","2026-07-31","0","In Arbeit","Dalek Martin (LIS)","Wiehe Alexander (COB)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","",""],
+ ["Design IT service","CP",2,0,"ITSM","In Arbeit","50%","2026-05-04","2026-07-31","0","In Arbeit","Dalek Martin (LIS)","Wiehe Alexander (COB)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","",""],
+ ["Define solution target architecture","CP",3,2,"Architecture management","Verzögert","50%","2026-01-14","2026-06-22","114","In Arbeit","Hammer Marco (AER)","Nussbaumer Florian (LBC)","Hoermann Patrick (LLI)","",""],
+ ["Perform software selection","CP",3,2,"Architecture management","Verzögert","100%","2025-10-01","2026-04-30","152","Abgeschlossen","Preiss Matthias (LBC)","Reiner Heiko (HAU-ITSA)","Hoermann Patrick (LLI)","2025-10-14",""],
+ ["Conduct market analysis and compile long or short list","CP",4,4,"Architecture management","Abgeschlossen","100%","2025-10-01","2026-04-30","1","Abgeschlossen","Preiss Matthias (LBC)","Reiner Heiko (HAU-ITSA)","Hoermann Patrick (LLI)","2025-10-14",""],
+ ["Perform vendor use case pitch and usability test","CP",4,4,"Architecture management","Abgeschlossen","100%","2025-10-01","2026-04-30","1","Abgeschlossen","Preiss Matthias (LBC)","Reiner Heiko (HAU-ITSA)","Hoermann Patrick (LLI)","2025-10-14",""],
+ ["Recommendation and EA approval","CP",4,4,"Architecture management","Abgeschlossen","100%","2025-10-01","2026-04-30","1","Abgeschlossen","Preiss Matthias (LBC)","Reiner Heiko (HAU-ITSA)","Hoermann Patrick (LLI)","2025-10-14",""],
+ ["Record and plan functional requirements","CP",4,4,"Architecture management","Abgeschlossen","100%","2025-10-01","2026-04-30","1","Abgeschlossen","Preiss Matthias (LBC)","Reiner Heiko (HAU-ITSA)","Hoermann Patrick (LLI)","2025-10-14",""],
+ ["Validate strategic fit","CP",4,4,"Architecture management","Abgeschlossen","100%","2025-10-01","2026-04-30","2","Abgeschlossen","Preiss Matthias (LBC)","Reiner Heiko (HAU-ITSA)","Hoermann Patrick (LLI)","2025-10-14",""],
+ ["Develop and customise IT service","CP",2,0,"ITSM","In Arbeit","0%","2026-05-04","2026-07-31","0","In Arbeit","Dalek Martin (LIS)","Wiehe Alexander (COB)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","",""],
+ ["Evaluate success of IT service rollout","CP",2,0,"ITSM","In Arbeit","0%","2026-05-04","2026-07-31","0","In Arbeit","Dalek Martin (LIS)","Wiehe Alexander (COB)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","",""],
+ ["Manage IT service change","CP",2,0,"ITSM","Abgeschlossen","100%","2026-01-12","2026-06-30","122","Abgeschlossen","Sint Rachel (LBH)","Wiehe Alexander (COB)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH), Frank Maren (LIS)","2026-04-15",""],
+ ["Manage IT service release","CP",2,0,"ITSM","In Arbeit","50%","2026-02-20","2026-06-30","93","In Arbeit","Hoeller Martin (LBH)","Wiehe Alexander (COB)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH), Frank Maren (LIS)","",""],
+ ["Test and validate IT service","CP",2,0,"ITSM","In Arbeit","0%","2026-05-04","2026-07-31","0","In Arbeit","Dalek Martin (LIS)","Wiehe Alexander (COB)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","",""],
+ ["Deliver IT service","CP",1,-1,"ITSM","Terminiert","0%","2026-04-01","2026-06-17","56","Ohne Angabe","","Schnurrenberger Christoph (LIS-LIN)","","",""],
+ ["Handle IT service order","CP",2,15,"ITSM","Verzögert","0%","2026-04-01","2026-06-17","56","Verzögert","","Schnurrenberger Christoph (LIS-LIN)","","",""],
+ ["Manage IT service provision request","CP",2,15,"ITSM","Verzögert","0%","2026-04-01","2026-06-17","56","Verzögert","","Schnurrenberger Christoph (LIS-LIN)","","",""],
+ ["Ensure Information security","SP",1,-1,"Information security","In Arbeit","50%","2025-10-16","2025-10-16","1","Ohne Angabe","Da Silva Alessandro (LIN)","Monnier Murielle (LEC)","Rollinger Alexander (LIS)","",""],
+ ["Perform SaaS Security Assessment","SP",2,18,"Information security","In Arbeit","50%","2025-10-19","2025-11-30","0","In Arbeit","Hefele Michael (LIN-LIS)","Reiner Heiko (HAU-ITSA)","Hoermann Patrick (LLI), Rollinger Alexander (LIS)","",""],
+ ["Ensure performance and conformance of IT services","SP",1,-1,"ITSM","Verzögert","0%","","","0","Verzögert","","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""],
+ ["Leverage IT innovation","SP",1,-1,"ITSM","In Arbeit","25%","2026-05-01","2026-10-31","55","Ohne Angabe","Abbondio Viviana (LIS)","Sint Rachel (LBH)","Chen Leilei (LIS-BPMO)","",""],
+ ["Manage IT governance framework","MP",1,-1,"Corporate IT body","In Arbeit","50%","2026-01-07","2026-08-31","169","In Arbeit","Felder Max (LLI)","Mielenz Thomas (LMT)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH), Kreis Andreas (LLI)","",""],
+ ["Maintain IT glossary","MP",2,22,"Corporate IT body","Verzögert","25%","2026-01-07","2026-01-17","8","Ohne Angabe","Felder Max (LLI)","Mielenz Thomas (LMT)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","",""],
+ ["Manage IT knowledge","SP",1,-1,"ITSM","Verzögert","100%","2026-01-20","2026-06-30","116","Abgeschlossen","Kuerschner Philipp (LIS)","Sint Rachel (LBH)","Schroeder Michael (LIS)","2026-03-19",""],
+ ["Manage IT portfolio","MP",1,-1,"ITSM","In Arbeit","78%","2025-11-10","2026-05-15","135","Abgeschlossen","","","Frank Maren (LIS), Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","",""],
+ ["Manage IT project portfolio","MP",2,25,"IT project management","Verzögert","100%","2025-11-10","2026-05-31","145","Abgeschlossen","Mühlbacher Christian (LIS)","Rollinger Alexander (LIS)","Frank Maren (LIS)","",""],
+ ["Manage IT service portfolio","MP",2,25,"ITSM","In Arbeit","50%","2026-04-01","2026-09-08","115","In Arbeit","Birgit Gerathewohl (LIS)","Reiner Heiko (HAU-ITSA)","Frank Maren (LIS), Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","",""],
+ ["Manage IT processes and continuous improvement","MP",1,-1,"ITSM","In Arbeit","21%","2025-10-01","2026-05-31","173","Abgeschlossen","Rollinger Alexander (LIS)","Reiner Heiko (HAU-ITSA)","Hoermann Patrick (LLI)","",""],
+ ["Develop and maintain IT BPM framework","MP",2,28,"ITSM","Abgeschlossen","100%","2025-08-04","2025-10-16","1","Abgeschlossen","Rollinger Alexander (LIS)","Reiner Heiko (HAU-ITSA)","Hoermann Patrick (LLI)","2025-09-18",""],
+ ["Manage continuous improvement","MP",2,28,"ITSM","Verzögert","0%","2025-10-01","2026-01-30","88","Verzögert","Kuerschner Philipp (LIS)","Reiner Heiko (HAU-ITSA)","Boehme Matthias (LIS-BPMO), Rollinger Alexander (LIS)","",""],
+ ["Manage a common approach to contiual improvement","MP",3,30,"ITSM","Nicht geplant","0%","","2025-10-16","0","Ohne Angabe","Kuerschner Philipp (LIS)","Reiner Heiko (HAU-ITSA)","Boehme Matthias (LIS-BPMO), Rollinger Alexander (LIS)","",""],
+ ["Manage continual improvement initiative","MP",3,30,"ITSM","Nicht geplant","0%","","2025-10-16","0","Ohne Angabe","Kuerschner Philipp (LIS)","Reiner Heiko (HAU-ITSA)","Boehme Matthias (LIS-BPMO), Rollinger Alexander (LIS)","",""],
+ ["Perform operational process management","MP",2,28,"ITSM","In Arbeit","25%","2025-10-01","2026-05-31","173","In Arbeit","Rollinger Alexander (LIS)","Reiner Heiko (HAU-ITSA)","Rollinger Alexander (LIS)","2025-09-18",""],
+ ["Analyse process","MP",3,33,"ITSM","Abgeschlossen","100%","2025-10-01","2025-10-01","1","Abgeschlossen","Rollinger Alexander (LIS)","Reiner Heiko (HAU-ITSA)","Hoermann Patrick (LLI)","2025-09-18",""],
+ ["Elaborate to-be process","MP",3,33,"ITSM","In Arbeit","25%","2026-01-12","2026-05-31","100","In Arbeit","Rollinger Alexander (LIS)","Reiner Heiko (HAU-ITSA)","Rollinger Alexander (LIS)","2025-09-18",""],
+ ["Identify process and determine goals","MP",3,33,"ITSM","In Arbeit","25%","2026-01-12","2026-05-31","100","In Arbeit","Rollinger Alexander (LIS)","Reiner Heiko (HAU-ITSA)","Rollinger Alexander (LIS)","2025-09-18",""],
+ ["Implement process","MP",3,33,"ITSM","In Arbeit","25%","2026-01-12","2026-05-31","100","In Arbeit","Rollinger Alexander (LIS)","Reiner Heiko (HAU-ITSA)","Rollinger Alexander (LIS)","2025-09-19",""],
+ ["Perform and measure process","MP",3,33,"ITSM","Abgeschlossen","100%","2025-10-01","2025-10-01","1","Abgeschlossen","Rollinger Alexander (LIS)","Reiner Heiko (HAU-ITSA)","Hoermann Patrick (LLI)","2025-09-18",""],
+ ["Plan process execution","MP",3,33,"ITSM","In Arbeit","25%","2026-01-12","2026-05-31","100","In Arbeit","Rollinger Alexander (LIS)","Reiner Heiko (HAU-ITSA)","Rollinger Alexander (LIS)","2025-09-18",""],
+ ["Manage IT project","SP",1,-1,"IT project management","Abgeschlossen","100%","2025-07-14","2025-12-10","108","Abgeschlossen","Mühlbacher Christian (LIS)","Rollinger Alexander (LIS)","Frank Maren (LIS)","2025-09-18",""],
+ ["Assign personnel resources to IT project","SP",2,40,"IT project management","Abgeschlossen","100%","2025-07-14","2025-12-10","1","Abgeschlossen","Mühlbacher Christian (LIS)","Rollinger Alexander (LIS)","Frank Maren (LIS)","",""],
+ ["Close IT project","SP",2,40,"IT project management","Abgeschlossen","100%","2025-07-14","2025-12-10","1","Abgeschlossen","Mühlbacher Christian (LIS)","Rollinger Alexander (LIS)","Frank Maren (LIS)","2025-09-18",""],
+ ["Initiate IT project","SP",2,40,"IT project management","Abgeschlossen","100%","2025-07-14","2025-12-10","1","Abgeschlossen","Mühlbacher Christian (LIS)","Rollinger Alexander (LIS)","Frank Maren (LIS)","2025-09-18",""],
+ ["Manage IT project change request","SP",2,40,"IT project management","Abgeschlossen","100%","2025-07-14","2025-12-10","1","Abgeschlossen","Mühlbacher Christian (LIS)","Rollinger Alexander (LIS)","Frank Maren (LIS)","2025-09-18",""],
+ ["Plan IT project","SP",2,40,"IT project management","Abgeschlossen","100%","2025-07-14","2025-12-10","1","Abgeschlossen","Mühlbacher Christian (LIS)","Rollinger Alexander (LIS)","Frank Maren (LIS)","2025-09-18",""],
+ ["Steer and execute IT project","SP",2,40,"IT project management","Abgeschlossen","100%","2025-07-14","2025-12-10","1","Abgeschlossen","Mühlbacher Christian (LIS)","Rollinger Alexander (LIS)","Frank Maren (LIS)","2025-09-18",""],
+ ["Manage IT risks and compliance","MP",1,-1,"","In Arbeit","22%","2025-10-01","2026-09-30","0","Abgeschlossen","Mueskens Jan (LHO)","Monnier Murielle (LEC)","Hoermann Patrick (LLI)","",""],
+ ["Manage IT compliance","MP",2,47,"Central area (Jan Müskens)","In Arbeit","25%","2025-10-01","2026-09-30","261","In Arbeit","Mueskens Jan (LHO)","Monnier Murielle (LEC)","Kreis Andreas (LLI)","",""],
+ ["DC/DCC/MSC IT-compliance","MP",3,48,"Central area (Jan Müskens)","In Arbeit","25%","2025-10-01","2026-09-30","261","In Arbeit","Mueskens Jan (LHO)","Monnier Murielle (LEC)","Kreis Andreas (LLI)","",""],
+ ["Implement to improve","MP",3,48,"Central area (Jan Müskens)","In Arbeit","25%","2025-10-01","2026-09-30","261","In Arbeit","Mueskens Jan (LHO)","Monnier Murielle (LEC)","","",""],
+ ["Manage IT-C framework","MP",3,48,"Central area (Jan Müskens)","In Arbeit","25%","2025-10-01","2026-09-30","261","In Arbeit","Mueskens Jan (LHO)","Monnier Murielle (LEC)","Kreis Andreas (LLI)","",""],
+ ["Manage IT-C strategy","MP",3,48,"Central area (Jan Müskens)","In Arbeit","25%","2025-10-01","2026-09-30","261","In Arbeit","Mueskens Jan (LHO)","Monnier Murielle (LEC)","Kreis Andreas (LLI)","",""],
+ ["Monitor to delegate","MP",3,48,"Central area (Jan Müskens)","In Arbeit","25%","2025-10-01","2026-09-30","261","In Arbeit","Mueskens Jan (LHO)","Monnier Murielle (LEC)","","",""],
+ ["Requirements to measures","MP",3,48,"Central area (Jan Müskens)","In Arbeit","25%","2025-10-01","2026-09-30","261","In Arbeit","Mueskens Jan (LHO)","Monnier Murielle (LEC)","","",""],
+ ["Manage IT risks","MP",2,47,"Central area (Jan Müskens)","Terminiert","0%","2025-10-01","2026-09-30","261","Ohne Angabe","","Monnier Murielle (LEC)","","",""],
+ ["Manage IT sourcing and procurement","SP",1,-1,"ITSM","In Arbeit","25%","2026-04-20","2026-07-08","118","In Arbeit","Dolderer Wolfgang (LIS)","Monnier Murielle (LEC)","Schoeberl Lorena (LBH)","",""],
+ ["Manage IT stakeholder relationships","MP",1,-1,"Corporate IT body","Verzögert","0%","2026-04-01","2026-12-23","191","Verzögert","Felder Max (LLI)","Mielenz Thomas (LMT)","Kreis Andreas (LLI)","",""],
+ ["Manage IT strategy","MP",1,-1,"Corporate IT body","In Arbeit","50%","2026-02-02","2026-07-29","128","In Arbeit","Felder Max (LLI)","Mielenz Thomas (LMT)","Kreis Andreas (LLI)","2026-05-06",""],
+ ["Manage and control IT financials","MP",1,-1,"IT planning and steering","In Arbeit","50%","2025-10-15","2026-07-31","208","In Arbeit","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Create and maintain IT budgets","MP",2,59,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Mielenz Thomas (LMT)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Approve and communicate budget plan","MP",3,60,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Mielenz Thomas (LMT)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Collect and consolidate budget from stakeholders","MP",3,60,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Mielenz Thomas (LMT)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Develop preliminary budget plan","MP",3,60,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Mielenz Thomas (LMT)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Maintan and adjust budget","MP",3,60,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Mielenz Thomas (LMT)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Review budget plan","MP",3,60,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Mielenz Thomas (LMT)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Revise and optimize budget plan","MP",3,60,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Mielenz Thomas (LMT)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Manage IT costs","MP",2,59,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Compare actual cost to budget forecast","MP",3,67,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Initiate corrective or preventive actions","MP",3,67,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Report actual IT costs","MP",3,67,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Manage finance and accounting","MP",2,59,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Mielenz Thomas (LMT)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Define financial management framework","MP",3,71,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Establish financial accounting structure","MP",3,71,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Model and allocate IT costs","MP",2,59,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Apply cost model to calculate service cost per unit","MP",3,74,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Define cost allocation principles","MP",3,74,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Establish cost allocation model","MP",3,74,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Gather relevant cost and consumption data","MP",3,74,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Implement cost allocation to stakeholders or companies","MP",3,74,"IT planning and steering","In Arbeit","50%","2025-10-15","","0","Ohne Angabe","Frank Nicole (LIS)","Moser Mario (LIS-LAH)","Hynek Tobias (LIS), Kreis Andreas (LLI)","",""],
+ ["Manage enterprise architecture","MP",1,-1,"Corporate IT body","Verzögert","0%","2025-10-16","2026-07-16","195.85","Verzögert","","","","",""],
+ ["Strategic architecture process","MP",2,80,"Corporate IT body","Verzögert","0%","2025-10-16","2026-04-30","0","Verzögert","","","","",""],
+ ["Plan IT service","CP",1,-1,"Corporate IT body","Verzögert","100%","2025-08-01","2026-04-30","195","Abgeschlossen","Spieth Tina (LIS)","Mielenz Thomas (LMT)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","",""],
+ ["Approve IT demand","CP",2,82,"Corporate IT body","Verzögert","100%","2025-08-01","2026-03-31","1","Abgeschlossen","Spieth Tina (LIS)","Mielenz Thomas (LMT)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","2025-08-19",""],
+ ["Evaluate and qualify IT demand","CP",2,82,"Corporate IT body","Verzögert","100%","2025-08-01","2026-04-30","195","Abgeschlossen","Spieth Tina (LIS)","Mielenz Thomas (LMT)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","2025-12-10",""],
+ ["Analyse architecture impact","CP",3,84,"Corporate IT body","Verzögert","100%","2025-08-01","2026-04-30","195","Abgeschlossen","Pernet Benoit (LEC) (MIN)","Mielenz Thomas (LMT)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","",""],
+ ["Perform initial assessment of customer need","CP",2,82,"Corporate IT body","Verzögert","100%","2025-08-01","2026-03-31","3","Abgeschlossen","Spieth Tina (LIS)","Mielenz Thomas (LMT)","Kunz Christina (LIS-MHP Management- und IT Beratung GmbH)","2025-08-19",""],
+ ["Provide and develop IT workforce","SP",1,-1,"HR initiatives for IT","In Arbeit","15%","2025-10-01","2027-06-30","456","Abgeschlossen","Amelang Nicole (LIS)","Rollinger Alexander (LIS)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Attract and hire employees","SP",2,87,"HR initiatives for IT","Verzögert","18%","2025-10-01","2026-12-31","327","In Arbeit","Kiesewetter Ivana (LIS)","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Perform active sourcing","SP",3,88,"HR initiatives for IT","Verzögert","0%","2025-10-01","2026-12-31","327","Verzögert","Kiesewetter Ivana (LIS)","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Recruit employees and managers","SP",3,88,"HR initiatives for IT","Verzögert","25%","2025-10-01","2026-12-31","327","In Arbeit","Kiesewetter Ivana (LIS)","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Manage HR4IT strategy, governane and framework","SP",2,87,"HR initiatives for IT","Terminiert","0%","2025-10-01","2026-12-31","0","Abgeschlossen","Amelang Nicole (LIS)","Rollinger Alexander (LIS)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Implement and maintain IT job architecture","SP",3,91,"HR initiatives for IT","Verzögert","0%","2025-10-16","2026-05-31","162","Verzögert","Amelang Nicole (LIS)","Rollinger Alexander (LIS)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Manage HR4IT service demand","SP",3,91,"HR initiatives for IT","Verzögert","0%","2025-10-01","2026-06-30","195","Verzögert","Amelang Nicole (LIS)","Rollinger Alexander (LIS)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Plan IT workforce","SP",3,91,"HR initiatives for IT","Verzögert","0%","2025-10-16","2026-12-31","316","Verzögert","Amelang Nicole (LIS)","Rollinger Alexander (LIS)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Perform onboarding","SP",2,87,"HR initiatives for IT","In Arbeit","33%","2025-10-16","2026-04-30","141","In Arbeit","","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Onboard new IT employee and manager","SP",3,95,"HR initiatives for IT","In Arbeit","50%","2025-10-16","2026-04-30","141","In Arbeit","","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Pre-board new IT employee and manager","SP",3,95,"HR initiatives for IT","In Arbeit","25%","2025-10-16","2026-04-30","141","In Arbeit","","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Perform, learn and grow","SP",2,87,"HR initiatives for IT","In Arbeit","11%","2025-10-01","2027-06-30","456","Ohne Angabe","Grabmair Melanie (LIS)","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Create, approve and publish trainings for IT workforce within IT Training Catalogue","SP",3,98,"HR initiatives for IT","In Arbeit","50%","2025-10-01","2026-04-30","152","In Arbeit","Grabmair Melanie (LIS)","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Manage IT development programme","SP",3,98,"HR initiatives for IT","Terminiert","0%","2025-10-16","2025-10-16","0","Ohne Angabe","Grabmair Melanie (LIS)","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Manage IT global orientation programme incl. job shadowing","SP",3,98,"HR initiatives for IT","Verzögert","0%","2026-01-15","2026-07-01","120","Verzögert","Grabmair Melanie (LIS)","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Manage IT skills","SP",3,98,"HR initiatives for IT","Verzögert","0%","2026-01-01","2027-06-30","390","Verzögert","Grabmair Melanie (LIS)","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Manage IT talent pool and identify potential","SP",3,98,"HR initiatives for IT","Terminiert","0%","2025-10-16","2025-10-16","0","Ohne Angabe","Grabmair Melanie (LIS)","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Mapping and evaluate IT career level","SP",3,98,"HR initiatives for IT","Verzögert","0%","2026-04-01","2027-01-01","198","Verzögert","Grabmair Melanie (LIS)","Mielenz Thomas (LMT)","Chen Leilei (LIS-BPMO), Hynek Tobias (LIS)","",""],
+ ["Run IT service","CP",1,-1,"ITSM","Verzögert","17%","2025-10-15","2026-09-25","248","Verzögert","Oey Kai (LIS)","Sint Rachel (LBH)","Schroeder Michael (LIS), Boehme Matthias (LIS-BPMO)","",""],
+ ["Ensure IT service continuity","CP",2,105,"ITSM","Nicht geplant","0%","","","0","Ohne Angabe","","Sint Rachel (LBH)","Schroeder Michael (LIS), Boehme Matthias (LIS-BPMO)","",""],
+ ["Manage IT service capacity","CP",3,106,"ITSM","Nicht geplant","0%","","","0","Ohne Angabe","","Sint Rachel (LBH)","Schroeder Michael (LIS), Boehme Matthias (LIS-BPMO)","",""],
+ ["Review and maintain IT service continuity plan","CP",3,106,"ITSM","Nicht geplant","0%","","","0","Ohne Angabe","","Sint Rachel (LBH)","Schroeder Michael (LIS), Boehme Matthias (LIS-BPMO)","",""],
+ ["Monitor and report IT service performance","CP",2,105,"ITSM","Terminiert","0%","2026-04-15","","0","Ohne Angabe","Kuerschner Philipp (LIS)","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""],
+ ["Monitor IT service risk and compliance","CP",3,109,"ITSM","Nicht geplant","0%","","","0","Ohne Angabe","Kuerschner Philipp (LIS)","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""],
+ ["Monitor and analyse events","CP",3,109,"ITSM","Nicht geplant","0%","","","0","Ohne Angabe","Kuerschner Philipp (LIS)","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""],
+ ["Monitor and report IT service financials","CP",3,109,"ITSM","Nicht geplant","0%","","","0","Ohne Angabe","Kuerschner Philipp (LIS)","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""],
+ ["Monitor and report IT service level","CP",3,109,"ITSM","Terminiert","0%","2026-04-15","2026-07-31","0","Ohne Angabe","Kuerschner Philipp (LIS)","Sint Rachel (LBH)","Schroeder Michael (LIS)","","Norbert Schwarz (MHP) wird für Philipp Kürschner den Prozess mit erarbeiten; Philipp ist weiterhin PO"],
+ ["Monitor user experience","CP",3,109,"ITSM","Nicht geplant","0%","","","0","Ohne Angabe","Kuerschner Philipp (LIS)","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""],
+ ["Operate and maintain IT service","CP",2,105,"ITSM","Verzögert","21%","2025-10-15","2026-06-30","185","Verzögert","Kretz Lucas (COC-COT-IT)","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""],
+ ["Maintain CMDB","CP",3,115,"ITSM","In Arbeit","50%","2026-01-14","2026-06-16","91","In Arbeit","Kretz Lucas (COC-COT-IT)","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""],
+ ["Maintain IT asset database","CP",3,115,"ITSM","Nicht geplant","0%","","","0","Ohne Angabe","","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""],
+ ["Maintain standard change catalogue for IT service","CP",3,115,"ITSM","Nicht geplant","0%","","","0","Ohne Angabe","","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""],
+ ["Provide IT service support","CP",2,105,"ITSM","Verzögert","57%","2025-10-16","2026-06-15","173","Verzögert","Kuerschner Philipp (LIS)","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""],
+ ["Handle IT Incident","CP",3,119,"ITSM","In Arbeit","75%","2026-01-13","2026-03-19","48","In Arbeit","Kuerschner Philipp (LIS)","Sint Rachel (LBH)","Schroeder Michael (LIS)","2026-03-19",""],
+ ["Handle IT problem","CP",3,119,"ITSM","In Arbeit","75%","2026-01-13","2026-03-19","48","In Arbeit","Kuerschner Philipp (LIS)","Sint Rachel (LBH)","Schroeder Michael (LIS)","2026-03-19",""],
+ ["Handle IT service request","CP",3,119,"ITSM","Abgeschlossen","100%","2026-02-02","2026-03-19","0","Abgeschlossen","Kuerschner Philipp (LIS)","Sint Rachel (LBH)","Frank Maren (LIS)","",""],
+ ["Manage IT service desk","CP",3,119,"ITSM","Nicht geplant","0%","","","0","Ohne Angabe","","Sint Rachel (LBH)","Schroeder Michael (LIS)","",""]
+];
+
+const GROUP_OF = {MP:"Management Processes", CP:"Core Processes", SP:"Support Processes"};
+/* Leere Quellfelder werden zu "To be assessed" - es wird nichts ergänzt. */
+const orTBA = v => (v !== null && v !== undefined && String(v).trim() !== "") ? String(v).trim() : TBA;
+
+/* Übersetzt den Excel-Export in Process_Master-Datensätze. Übernommen werden
+   ausschließlich Werte, die in der Quelle stehen: Name, Gruppe, Ebene,
+   Hierarchie, Initiative, Verantwortliche, Termine und das Freigabedatum.
+   MSC Relevance, Approval Body, Repository URL, Review-Daten und KPI Status
+   stehen in der Quelle nicht und bleiben deshalb offen. */
+function portfolioRecords(offset){
+  /* offset = Anzahl bereits vergebener PRC-Nummern. Im Auslieferungsbestand
+     sind das die sechs Pilotprozesse, bei einer Migration der hoechste bereits
+     vergebene Zaehler. So kollidiert kein Import mit vorhandenen Datensaetzen. */
+  const base = (offset === undefined || offset === null) ? PILOTS.length : offset;
+  const pid = i => "PRC-" + String(base + i + 1).padStart(3,"0");
+  return PORTFOLIO.map((r,i) => ({
+    "Process ID":pid(i), "Process Name":r[0],
+    "Process Group":GROUP_OF[r[1]] || TBA,
+    "Parent Process": r[3] >= 0 ? pid(r[3]) : "",
+    "Process Level":"L" + r[2],
+    "Domain":orTBA(r[4]),                           /* Initiative aus dem Export */
+    "Description":DESCR,
+    "MSC Relevance":TBA,
+    "Process Owner":orTBA(r[11]),                   /* Initiative Lead */
+    "Process Manager":orTBA(r[12]),
+    /* Freigegeben heißt hier ausschließlich: die Quelle nennt ein
+       Freigabedatum. Ohne Datum bleibt der Lifecycle offen. */
+    "Lifecycle Status": r[14] ? "Approved" : TBA,
+    "Current Phase":TBA, "Approval Body":TBA, "Approval Date":r[14],
+    "Repository":"ADONIS", "Repository URL":TBA,
+    "Last Review Date":"", "Next Review Date":"",
+    "KPI Status":TBA, "Overall RAG":"Grey",
+    "Next Action":TBA, "Action Owner":TBA, "Due Date":"",
+    "Consultant":orTBA(r[13]),
+    "Schedule Status":orTBA(r[5]),
+    /* "Ohne Angabe" ist die Art der Quelle, Unbekanntes zu schreiben. */
+    "Elaboration Status": r[10] === "Ohne Angabe" ? TBA : orTBA(r[10]),
+    "Planned Start":r[7], "Planned End":r[8],
+    "Duration (d)":r[9], "Completion %":r[6],
+    "Source Comment":r[15]
+  }));
+}
+
+/* Die acht Felder aus dem Excel-Export in einem aelteren Datensatz nachtragen.
+   Vorhandene Werte werden nie ueberschrieben. */
+const SOURCE_FIELDS = {"Consultant":TBA, "Schedule Status":TBA, "Elaboration Status":TBA,
+  "Planned Start":"", "Planned End":"", "Duration (d)":"", "Completion %":"", "Source Comment":""};
+function fillSourceFields(rec){
+  for (const k in SOURCE_FIELDS) if (!(k in rec)) rec[k] = SOURCE_FIELDS[k];
+  return rec;
+}
+
+/* Bestaende aus der Fassung ohne Excel-Import werden ergaenzt statt ersetzt:
+   alles Gepflegte bleibt, die fehlenden Prozesse kommen dazu. Der Abgleich
+   laeuft ueber den Prozessnamen, der in der Quelle eindeutig ist. */
+function migrateToV2(d){
+  const P = d.Process_Master || (d.Process_Master = []);
+  P.forEach(fillSourceFields);
+  const known = new Set(P.map(r => String(r["Process Name"] || "").trim()));
+  let max = 0;
+  P.forEach(r => { const m = String(r["Process ID"]||"").match(/(\d+)\s*$/); if (m) max = Math.max(max, +m[1]); });
+  const added = portfolioRecords(max).filter(r => !known.has(r["Process Name"]));
+  if (!added.length) return 0;
+  P.push.apply(P, added);
+  /* Rollout-Kombinationen fuer die neuen Prozesse nachziehen, wie im Auslieferungsbestand. */
+  const R = d.Process_Rollout || (d.Process_Rollout = []);
+  const seen = new Set(R.map(r => r["Process ID"] + "\u0000" + r["MSC ID"]));
+  (d.MSC_Master || []).forEach(msc => added.forEach(p => {
+    const k = p["Process ID"] + "\u0000" + msc["MSC ID"];
+    if (seen.has(k)) return;
+    seen.add(k);
+    R.push({"Rollout ID":"ROL-" + p["Process ID"].slice(4) + "-" + msc["MSC ID"].slice(4),
+      "Process ID":p["Process ID"], "MSC ID":msc["MSC ID"], "Rollout Status":"Not Assessed",
+      "Access Ready":TBA, "Training Status":TBA, "Roles Clarified":TBA,
+      "Start Date":"", "Go-Live Date":"", "Local Exception":"No", "Evidence URL":TBA, "Comment":"", _demo:true});
+  }));
+  (d.News || (d.News = [])).unshift({
+    "News ID":"NEW-" + String((d.News.length || 0) + 900), "Date":today(),
+    "Title":"Prozessportfolio aus dem Excel-Export ergänzt", "Category":"Meilenstein",
+    "Pinned":"Yes", "Author":TBA,
+    "Body":added.length + " Prozesse aus dem Excel-Export \"Process Portfolio\" wurden dem vorhandenen "
+         + "Bestand hinzugefügt, einschließlich Hierarchie, Initiative, Initiative Lead, Process Manager, "
+         + "Consultant, Terminen und Freigabedatum.\n\nBereits gepflegte Datensätze wurden nicht verändert.\n\n"
+         + "MSC Relevance, Approval Body, Repository URL, Review-Daten und KPI-Werte stehen in der Quelle nicht "
+         + "und bleiben auf \"To be assessed\"."});
+  return added.length;
+}
+
 function seed(){
   const db = {_meta:{version:SCHEMA_VERSION, created:today(), saved:null}};
   TABLES.forEach(t => db[t] = []);
 
+  /* Zuerst die sechs Pilotprozesse der Spezifikation, danach das vollständige
+     Portfolio aus dem Excel-Export. Die Pilot-IDs bleiben dadurch stabil. */
   db.Process_Master = PILOTS.map(([id,name,grp,parent,lvl]) => ({
     "Process ID":id, "Process Name":name, "Process Group":grp,
     "Parent Process":parent || "", "Process Level":lvl, "Domain":"IT", "Description":DESCR,
     "MSC Relevance":TBA, "Process Owner":TBA, "Process Manager":TBA,
     "Lifecycle Status":TBA, "Current Phase":TBA, "Approval Body":TBA, "Approval Date":"",
     "Repository":"ADONIS", "Repository URL":TBA, "Last Review Date":"", "Next Review Date":"",
-    "KPI Status":TBA, "Overall RAG":"Grey", "Next Action":TBA, "Action Owner":TBA, "Due Date":""
-  }));
+    "KPI Status":TBA, "Overall RAG":"Grey", "Next Action":TBA, "Action Owner":TBA, "Due Date":"",
+    "Consultant":TBA, "Schedule Status":TBA, "Elaboration Status":TBA,
+    "Planned Start":"", "Planned End":"", "Duration (d)":"", "Completion %":"", "Source Comment":""
+  })).concat(portfolioRecords(PILOTS.length));
 
   /* MSC-Stammdaten sind hier Platzhalter: die echten Einheiten trägt die
      Administration nach. Deshalb durchgängig als Demo Data gekennzeichnet. */
@@ -759,11 +1002,16 @@ function seed(){
      "Body":"Das MSC IT Governance & Process Cockpit steht bereit. Es steuert Governance, Rollout, Risiken, "
           +"Maßnahmen und KPIs.\n\nVeröffentlichte Prozessinhalte bleiben in ADONIS; das Cockpit verweist nur darauf.\n\n"
           +"Nächste Schritte: Process Owner benennen, echte MSC-Stammdaten erfassen und die Rollout-Matrix bewerten."},
-    {"News ID":"NEW-002","Date":today(),"Title":"Pilotprozesse angelegt","Category":"Meilenstein","Pinned":"No",
-     "Author":TBA,
-     "Body":"Sechs Pilotprozesse sind im Portfolio angelegt: IT Demand Management, Change Request, "
-          +"Manage IT Project, Service Request, Security Assessment und Software Selection.\n\n"
-          +"Alle Verantwortlichen, Freigabe- und Reviewdaten stehen auf \"To be assessed\" und sind zu erheben."}
+    {"News ID":"NEW-002","Date":today(),"Title":"Prozessportfolio vollständig übernommen","Category":"Meilenstein",
+     "Pinned":"No","Author":TBA,
+     "Body":"Das Portfolio enthält " + (PILOTS.length + PORTFOLIO.length) + " Prozesse: die sechs Pilotprozesse "
+          +"der Spezifikation (IT Demand Management, Change Request, Manage IT Project, Service Request, "
+          +"Security Assessment, Software Selection) und " + PORTFOLIO.length + " Prozesse aus dem Excel-Export "
+          +"\"Process Portfolio\" mit ihrer vollständigen Hierarchie über vier Ebenen.\n\n"
+          +"Aus der Quelle übernommen sind Name, Prozessgruppe, Ebene, übergeordneter Prozess, Initiative, "
+          +"Initiative Lead, Process Manager, Consultant, Termine und das Freigabedatum.\n\n"
+          +"MSC Relevance, Approval Body, Repository URL, Review-Daten und KPI-Werte stehen in der Quelle nicht "
+          +"und deshalb auf \"To be assessed\"; sie sind zu erheben."}
   ];
   return db;
 }
@@ -854,6 +1102,7 @@ function recordsToCsv(table, rows){
 
 /* --- Speicher ------------------------------------------------------------ */
 let DB = null, saveTimer = 0;
+let MIGRATED = 0;   /* Anzahl der beim Laden ergaenzten Prozesse, 0 = nichts zu tun */
 function loadDB(){
   let raw = null;
   try { raw = localStorage.getItem(STORE_KEY); } catch(e){ raw = null; }
@@ -861,8 +1110,10 @@ function loadDB(){
   try {
     const d = JSON.parse(raw);
     if (!d || typeof d !== "object") return seed();
-    if (!d._meta) d._meta = {version:SCHEMA_VERSION, created:today(), saved:null};
+    if (!d._meta) d._meta = {version:1, created:today(), saved:null};
     TABLES.forEach(t => { if (!Array.isArray(d[t])) d[t] = []; });
+    if ((+d._meta.version || 1) < 2){ MIGRATED = migrateToV2(d); d._meta.version = SCHEMA_VERSION; }
+    else (d.Process_Master || []).forEach(fillSourceFields);
     return d;
   } catch(e){ return seed(); }
 }
@@ -1447,22 +1698,45 @@ function renderFlow(){
 function renderLandscape(){
   renderFlow();
   const P = DB.Process_Master || [];
-  const gSel = $("#lsGroupFilter"), rSel = $("#lsRagFilter");
+  const gSel = $("#lsGroupFilter"), rSel = $("#lsRagFilter"),
+        lSel = $("#lsLevelFilter"), dSel = $("#lsDomainFilter");
   if (gSel.options.length <= 1)
     ["Management Processes","Core Processes","Support Processes",TBA].forEach(g =>
       gSel.appendChild(el("option",{value:g, text:g})));
   if (rSel.options.length <= 1)
     RAG_VALUES.forEach(r => rSel.appendChild(el("option",{value:r, text:RAG_LABEL[r]})));
-  const gf = gSel.value, rf = rSel.value;
+  if (lSel.options.length <= 1)
+    ["L1","L2","L3","L4",TBA].forEach(l => lSel.appendChild(el("option",{value:l, text:l})));
+  /* Die Initiativen stehen nicht fest, sie kommen aus dem Bestand. Die Liste
+     wird darum bei jedem Lauf gegen die aktuellen Werte abgeglichen. */
+  const doms = P.map(p => p["Domain"]).filter(Boolean)
+    .filter((v,i,a) => a.indexOf(v) === i).sort((a,b) => a.localeCompare(b,"de"));
+  const domNow = [].slice.call(dSel.options,1).map(o => o.value).join("\u0001");
+  if (domNow !== doms.join("\u0001")){
+    const keep = dSel.value;
+    while (dSel.options.length > 1) dSel.remove(1);
+    doms.forEach(d => dSel.appendChild(el("option",{value:d, text:d})));
+    if (doms.indexOf(keep) >= 0) dSel.value = keep;
+  }
+  const gf = gSel.value, rf = rSel.value, lf = lSel.value, df = dSel.value;
+  const q = ($("#lsSearch").value || "").trim().toLowerCase();
   const host = $("#lsGroups"); host.replaceChildren();
   const groups = ["Management Processes","Core Processes","Support Processes"];
   const others = P.map(p => p["Process Group"]).filter(g => groups.indexOf(g) < 0);
   groups.concat(others.filter((v,i,a) => a.indexOf(v) === i)).forEach(grp => {
     if (gf && gf !== grp) return;
-    const list = P.filter(p => (p["Process Group"] || TBA) === grp && (!rf || p["Overall RAG"] === rf));
+    const list = P.filter(p => (p["Process Group"] || TBA) === grp
+      && (!rf || p["Overall RAG"] === rf)
+      && (!lf || (p["Process Level"] || TBA) === lf)
+      && (!df || p["Domain"] === df)
+      && (!q || (p["Process Name"]||"").toLowerCase().indexOf(q) >= 0
+             || (p["Process ID"]||"").toLowerCase().indexOf(q) >= 0
+             || (p["Process Owner"]||"").toLowerCase().indexOf(q) >= 0));
     const sec = el("div",{class:"lgroup"});
     sec.appendChild(el("h3",{text:grp + " · " + list.length}));
-    if (!list.length) sec.appendChild(el("div",{class:"empty", text:"Kein Prozess in dieser Gruppe."}));
+    if (!list.length) sec.appendChild(el("div",{class:"empty",
+      text:(q || rf || lf || df) ? "Kein Prozess passt zu den gesetzten Filtern."
+                                 : "Kein Prozess in dieser Gruppe."}));
     else sec.appendChild(el("div",{class:"pcards"}, list.map(p => {
       const kids = P.filter(c => c["Parent Process"] === p["Process ID"]);
       const parent = P.find(c => c["Process ID"] === p["Parent Process"]);
@@ -1470,10 +1744,13 @@ function renderLandscape(){
         onclick:() => openProcess(p)});
       card.appendChild(el("span",{class:"id", text:p["Process ID"] + " · " + (p["Process Level"]||"")}));
       card.appendChild(el("h4",{text:p["Process Name"] || "(ohne Name)"}));
-      card.appendChild(el("div",{class:"meta"},[
+      const meta = [
         el("span",{class:"rag " + (RAG_CODE[p["Overall RAG"]]||"X"), text:RAG_LABEL[p["Overall RAG"]]||"Grau"}),
         el("span",{class:"tag", text:p["Lifecycle Status"] || TBA})
-      ]));
+      ];
+      if (has(p["Schedule Status"])) meta.push(el("span",{class:"tag", text:p["Schedule Status"]}));
+      if (has(p["Domain"])) meta.push(el("span",{class:"tag", text:p["Domain"]}));
+      card.appendChild(el("div",{class:"meta"}, meta));
       const rel = [];
       if (parent) rel.push("Folgeprozess von " + parent["Process Name"]);
       if (kids.length) rel.push(kids.length + " abhängige Prozesse: " + kids.map(k => k["Process Name"]).join(", "));
@@ -1513,11 +1790,19 @@ function openProcess(p){
     ["Next Review Date", p["Next Review Date"] ? fmtDate(p["Next Review Date"]) : TBA],
     ["KPI Status", p["KPI Status"]], ["Next Action", p["Next Action"]],
     ["Action Owner", p["Action Owner"]], ["Due Date", p["Due Date"] ? fmtDate(p["Due Date"]) : TBA],
+    /* Felder aus dem Excel-Export */
+    ["Consultant", p["Consultant"]], ["Schedule Status", p["Schedule Status"]],
+    ["Elaboration Status", p["Elaboration Status"]],
+    ["Planned Start", p["Planned Start"] ? fmtDate(p["Planned Start"]) : TBA],
+    ["Planned End", p["Planned End"] ? fmtDate(p["Planned End"]) : TBA],
+    ["Duration (d)", p["Duration (d)"]], ["Completion %", p["Completion %"]],
     ["Eltern-Beziehung", parent ? parent["Process ID"] + " · " + parent["Process Name"] : "kein Elternprozess"],
     ["Abhängige Prozesse", kids.length ? kids.map(k => k["Process Name"]).join(", ") : "keine"]
   ];
+  if (has(p["Source Comment"])) rows.push(["Kommentar aus der Quelle", p["Source Comment"]]);
   const grid = el("div",{class:"fgrid"});
-  rows.forEach(([k,v]) => grid.appendChild(el("div",{class:"fld" + (k === "Beschreibung" ? " full" : "")},[
+  const wide = {"Beschreibung":1, "Kommentar aus der Quelle":1, "Abhängige Prozesse":1};
+  rows.forEach(([k,v]) => grid.appendChild(el("div",{class:"fld" + (wide[k] ? " full" : "")},[
     el("label",{text:k}),
     el("div",{style:"font-size:13px;color:" + (isTBA(v) ? "var(--ink-3)" : "var(--ink)") + ";" + (isTBA(v) ? "font-style:italic;" : ""),
       text: isTBA(v) ? (v || TBA) : String(v)})
@@ -1556,14 +1841,23 @@ function renderMatrix(){
   const sel = $("#mxGroup");
   if (sel.options.length <= 1)
     ["Management Processes","Core Processes","Support Processes"].forEach(g => sel.appendChild(el("option",{value:g, text:g})));
-  const grp = sel.value;
-  const P = (DB.Process_Master||[]).filter(p => !grp || p["Process Group"] === grp);
+  const lvl = $("#mxLevel");
+  if (lvl.options.length <= 1)
+    ["L1","L2","L3","L4",TBA].forEach(l => lvl.appendChild(el("option",{value:l, text:l})));
+  const grp = sel.value, lf = lvl.value, q = ($("#mxSearch").value || "").trim().toLowerCase();
+  const P = (DB.Process_Master||[]).filter(p => (!grp || p["Process Group"] === grp)
+    && (!lf || (p["Process Level"] || TBA) === lf)
+    && (!q || (p["Process Name"]||"").toLowerCase().indexOf(q) >= 0
+           || (p["Process ID"]||"").toLowerCase().indexOf(q) >= 0));
   const M = DB.MSC_Master || [];
+  /* Ein Index statt einer Suche je Zelle: bei 130 x 6 Zellen sonst spuerbar. */
+  const byCombo = new Map();
+  (DB.Process_Rollout||[]).forEach(r => byCombo.set(r["Process ID"] + "\u0000" + r["MSC ID"], r));
   const wrap = $("#mxWrap"); wrap.replaceChildren();
   if (!P.length || !M.length){
     wrap.appendChild(el("div",{class:"empty",
       text: !M.length ? "Keine MSC-Stammdaten erfasst. In der Administration anlegen."
-                      : "Kein Prozess in dieser Auswahl."}));
+                      : "Kein Prozess passt zu dieser Auswahl."}));
   } else {
     const tb = el("table",{class:"matrix"});
     const hr = el("tr");
@@ -1579,7 +1873,7 @@ function renderMatrix(){
         el("div",{style:"font-weight:400;color:var(--ink-3);font-size:10.5px;", text:p["Process ID"] + " · " + (p["Process Group"]||"")})
       ]));
       M.forEach(m => {
-        const rec = (DB.Process_Rollout||[]).find(r => r["Process ID"] === p["Process ID"] && r["MSC ID"] === m["MSC ID"]);
+        const rec = byCombo.get(p["Process ID"] + "\u0000" + m["MSC ID"]);
         const st = rec ? rec["Rollout Status"] : null;
         const meta = ROLLOUT_META[st] || {bg:"#FFFFFF", fg:"#C9CED2"};
         const td = el("td");
@@ -1789,7 +2083,8 @@ $("#admDropDemo").addEventListener("click", () => {
 });
 $("#admReset").addEventListener("click", () => {
   confirmDlg("Der gesamte lokale Datenbestand wird verworfen und der Auslieferungszustand mit den "
-    + "sechs Pilotprozessen wiederhergestellt. Vorher ein Backup erzeugen?", () => {
+    + (PILOTS.length + PORTFOLIO.length) + " ausgelieferten Prozessen wiederhergestellt. "
+    + "Vorher ein Backup erzeugen?", () => {
     DB = seed(); save(); refreshAll(); show("overview"); alert("Auslieferungszustand hergestellt.");
   });
 });
@@ -1908,14 +2203,21 @@ function init(){
   $("#ovRefresh").addEventListener("click", () => renderOverview());
   $("#lsGroupFilter").addEventListener("change", renderLandscape);
   $("#lsRagFilter").addEventListener("change", renderLandscape);
+  $("#lsLevelFilter").addEventListener("change", renderLandscape);
+  $("#lsDomainFilter").addEventListener("change", renderLandscape);
+  $("#lsSearch").addEventListener("input", renderLandscape);
   $("#mxGroup").addEventListener("change", renderMatrix);
+  $("#mxLevel").addEventListener("change", renderMatrix);
+  $("#mxSearch").addEventListener("input", renderMatrix);
   try { addEventListener("hashchange", () => show(location.hash.slice(1) || "overview")); } catch(e){}
   setSaveState("ok");
   updateFooter();
   let start = "overview";
   try { const h = location.hash.slice(1); if (NAV.some(n => n[0] === h)) start = h; } catch(e){}
   show(start);
-  if (!localStorage.getItem(STORE_KEY)) save();
+  /* Ein ergaenzter Bestand wird sofort festgeschrieben, damit die Ergaenzung
+     nicht bei jedem Aufruf erneut laeuft. */
+  if (MIGRATED || !localStorage.getItem(STORE_KEY)) save();
 }
 init();
 </script>

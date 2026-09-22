@@ -24,6 +24,56 @@ erzeugte Datei im Ordner liegt, und räumt sich dann selbst auf.
 
 ---
 
+# MSC IT Governance & Process Cockpit
+
+`MSCITGovernanceProcessCockpit.html` – eine einzelne Datei, die Governance,
+Rollout, Risiken, Maßnahmen und Kennzahlen steuert. Kein Server, keine
+Installation, keine externen Abhängigkeiten; gespeichert wird im `localStorage`
+des Browsers, gesichert über **Backup**/**Restore** als JSON.
+
+**ADONIS bleibt die führende Quelle für veröffentlichte Prozessinhalte.** Das
+Cockpit hält nur Verweise darauf und steuert die Governance darum herum.
+
+## Prozessbestand
+
+Im Auslieferungszustand stehen 130 Prozesse bereit:
+
+| Herkunft | Anzahl | IDs |
+|---|---|---|
+| Pilotprozesse der Spezifikation | 6 | `PRC-001` … `PRC-006` |
+| Excel-Export „Process Portfolio", Stand 2026-09-22 | 124 | `PRC-007` … `PRC-130` |
+
+Die Quelle liegt als `data/process_portfolio_2026-09-22.csv` im Repository, der
+eingebettete Block ist erzeugt und nicht von Hand gepflegt:
+
+```
+python3 build/portfolio_import.py --check   # prüft Cockpit gegen die Quelle
+python3 build/portfolio_import.py           # schreibt den Block nach neuem Export neu
+```
+
+Der Import übernimmt die vollständige Hierarchie über vier Ebenen
+(19 Wurzelprozesse, 40 auf L2, 60 auf L3, 5 auf L4) und aus jeder Quellzeile
+Name, Prozessgruppe, Ebene, übergeordneten Prozess, Initiative, Initiative Lead,
+Process Manager, Consultant, Termine, Fortschritt und Freigabedatum. Ein
+Prozess gilt genau dann als `Approved`, wenn die Quelle ein Freigabedatum nennt.
+
+Was die Quelle nicht enthält, wird nicht erfunden: `MSC Relevance`,
+`Approval Body`, `Repository URL`, `Last Review Date`, `Next Review Date` und
+`KPI Status` stehen auf `To be assessed`. Ergänzende Testdatensätze (MSC-Stammdaten,
+Rollout-Kombinationen, je zwei Entscheidungen, Risiken und Maßnahmen) sind in der
+Oberfläche als **Demo Data** gekennzeichnet und über *Administration → Demo-Daten
+entfernen* in einem Schritt löschbar.
+
+## Umstieg von einer älteren Fassung
+
+Wer das Cockpit vorher geöffnet hat, hat einen Bestand im Browser. Der wird beim
+nächsten Aufruf **ergänzt, nicht ersetzt**: Gepflegtes bleibt unverändert, die
+fehlenden Prozesse kommen dazu (Abgleich über den Prozessnamen, IDs zählen hinter
+dem vorhandenen Bestand weiter), und eine angeheftete Meldung hält die Ergänzung
+fest. Ein zweiter Aufruf ändert nichts mehr.
+
+---
+
 # Portfolio-Dashboard
 
 Management-Dashboard für das Corporate-IT-Prozessportfolio aus
@@ -169,5 +219,7 @@ python3 build/build.py --extract
 | `dashboard/index.html` | fertiges Dashboard |
 | `index.html` | Management Board (Einstieg) |
 | `build/bundle.py`, `build/excel.py`, `verteilfassung/` | Leseausgabe, PDF-Bericht und Excel-Cockpit |
+| `MSCITGovernanceProcessCockpit.html` | Governance-Cockpit, eine Datei, Bestand im Browser |
+| `build/portfolio_import.py`, `data/process_portfolio_*.csv` | Prozessportfolio des Cockpits und seine Quelle |
 | `content/*.js` | Inhalte des Boards |
 | `anhaenge/`, `rollout-maps/` | Dateien für Anhänge und Maps |
